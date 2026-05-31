@@ -221,8 +221,10 @@ export default function DemoCommercialTool() {
     const params = new URLSearchParams()
     if (form.empresa.trim()) params.set("empresa", form.empresa.trim())
     if (form.nicho.trim()) params.set("nicho", form.nicho.trim())
+    if (form.objetivo.trim()) params.set("objetivo", form.objetivo.trim())
+    if (form.website.trim()) params.set("website", form.website.trim())
     return params.toString()
-  }, [form.empresa, form.nicho])
+  }, [form.empresa, form.nicho, form.objetivo, form.website])
 
   function updateField(field: keyof DemoFormData, value: string) {
     setForm((current) => ({ ...current, [field]: value }))
