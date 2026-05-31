@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { assertCrmAccess } from "@/lib/crm-auth"
-import { isCrmStatus, updateCrmLeadStatus } from "@/lib/crm"
+import type { CrmStatus } from "@/lib/crm"
+import { isCrmStatus, updateCrmLead } from "@/lib/crm"
 
 type RouteContext = {
   params: Promise<{
@@ -24,13 +25,17 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 
   const { id } = await context.params
-  const payload = (await request.json()) as { status?: string }
+  const payload = (await request.json()) as { status?: string; notas?: string; proxima_acao?: string }
 
-  if (!payload.status || !isCrmStatus(payload.status)) {
+  if (payload.status !== undefined && !isCrmStatus(payload.status)) {
     return NextResponse.json({ error: "Status invalido." }, { status: 400 })
   }
 
-  const { data, error } = await updateCrmLeadStatus(id, payload.status)
+  const { data, error } = await updateCrmLead(id, {
+    status: payload.status as CrmStatus | undefined,
+    notas: typeof payload.notas === "string" ? payload.notas : undefined,
+    proxima_acao: typeof payload.proxima_acao === "string" ? payload.proxima_acao : undefined,
+  })
 
   if (error) {
     return NextResponse.json({ error: error.message, code: error.code }, { status: error.code === "SUPABASE_NOT_CONFIGURED" ? 503 : 500 })

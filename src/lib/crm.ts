@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js"
 
-export const crmStatuses = ["novo", "contactado", "reuniao", "proposta", "fechado", "perdido"] as const
+export const crmStatuses = ["novo", "contactado", "reuniao", "simulacao", "proposta", "negociacao", "fechado", "perdido"] as const
 export const crmSortFields = ["created_at", "score_geral"] as const
 export const crmSortDirections = ["asc", "desc"] as const
 
@@ -11,6 +11,7 @@ export type CrmSortDirection = (typeof crmSortDirections)[number]
 export type ListCrmLeadsOptions = {
   status?: CrmStatus
   search?: string
+  niche?: string
   sort?: CrmSortField
   direction?: CrmSortDirection
 }
@@ -22,11 +23,25 @@ export type CrmLead = {
   email: string
   telefone: string
   website: string
+  setor: string
+  objetivo: string
   score_geral: number
+  score_website: number
+  score_google: number
+  score_conversao: number
+  score_automacao: number
+  score_crm: number
   status: string
+  origem: string
+  proxima_acao: string
+  notas: string
+  perda_mensal_estimada: number
+  impacto_financeiro: Record<string, unknown> | null
+  plano_recomendado: string
   whatsapp_status: string | null
   whatsapp_message: string | null
   created_at: string
+  updated_at: string
 }
 
 export type CrmSupabaseConfigError = {
@@ -47,7 +62,9 @@ export function isCrmSortDirection(value: string): value is CrmSortDirection {
 }
 
 export function getCrmStatusLabel(status: string) {
-  if (status === "reuniao") return "Reunião"
+  if (status === "reuniao") return "Reuniao"
+  if (status === "simulacao") return "Simulacao"
+  if (status === "negociacao") return "Negociacao"
   return status.charAt(0).toUpperCase() + status.slice(1)
 }
 
@@ -87,12 +104,16 @@ export async function listCrmLeads(options: ListCrmLeadsOptions = {}) {
   let query = client.supabase
     .from("diagnosticos")
     .select(
-      "id,empresa,nome_contacto,email,telefone,website,score_geral,status,whatsapp_status,whatsapp_message,created_at",
+      "id,empresa,nome_contacto,email,telefone,website,setor,objetivo,score_geral,score_website,score_google,score_conversao,score_automacao,score_crm,status,origem,proxima_acao,notas,perda_mensal_estimada,impacto_financeiro,plano_recomendado,whatsapp_status,whatsapp_message,created_at,updated_at",
     )
     .order(sort, { ascending: direction === "asc" })
 
   if (options.status) {
     query = query.eq("status", options.status)
+  }
+
+  if (options.niche?.trim()) {
+    query = query.eq("setor", options.niche.trim())
   }
 
   if (options.search?.trim()) {
@@ -110,6 +131,10 @@ export async function listCrmLeads(options: ListCrmLeadsOptions = {}) {
 }
 
 export async function updateCrmLeadStatus(id: string, status: CrmStatus) {
+  return updateCrmLead(id, { status })
+}
+
+export async function updateCrmLead(id: string, fields: { status?: CrmStatus; notas?: string; proxima_acao?: string }) {
   const client = getSupabaseClient()
 
   if ("error" in client) {
@@ -118,9 +143,9 @@ export async function updateCrmLeadStatus(id: string, status: CrmStatus) {
 
   const { data, error } = await client.supabase
     .from("diagnosticos")
-    .update({ status, updated_at: new Date().toISOString() })
+    .update({ ...fields, updated_at: new Date().toISOString() })
     .eq("id", id)
-    .select("id,status")
+    .select("id,status,notas,proxima_acao")
     .single()
 
   if (error) {

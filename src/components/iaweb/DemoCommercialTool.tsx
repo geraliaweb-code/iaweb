@@ -301,6 +301,7 @@ export default function DemoCommercialTool() {
           conversao: analysis.scores.conversao,
           automacao: analysis.scores.automacao,
         },
+        crmScore: analysis.scores.crm,
         classificacao: {
           label: analysis.scoreFinal <= 40 ? "Critico" : analysis.scoreFinal <= 70 ? "Em Desenvolvimento" : "Forte",
           message: analysis.diagnostico,
@@ -308,6 +309,19 @@ export default function DemoCommercialTool() {
         potencialEstimado: `Perda mensal estimada: EUR ${analysis.monthlyLoss.toLocaleString("pt-PT")}`,
         recomendacoes: analysis.recommendations,
         createdAt: new Date().toISOString(),
+        crm: {
+          origem: "demo",
+          proximaAcao: "Contactar lead e validar interesse comercial",
+          notas: [
+            `Nicho: ${form.nicho}`,
+            `Objetivo: ${form.objetivo}`,
+            `Plano recomendado: ${analysis.packageName}`,
+            `Perda mensal estimada: EUR ${analysis.monthlyLoss.toLocaleString("pt-PT")}`,
+          ].join("\n"),
+          perdaMensalEstimada: analysis.monthlyLoss,
+          impactoFinanceiro: analysis.financeImpact,
+          planoRecomendado: analysis.packageName,
+        },
       },
     }
 
@@ -359,6 +373,12 @@ export default function DemoCommercialTool() {
           from { transform: translateX(-30%); opacity: 0; }
           20%, 80% { opacity: 0.8; }
           to { transform: translateX(130%); opacity: 0; }
+        }
+        @keyframes demo-lightning {
+          0%, 100% { opacity: 0; transform: translate3d(-8%, 0, 0) scaleX(0.92); }
+          12%, 18% { opacity: 0.42; }
+          45% { opacity: 0.16; transform: translate3d(4%, -1%, 0) scaleX(1.04); }
+          72% { opacity: 0.34; }
         }
         .demo-grid-bg {
           background-image:
@@ -413,12 +433,24 @@ export default function DemoCommercialTool() {
         .demo-count {
           animation: demo-slide-up 0.7s ease both;
         }
+        .demo-lightning {
+          position: absolute;
+          height: 2px;
+          width: 62vw;
+          filter: blur(0.2px);
+          opacity: 0;
+          clip-path: polygon(0 50%, 13% 38%, 23% 58%, 36% 42%, 48% 56%, 62% 36%, 76% 52%, 100% 44%, 100% 58%, 76% 66%, 62% 50%, 48% 68%, 36% 54%, 23% 72%, 13% 52%, 0 64%);
+          animation: demo-lightning 12s ease-in-out infinite;
+        }
       `}</style>
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_17%_22%,rgba(0,163,255,0.32),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(255,184,0,0.18),transparent_26%),radial-gradient(circle_at_72%_78%,rgba(0,123,255,0.18),transparent_30%),linear-gradient(180deg,#050816_0%,#081120_48%,#0B1325_100%)]" />
         <div className="demo-grid-bg absolute inset-0" />
         <div className="absolute left-0 top-1/3 h-px w-full bg-gradient-to-r from-transparent via-[#00A3FF]/55 to-transparent opacity-60 [animation:demo-energy_7s_linear_infinite]" />
         <div className="absolute bottom-1/4 left-0 h-px w-full bg-gradient-to-r from-transparent via-[#FFB800]/45 to-transparent opacity-50 [animation:demo-energy_9s_linear_infinite_1.8s]" />
+        <span className="demo-lightning left-[-8%] top-[18%] bg-gradient-to-r from-transparent via-[#00A3FF]/75 to-transparent" />
+        <span className="demo-lightning right-[-12%] top-[56%] bg-gradient-to-r from-transparent via-[#FFB800]/60 to-transparent [animation-delay:3.4s]" />
+        <span className="demo-lightning left-[18%] bottom-[12%] bg-gradient-to-r from-transparent via-[#3AB8FF]/45 to-transparent [animation-delay:6.5s]" />
         {[
           ["left-[4%] top-[16%]", "0s"],
           ["left-[24%] top-[78%]", "1.4s"],

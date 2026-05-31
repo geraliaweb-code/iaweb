@@ -6,7 +6,19 @@ import { generateDiagnosticoWhatsAppMessage } from "@/lib/diagnostico-whatsapp"
 
 type LeadPayload = {
   formData?: Partial<DiagnosticoFormData>
-  result?: Partial<DiagnosticoResult>
+  result?: Partial<DiagnosticoResult> & Partial<CommercialCrmFields>
+}
+
+type CommercialCrmFields = {
+  crmScore?: number
+  crm?: {
+    origem?: string
+    proximaAcao?: string
+    notas?: string
+    perdaMensalEstimada?: number
+    impactoFinanceiro?: Record<string, unknown>
+    planoRecomendado?: string
+  }
 }
 
 const scoreFields = ["website", "google", "conversao", "automacao"] as const
@@ -70,7 +82,7 @@ export async function POST(request: Request) {
     }
 
     const formData = payload.formData as DiagnosticoFormData
-    const result = payload.result as DiagnosticoResult
+    const result = payload.result as DiagnosticoResult & CommercialCrmFields
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -112,9 +124,16 @@ export async function POST(request: Request) {
       score_google: result.categorias.google,
       score_conversao: result.categorias.conversao,
       score_automacao: result.categorias.automacao,
+      score_crm: typeof result.crmScore === "number" ? result.crmScore : 0,
       classificacao: result.classificacao.label,
       potencial_estimado: result.potencialEstimado,
       recomendacoes: result.recomendacoes,
+      origem: result.crm?.origem ?? "diagnostico",
+      proxima_acao: result.crm?.proximaAcao ?? "",
+      notas: result.crm?.notas ?? "",
+      perda_mensal_estimada: result.crm?.perdaMensalEstimada ?? 0,
+      impacto_financeiro: result.crm?.impactoFinanceiro ?? {},
+      plano_recomendado: result.crm?.planoRecomendado ?? "",
       whatsapp_message: whatsappMessage,
       whatsapp_status: whatsappStatus,
       status: "novo",

@@ -20,6 +20,7 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url)
   const status = searchParams.get("status")
+  const niche = searchParams.get("niche") ?? undefined
   const search = searchParams.get("q") ?? undefined
   const sort = searchParams.get("sort")
   const direction = searchParams.get("direction")
@@ -47,6 +48,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await listCrmLeads({
     status: statusFilter,
+    niche,
     search,
     sort: sortField,
     direction: sortDirection,
