@@ -1,5 +1,6 @@
 import { ArrowRight, CalendarDays, CheckCircle2, FileText, ShieldCheck, Sparkles } from "lucide-react"
 import type { ProposalPlan } from "@/components/iaweb/ProposalPlanSelector"
+import { getNicheEngine } from "@/lib/niches"
 
 export type ProposalData = {
   empresa: string
@@ -24,22 +25,15 @@ function display(value: string, fallback: string) {
 }
 
 function getOpportunity(data: ProposalData) {
-  if (data.objetivo.toLowerCase().includes("orcamento")) {
-    return "Transformar visitas dispersas em pedidos de orcamento qualificados, com menos friccao e mais prova comercial."
-  }
+  const niche = getNicheEngine(data.nicho)
 
-  if (data.objetivo.toLowerCase().includes("marc")) {
-    return "Aumentar marcacoes e contactos atraves de uma jornada mais clara, credibilidade imediata e CTA direto."
-  }
-
-  if (data.objetivo.toLowerCase().includes("funil") || data.objetivo.toLowerCase().includes("crm")) {
-    return "Organizar o funil comercial para reduzir oportunidades perdidas e melhorar o acompanhamento de cada lead."
-  }
-
-  return "Criar uma presenca digital mais clara, confiavel e orientada a conversao para gerar mais oportunidades comerciais."
+  return `${niche.personalizedDiagnosis} Dor principal: ${niche.pains[0]} Oportunidade imediata: ${niche.opportunities[0]}`
 }
 
 export default function ProposalPreview({ data, plan }: ProposalPreviewProps) {
+  const niche = getNicheEngine(data.nicho)
+  const scopedIncludes = Array.from(new Set([...plan.includes, ...niche.salesArguments.slice(0, 3)]))
+
   return (
     <article id="proposal-print-area" className="overflow-hidden rounded-[28px] border border-white/10 bg-white text-slate-950 shadow-[0_30px_120px_rgba(0,0,0,0.42)]">
       <section className="relative overflow-hidden bg-[#030712] px-6 py-8 text-white sm:px-8">
@@ -77,7 +71,7 @@ export default function ProposalPreview({ data, plan }: ProposalPreviewProps) {
             principal: {display(data.objetivo, "gerar mais oportunidades comerciais")}.
           </p>
           <p className="mt-4 text-sm leading-7 text-slate-600">
-            Website atual: {display(data.website, "nao indicado")}. Responsavel: {display(data.responsavel, "a definir")}.
+            {niche.personalizedDiagnosis} Website atual: {display(data.website, "nao indicado")}. Responsavel: {display(data.responsavel, "a definir")}.
           </p>
         </div>
 
@@ -107,7 +101,8 @@ export default function ProposalPreview({ data, plan }: ProposalPreviewProps) {
           </div>
           <h2 className="text-2xl font-black tracking-[-0.04em] text-slate-950">{plan.name}</h2>
           <p className="mt-3 text-sm leading-7 text-slate-700">
-            Implementacao focada em gerar clareza, confianca e contactos qualificados, com acompanhamento mensal.
+            Implementacao focada em {niche.opportunities[0].toLowerCase()}, com acompanhamento mensal e argumentos
+            comerciais alinhados ao nicho.
           </p>
         </div>
       </section>
@@ -116,7 +111,7 @@ export default function ProposalPreview({ data, plan }: ProposalPreviewProps) {
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
           <h3 className="text-sm font-black uppercase tracking-[0.14em] text-slate-500">Escopo incluido</h3>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {plan.includes.map((item) => (
+            {scopedIncludes.map((item) => (
               <div key={item} className="flex gap-3 rounded-xl bg-white p-3 text-sm font-semibold text-slate-700">
                 <CheckCircle2 size={17} className="mt-0.5 shrink-0 text-emerald-500" />
                 {item}

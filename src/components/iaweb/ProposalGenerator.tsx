@@ -11,6 +11,7 @@ import ProposalPlanSelector, {
   type ProposalPlan,
 } from "@/components/iaweb/ProposalPlanSelector"
 import ProposalPreview, { type ProposalData } from "@/components/iaweb/ProposalPreview"
+import { getNicheEngine } from "@/lib/niches"
 
 const defaultData: ProposalData = {
   empresa: "",
@@ -25,7 +26,7 @@ const defaultData: ProposalData = {
   notes: "",
 }
 
-const nicheOptions = ["clinicas", "construcao", "imobiliario", "restaurantes", "industria", "servicos B2B", "comercio local", "outro"]
+const nicheOptions = ["clinicas", "construcao", "imobiliario", "restaurantes", "industria", "servicos B2B", "advocacia", "contabilidade", "comercio local", "outro"]
 const objectiveOptions = [
   "Gerar mais leads qualificados",
   "Melhorar percecao de valor",
@@ -98,9 +99,12 @@ export default function ProposalGenerator() {
   }, [data])
 
   const whatsAppHref = useMemo(() => {
+    const niche = getNicheEngine(data.nicho)
     const message = [
       `Ola${data.responsavel ? ` ${data.responsavel}` : ""},`,
       `preparei a proposta da IAWEB para ${data.empresa || "a sua empresa"}.`,
+      `Dor principal identificada: ${niche.pains[0]}`,
+      `Oportunidade: ${niche.opportunities[0]}`,
       `Pacote recomendado: ${plan.name}.`,
       `Setup: ${data.setupValue || plan.setupLabel}. Mensalidade: ${data.monthlyValue || plan.monthlyLabel}.`,
       "A proposta tem validade de 7 dias. Posso enviar os proximos passos?",

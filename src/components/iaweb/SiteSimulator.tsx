@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, ImagePlus, Loader2, Save, Send, Sparkles } from 
 import SitePaletteSelector, { type SitePalette } from "@/components/iaweb/SitePaletteSelector"
 import SitePreviewMockup, { type SiteCopy } from "@/components/iaweb/SitePreviewMockup"
 import SiteStructurePreview from "@/components/iaweb/SiteStructurePreview"
+import { getNicheEngine } from "@/lib/niches"
 
 type SimulatorForm = {
   empresa: string
@@ -23,7 +24,7 @@ type SimulatorResult = {
   packageName: string
 }
 
-const nicheOptions = ["clinicas", "construcao", "imobiliario", "restaurantes", "industria", "servicos B2B", "comercio local", "outro"]
+const nicheOptions = ["clinicas", "construcao", "imobiliario", "restaurantes", "industria", "servicos B2B", "advocacia", "contabilidade", "comercio local", "outro"]
 const toneOptions = ["Premium e confiavel", "Direto e comercial", "Humano e proximo", "Tecnico e especialista", "Moderno e ousado"]
 const objectiveOptions = [
   "Gerar mais leads qualificados",
@@ -69,6 +70,16 @@ const palettes: Record<string, SitePalette> = {
     colors: ["#14532d", "#ffffff", "#1f2937"],
     labels: ["proximidade", "clareza", "solidez"],
   },
+  advocacia: {
+    name: "Azul profundo, branco e dourado discreto",
+    colors: ["#07111f", "#ffffff", "#b8995b"],
+    labels: ["autoridade", "clareza", "confiança"],
+  },
+  contabilidade: {
+    name: "Azul profundo, branco e teal",
+    colors: ["#082f49", "#ffffff", "#14b8a6"],
+    labels: ["rigor", "clareza", "gestao"],
+  },
   outro: {
     name: "Preto, azul eletrico e branco",
     colors: ["#030712", "#ffffff", "#38bdf8"],
@@ -83,6 +94,8 @@ const nicheLabels: Record<string, string> = {
   restaurantes: "restaurante",
   industria: "empresa industrial",
   "servicos B2B": "empresa de servicos B2B",
+  advocacia: "sociedade de advocacia",
+  contabilidade: "gabinete de contabilidade",
   "comercio local": "comercio local",
   outro: "empresa",
 }
@@ -113,44 +126,34 @@ function buildSimulation(form: SimulatorForm): SimulatorResult {
   const company = form.empresa.trim() || "A sua empresa"
   const label = nicheLabels[form.nicho] ?? "empresa"
   const objective = form.objetivo.toLowerCase()
+  const nicheEngine = getNicheEngine(form.nicho)
   const palette = palettes[form.nicho] ?? palettes.outro
-
-  const serviceMap: Record<string, string[]> = {
-    clinicas: ["Marcacoes online", "Tratamentos principais", "Equipa clinica", "Contacto rapido"],
-    construcao: ["Obras realizadas", "Pedidos de orcamento", "Especialidades", "Garantias"],
-    imobiliario: ["Imoveis em destaque", "Avaliacao gratuita", "Consultoria", "Contactos rapidos"],
-    restaurantes: ["Menu e reservas", "Experiencia", "Eventos privados", "Localizacao"],
-    industria: ["Capacidades tecnicas", "Setores servidos", "Certificacoes", "Pedido de contacto"],
-    "servicos B2B": ["Servico principal", "Casos de uso", "Processo comercial", "Diagnostico"],
-    "comercio local": ["Produtos estrela", "Promocoes", "Prova local", "WhatsApp"],
-    outro: ["Oferta principal", "Beneficios", "Processo", "Contacto"],
-  }
 
   const structure = [
     "Hero com promessa clara e CTA direto",
-    "Blocos de servicos orientados a decisao",
-    "Diferenciais e prova de confianca",
+    `Blocos orientados a ${nicheEngine.opportunities[0].toLowerCase()}`,
+    `Diferenciais baseados em: ${nicheEngine.salesArguments[0]}`,
     "Prova social e resultados ficticios para mockup",
     "CTA final com contacto ou pedido de proposta",
   ]
+  const services = [
+    ...nicheEngine.opportunities.slice(0, 3),
+    nicheEngine.keywords[0] ? `Captacao por ${nicheEngine.keywords[0]}` : "Contacto rapido",
+  ].slice(0, 4)
 
   const copy: SiteCopy = {
     headline:
       objective.includes("marcacoes")
-        ? `${company}: mais marcacoes com uma presenca digital que transmite confianca.`
+        ? `${company}: mais marcacoes com ${nicheEngine.keywords[0] ?? "presenca digital"} e confianca imediata.`
         : objective.includes("orcamento")
-          ? `${company}: transformar visitantes em pedidos de orcamento qualificados.`
-          : `${company}: uma homepage premium para gerar mais clientes no setor ${label}.`,
-    subheadline: `Simulacao inicial com tom ${form.tom.toLowerCase()}, criada para posicionar a marca, explicar valor rapidamente e conduzir o visitante para uma acao comercial.`,
-    cta: objective.includes("orcamento") ? "Pedir orcamento" : objective.includes("marcacoes") ? "Marcar avaliacao" : "Falar com a equipa",
-    services: serviceMap[form.nicho] ?? serviceMap.outro,
-    differentiators: [
-      "Mensagem clara nos primeiros cinco segundos.",
-      "CTA visivel em todos os momentos importantes.",
-      "Estrutura pensada para decisao e nao apenas estetica.",
-    ],
-    testimonial: `A equipa percebeu rapidamente o valor da ${company} e criou uma experiencia muito mais clara para quem chega pelo Google ou redes sociais.`,
-    finalCta: `Pronto para transformar a presenca digital da ${company}?`,
+          ? `${company}: transformar procura por ${nicheEngine.keywords[1] ?? label} em pedidos qualificados.`
+          : `${company}: uma homepage premium para capturar ${nicheEngine.opportunities[0].toLowerCase()}.`,
+    subheadline: `${nicheEngine.personalizedDiagnosis} Simulacao com tom ${form.tom.toLowerCase()}, pensada para responder a dor: ${nicheEngine.pains[0].toLowerCase()}`,
+    cta: objective.includes("orcamento") ? "Pedir orcamento" : objective.includes("marcacoes") ? "Marcar avaliacao" : `Resolver: ${nicheEngine.pains[0].split(".")[0]}`,
+    services,
+    differentiators: nicheEngine.salesArguments.slice(0, 3),
+    testimonial: `A equipa percebeu rapidamente o valor da ${company}: ${nicheEngine.salesArguments[0].toLowerCase()}`,
+    finalCta: `Pronto para transformar ${nicheEngine.opportunities[0].toLowerCase()} numa conversa comercial?`,
   }
 
   return {
