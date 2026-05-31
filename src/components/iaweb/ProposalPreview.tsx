@@ -1,5 +1,6 @@
 import { ArrowRight, CalendarDays, CheckCircle2, FileText, ShieldCheck, Sparkles } from "lucide-react"
 import type { ProposalPlan } from "@/components/iaweb/ProposalPlanSelector"
+import { calculateFinanceImpact, formatEuro } from "@/lib/finance-impact"
 import { getNicheEngine } from "@/lib/niches"
 
 export type ProposalData = {
@@ -33,6 +34,10 @@ function getOpportunity(data: ProposalData) {
 export default function ProposalPreview({ data, plan }: ProposalPreviewProps) {
   const niche = getNicheEngine(data.nicho)
   const scopedIncludes = Array.from(new Set([...plan.includes, ...niche.salesArguments.slice(0, 3)]))
+  const financeImpact = calculateFinanceImpact({
+    niche: data.nicho,
+    packageName: plan.name,
+  })
 
   return (
     <article id="proposal-print-area" className="overflow-hidden rounded-[28px] border border-white/10 bg-white text-slate-950 shadow-[0_30px_120px_rgba(0,0,0,0.42)]">
@@ -104,6 +109,40 @@ export default function ProposalPreview({ data, plan }: ProposalPreviewProps) {
             Implementacao focada em {niche.opportunities[0].toLowerCase()}, com acompanhamento mensal e argumentos
             comerciais alinhados ao nicho.
           </p>
+        </div>
+      </section>
+
+      <section className="px-6 pb-6 sm:px-8">
+        <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-5">
+          <h3 className="text-sm font-black uppercase tracking-[0.14em] text-emerald-700">Impacto financeiro estimado</h3>
+          <p className="mt-3 text-sm leading-7 text-slate-700">
+            {financeImpact.impactPhrase} Estes valores representam potencial estimado e oportunidades nao capturadas, com
+            base no cenario analisado, sem garantia de resultado.
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-4">
+            <div className="rounded-xl bg-white p-3">
+              <div className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Potencial mensal</div>
+              <div className="mt-2 text-lg font-black text-slate-950">
+                {formatEuro(financeImpact.lostRevenueMonthly.min)}-{formatEuro(financeImpact.lostRevenueMonthly.max)}
+              </div>
+            </div>
+            <div className="rounded-xl bg-white p-3">
+              <div className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Potencial anual</div>
+              <div className="mt-2 text-lg font-black text-slate-950">
+                {formatEuro(financeImpact.lostRevenueAnnual.min)}-{formatEuro(financeImpact.lostRevenueAnnual.max)}
+              </div>
+            </div>
+            <div className="rounded-xl bg-white p-3">
+              <div className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">ROI potencial</div>
+              <div className="mt-2 text-lg font-black text-slate-950">
+                {financeImpact.potentialRoi.min}x-{financeImpact.potentialRoi.max}x
+              </div>
+            </div>
+            <div className="rounded-xl bg-white p-3">
+              <div className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Payback</div>
+              <div className="mt-2 text-lg font-black text-slate-950">{financeImpact.estimatedPayback}</div>
+            </div>
+          </div>
         </div>
       </section>
 

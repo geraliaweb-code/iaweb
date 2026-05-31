@@ -18,6 +18,7 @@ import {
 import DemoOpportunityLoss from "@/components/iaweb/DemoOpportunityLoss"
 import DemoRecommendedPlan from "@/components/iaweb/DemoRecommendedPlan"
 import DemoScoreCard from "@/components/iaweb/DemoScoreCard"
+import { calculateFinanceImpact, formatEuro, type FinanceImpact } from "@/lib/finance-impact"
 import { getNicheEngine } from "@/lib/niches"
 
 type DemoFormData = {
@@ -48,6 +49,7 @@ type DemoAnalysis = {
   opportunities: string[]
   recommendations: string[]
   packageName: string
+  financeImpact: FinanceImpact
 }
 
 const initialForm: DemoFormData = {
@@ -151,6 +153,13 @@ function calculateDemoAnalysis(form: DemoFormData): DemoAnalysis {
   const topPain = nicheEngine.pains[0]
   const topOpportunity = nicheEngine.opportunities[0]
 
+  const packageName = getPackage(scoreFinal, form.objetivo)
+  const financeImpact = calculateFinanceImpact({
+    niche: form.nicho,
+    packageName,
+    score: scoreFinal,
+  })
+
   return {
     scoreFinal,
     scores,
@@ -166,7 +175,8 @@ function calculateDemoAnalysis(form: DemoFormData): DemoAnalysis {
       `${nicheEngine.estimatedRoi} Esta estimativa combina o potencial medio do nicho com o risco comercial indicado pelo score. Serve para enquadrar a conversa, nao como promessa de resultado.`,
     opportunities: nicheEngine.opportunities.slice(0, 3),
     recommendations,
-    packageName: getPackage(scoreFinal, form.objetivo),
+    packageName,
+    financeImpact,
   }
 }
 
@@ -217,6 +227,15 @@ function DemoSelect({
         ))}
       </select>
     </label>
+  )
+}
+
+function FinanceMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+      <div className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{label}</div>
+      <div className="mt-2 text-xl font-black tracking-[-0.04em] text-white">{value}</div>
+    </div>
   )
 }
 
@@ -398,6 +417,53 @@ export default function DemoCommercialTool() {
                   monthlyLoss={analysis.monthlyLoss}
                   reason={analysis.lossReason}
                 />
+
+                <section className="rounded-[26px] border border-emerald-300/15 bg-emerald-300/[0.055] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-2xl sm:p-6">
+                  <div className="mb-4 text-sm font-bold uppercase tracking-[0.16em] text-emerald-100">
+                    Impacto Financeiro
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                    <FinanceMetric
+                      label="Oportunidades perdidas/mes"
+                      value={`${analysis.financeImpact.lostLeadsMonthly.min}-${analysis.financeImpact.lostLeadsMonthly.max} ${analysis.financeImpact.opportunityLabel}`}
+                    />
+                    <FinanceMetric
+                      label="Ticket medio estimado"
+                      value={`${formatEuro(analysis.financeImpact.averageTicket.min)}-${formatEuro(analysis.financeImpact.averageTicket.max)}`}
+                    />
+                    <FinanceMetric
+                      label="Potencial nao capturado/mes"
+                      value={`${formatEuro(analysis.financeImpact.lostRevenueMonthly.min)}-${formatEuro(analysis.financeImpact.lostRevenueMonthly.max)}`}
+                    />
+                    <FinanceMetric
+                      label="Potencial nao capturado/ano"
+                      value={`${formatEuro(analysis.financeImpact.lostRevenueAnnual.min)}-${formatEuro(analysis.financeImpact.lostRevenueAnnual.max)}`}
+                    />
+                    <FinanceMetric
+                      label="ROI potencial"
+                      value={`${analysis.financeImpact.potentialRoi.min}x-${analysis.financeImpact.potentialRoi.max}x`}
+                    />
+                    <FinanceMetric label="Payback estimado" value={analysis.financeImpact.estimatedPayback} />
+                  </div>
+                  <p className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm leading-7 text-emerald-50/90">
+                    {analysis.financeImpact.impactPhrase} Valores apresentados como estimativas conservadoras, sem garantia de resultado.
+                  </p>
+                </section>
+
+                <section className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-[24px] border border-white/10 bg-white/[0.055] p-5 backdrop-blur-2xl">
+                    <div className="text-sm font-bold uppercase tracking-[0.16em] text-amber-100">Antes</div>
+                    <p className="mt-3 text-sm leading-7 text-slate-300">
+                      Pedidos, marcacoes, reservas ou contratos chegam por canais dispersos, com seguimento manual e oportunidades nao capturadas.
+                    </p>
+                  </div>
+                  <div className="rounded-[24px] border border-cyan-200/15 bg-cyan-300/[0.07] p-5 backdrop-blur-2xl">
+                    <div className="text-sm font-bold uppercase tracking-[0.16em] text-cyan-100">Depois</div>
+                    <p className="mt-3 text-sm leading-7 text-cyan-50">
+                      A marca apresenta valor com clareza, capta contactos qualificados e conduz cada oportunidade para o proximo passo comercial.
+                    </p>
+                  </div>
+                </section>
 
                 <DemoRecommendedPlan packageName={analysis.packageName} recommendations={analysis.recommendations} />
 
