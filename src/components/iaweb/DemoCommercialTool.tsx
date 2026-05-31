@@ -1,6 +1,6 @@
 "use client"
 
-import { FormEvent, useMemo, useState } from "react"
+import { FormEvent, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -18,6 +18,7 @@ import {
 import DemoOpportunityLoss from "@/components/iaweb/DemoOpportunityLoss"
 import DemoRecommendedPlan from "@/components/iaweb/DemoRecommendedPlan"
 import DemoScoreCard from "@/components/iaweb/DemoScoreCard"
+import { getNicheEngine } from "@/lib/niches"
 
 type DemoFormData = {
   empresa: string
@@ -44,6 +45,7 @@ type DemoAnalysis = {
   }
   monthlyLoss: number
   lossReason: string
+  opportunities: string[]
   recommendations: string[]
   packageName: string
 }
@@ -64,6 +66,8 @@ const nicheOptions = [
   "restaurantes",
   "industria",
   "servicos B2B",
+  "advocacia",
+  "contabilidade",
   "comercio local",
   "outro",
 ]
@@ -83,6 +87,8 @@ const lossRanges: Record<string, { min: number; max: number }> = {
   restaurantes: { min: 1000, max: 8000 },
   industria: { min: 5000, max: 50000 },
   "servicos B2B": { min: 2000, max: 20000 },
+  advocacia: { min: 2000, max: 20000 },
+  contabilidade: { min: 2000, max: 20000 },
   "comercio local": { min: 800, max: 6000 },
   outro: { min: 1000, max: 10000 },
 }
@@ -109,6 +115,7 @@ function getPackage(score: number, objective: string) {
 }
 
 function calculateDemoAnalysis(form: DemoFormData): DemoAnalysis {
+  const nicheEngine = getNicheEngine(form.nicho)
   const websiteReady = hasWebsite(form.website)
   const professionalEmail = hasProfessionalEmail(form.email)
   const hasPhone = form.telefone.trim().length >= 9
@@ -136,26 +143,28 @@ function calculateDemoAnalysis(form: DemoFormData): DemoAnalysis {
     .map(([key]) => key)
 
   const recommendations = [
-    scores.website < 70 ? "Reforcar a primeira dobra com proposta de valor, prova e CTA visivel." : "Usar o website atual como base para campanhas e paginas de conversao.",
-    scores.google < 70 ? "Otimizar presenca no Google para capturar procura com intencao comercial." : "Aumentar captura de leads a partir da visibilidade existente.",
-    scores.conversao < 70 ? "Reduzir friccao no contacto: formulario curto, WhatsApp claro e resposta rapida." : "Medir conversao por canal para investir no que ja funciona.",
-    scores.crm < 70 ? "Centralizar leads num funil simples com status, prioridade e proxima acao." : "Automatizar alertas e seguimento no CRM.",
-    scores.automacao < 70 ? "Criar follow-up automatico para nao perder contactos fora do horario comercial." : "Ligar automacoes a metricas de receita.",
-  ].slice(0, 4)
+    nicheEngine.opportunities[0],
+    nicheEngine.opportunities[1],
+    scores.website < 70 ? "Reforcar a primeira dobra com proposta de valor, prova e CTA visivel." : nicheEngine.salesArguments[0],
+    scores.crm < 70 ? "Centralizar leads num funil simples com status, prioridade e proxima acao." : nicheEngine.salesArguments[1],
+  ].filter(Boolean).slice(0, 4)
+  const topPain = nicheEngine.pains[0]
+  const topOpportunity = nicheEngine.opportunities[0]
 
   return {
     scoreFinal,
     scores,
     diagnostico:
       scoreFinal < 45
-        ? `A ${form.empresa || "empresa"} parece estar a perder procura por falta de clareza, captacao e seguimento comercial. As areas mais frageis sao ${weakAreas.join(", ")}.`
+        ? `${nicheEngine.personalizedDiagnosis} Na ${form.empresa || "empresa"}, o bloqueio principal parece ser: ${topPain} As areas mais frageis sao ${weakAreas.join(", ")}.`
         : scoreFinal < 70
-          ? `A ${form.empresa || "empresa"} ja tem alguns sinais positivos, mas ainda nao existe um sistema comercial completo. O ganho mais rapido esta em ${weakAreas.join(", ")}.`
-          : `A ${form.empresa || "empresa"} tem uma boa base para crescer. A oportunidade agora e transformar presenca digital em pipeline previsivel.`,
+          ? `${nicheEngine.personalizedDiagnosis} A oportunidade mais rapida e: ${topOpportunity} O ganho operacional esta em ${weakAreas.join(", ")}.`
+          : `${nicheEngine.personalizedDiagnosis} A ${form.empresa || "empresa"} ja tem uma boa base; agora deve escalar com ${nicheEngine.salesArguments[0].toLowerCase()}`,
     lossRange,
     monthlyLoss,
     lossReason:
-      "Esta estimativa combina o potencial medio do nicho com o risco comercial indicado pelo score. Serve para enquadrar a conversa, nao como promessa de resultado.",
+      `${nicheEngine.estimatedRoi} Esta estimativa combina o potencial medio do nicho com o risco comercial indicado pelo score. Serve para enquadrar a conversa, nao como promessa de resultado.`,
+    opportunities: nicheEngine.opportunities.slice(0, 3),
     recommendations,
     packageName: getPackage(scoreFinal, form.objetivo),
   }
@@ -225,6 +234,12 @@ export default function DemoCommercialTool() {
     if (form.website.trim()) params.set("website", form.website.trim())
     return params.toString()
   }, [form.empresa, form.nicho, form.objetivo, form.website])
+
+  useEffect(() => {
+    if (!analysis) return
+    setAnalysis(calculateDemoAnalysis(form))
+    setCrmStatus("")
+  }, [form])
 
   function updateField(field: keyof DemoFormData, value: string) {
     setForm((current) => ({ ...current, [field]: value }))
@@ -362,6 +377,19 @@ export default function DemoCommercialTool() {
                     Diagnostico comercial
                   </div>
                   <p className="text-lg font-semibold leading-8 text-white">{analysis.diagnostico}</p>
+                </section>
+
+                <section className="rounded-[26px] border border-white/10 bg-white/[0.055] p-5 backdrop-blur-2xl sm:p-6">
+                  <div className="mb-4 text-sm font-bold uppercase tracking-[0.16em] text-cyan-100">
+                    Oportunidades por nicho
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-3">
+                    {analysis.opportunities.map((opportunity) => (
+                      <div key={opportunity} className="rounded-2xl border border-cyan-200/15 bg-cyan-300/[0.07] p-4 text-sm font-semibold leading-6 text-cyan-50">
+                        {opportunity}
+                      </div>
+                    ))}
+                  </div>
                 </section>
 
                 <DemoOpportunityLoss
