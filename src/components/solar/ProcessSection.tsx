@@ -57,7 +57,7 @@ export default function ProcessSection() {
           <p className="text-amber-400 text-xs font-bold tracking-[0.2em] uppercase">
             Como funciona
           </p>
-          <h2 className="text-4xl md:text-[2.75rem] font-black text-white leading-[1.1] tracking-tight">
+          <h2 className="text-4xl md:text-[2.75rem] font-bold text-white leading-[1.07] tracking-[-0.02em]">
             De zero a clientes em{' '}
             <span className="bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
               30 dias
@@ -109,7 +109,7 @@ export default function ProcessSection() {
 
                   <div className="space-y-3 md:pt-0">
                     <div className="flex items-center gap-2.5">
-                      <span className="text-[10px] font-black text-amber-400/50 tracking-[0.2em] uppercase">
+                      <span className="text-[10px] font-semibold text-amber-400/50 tracking-[0.2em] uppercase">
                         {step.number}
                       </span>
                       <span className="w-1 h-1 rounded-full bg-slate-700" />

@@ -56,7 +56,7 @@ export default function ProblemSection() {
           <p className="text-amber-400 text-xs font-bold tracking-[0.2em] uppercase">
             O problema que ninguém quer admitir
           </p>
-          <h2 className="text-4xl md:text-[2.75rem] font-black text-white leading-[1.1] tracking-tight">
+          <h2 className="text-4xl md:text-[2.75rem] font-bold text-white leading-[1.07] tracking-[-0.02em]">
             A sua empresa solar está a crescer{' '}
             <span className="text-slate-500">ou apenas a sobreviver?</span>
           </h2>
@@ -87,7 +87,7 @@ export default function ProblemSection() {
                   </div>
 
                   <div>
-                    <p className="text-4xl font-black text-white tabular-nums leading-none">
+                    <p className="text-4xl font-bold text-white tabular-nums leading-none">
                       {p.stat}
                     </p>
                     <p className="text-xs text-slate-500 mt-1.5 leading-snug max-w-[16rem]">

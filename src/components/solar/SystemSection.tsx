@@ -56,7 +56,7 @@ export default function SystemSection() {
             <p className="text-amber-400 text-xs font-bold tracking-[0.2em] uppercase">
               O Sistema IAWEB
             </p>
-            <h2 className="text-4xl md:text-[2.75rem] font-black text-white leading-[1.1] tracking-tight">
+            <h2 className="text-4xl md:text-[2.75rem] font-bold text-white leading-[1.07] tracking-[-0.02em]">
               Três pilares que geram{' '}
               <span className="bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
                 resultados previsíveis

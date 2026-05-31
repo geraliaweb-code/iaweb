@@ -1,25 +1,23 @@
-import HeroSection from '@/components/solar/HeroSection'
-import ProblemSection from '@/components/solar/ProblemSection'
-import SystemSection from '@/components/solar/SystemSection'
-import ProcessSection from '@/components/solar/ProcessSection'
-import MetricsSection from '@/components/solar/MetricsSection'
-import PilotOfferSection from '@/components/solar/PilotOfferSection'
-import LeadFormSection from '@/components/solar/LeadFormSection'
-import CtaSection from '@/components/solar/CtaSection'
-import FooterSection from '@/components/solar/FooterSection'
+import NavbarSection from "@/components/iaweb/NavbarSection"
+import HeroSection from "@/components/iaweb/HeroSection"
+import SystemSection from "@/components/iaweb/SystemSection"
+import ProcessSection from "@/components/iaweb/ProcessSection"
+import ResultsSection from "@/components/iaweb/ResultsSection"
+import LeadFormSection from "@/components/iaweb/LeadFormSection"
+import FooterSection from "@/components/iaweb/FooterSection"
+import WhatsAppButton from "@/components/iaweb/WhatsAppButton"
 
 export default function Home() {
   return (
-    <>
+    <main className="bg-[#030712] min-h-screen overflow-x-hidden">
+      <NavbarSection />
       <HeroSection />
-      <ProblemSection />
       <SystemSection />
       <ProcessSection />
-      <MetricsSection />
-      <PilotOfferSection />
+      <ResultsSection />
       <LeadFormSection />
-      <CtaSection />
       <FooterSection />
-    </>
+      <WhatsAppButton />
+    </main>
   )
 }

@@ -4,7 +4,7 @@ import { motion } from 'motion/react'
 import { BentoCard, BentoGrid } from '@/components/ui/bento-grid'
 import { TrendingUp, Globe2, Clock, BarChart3 } from 'lucide-react'
 
-/* ── Bento card backgrounds ──────────────────────────────────────────────── */
+/* —— Bento card backgrounds ———————————————————————————————— */
 
 const BAR_HEIGHTS = [38, 55, 48, 70, 58, 82, 66, 90, 74, 100]
 
@@ -70,7 +70,7 @@ function NumberWatermark({ label }: { label: string }) {
   )
 }
 
-/* ── Features config ─────────────────────────────────────────────────────── */
+/* —— Features config ——————————————————————————————————————————————— */
 
 const FEATURES = [
   {
@@ -115,7 +115,7 @@ const FEATURES = [
   },
 ]
 
-/* ── Component ───────────────────────────────────────────────────────────── */
+/* —— Component ——————————————————————————————————————————————————————— */
 
 export default function MetricsSection() {
   return (
@@ -139,7 +139,7 @@ export default function MetricsSection() {
           <p className="text-amber-400 text-xs font-bold tracking-[0.2em] uppercase">
             Resultados comprovados
           </p>
-          <h2 className="text-4xl md:text-[2.75rem] font-black text-white leading-[1.1] tracking-tight">
+          <h2 className="text-4xl md:text-[2.75rem] font-bold text-white leading-[1.07] tracking-[-0.02em]">
             Métricas que{' '}
             <span className="bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
               definem o padrão

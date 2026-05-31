@@ -56,7 +56,7 @@ export default function LeadFormSection() {
             <p className="text-amber-400 text-xs font-bold tracking-[0.2em] uppercase">
               Comece o seu piloto
             </p>
-            <h2 className="text-4xl md:text-[2.75rem] font-black text-white leading-[1.1] tracking-tight">
+            <h2 className="text-4xl md:text-[2.75rem] font-bold text-white leading-[1.07] tracking-[-0.02em]">
               Pronto para clientes{' '}
               <span className="bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
                 que fecham?
@@ -180,7 +180,7 @@ export default function LeadFormSection() {
   )
 }
 
-/* ── Sub-components ──────────────────────────────────────────────────────── */
+/* —— Sub-components ———————————————————————————————————————————————— */
 
 function Field({
   label, placeholder, value, onChange, type = 'text', required = false,

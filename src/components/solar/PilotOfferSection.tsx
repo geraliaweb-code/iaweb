@@ -42,7 +42,7 @@ export default function PilotOfferSection() {
           <p className="text-amber-400 text-xs font-bold tracking-[0.2em] uppercase">
             Oferta de entrada
           </p>
-          <h2 className="text-4xl md:text-[2.75rem] font-black text-white leading-[1.1] tracking-tight">
+          <h2 className="text-4xl md:text-[2.75rem] font-bold text-white leading-[1.07] tracking-[-0.02em]">
             Piloto Premium
           </h2>
           <p className="text-lg text-slate-400 max-w-xl mx-auto">

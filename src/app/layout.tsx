@@ -13,9 +13,21 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'SolarPro — Energia Solar Industrial',
+  title: 'IAWEB — Automatizamos Aquisição. Escalamos Negócios.',
   description:
-    'Reduza até 60% da sua fatura elétrica com sistemas fotovoltaicos industriais. ROI garantido em menos de 4 anos. Análise técnica gratuita.',
+    'A IAWEB cria websites premium, automações inteligentes e sistemas com IA para empresas que querem crescer com previsibilidade. Leads qualificados, conversão real.',
+  keywords: ['IAWEB', 'websites premium', 'automação', 'IA', 'leads', 'marketing digital', 'Portugal'],
+  openGraph: {
+    title: 'IAWEB — Automatizamos Aquisição. Escalamos Negócios.',
+    description: 'Websites premium, automações inteligentes e IA para empresas que querem crescer com previsibilidade.',
+    type: 'website',
+    locale: 'pt_PT',
+  },
+  icons: {
+    icon: '/brand/iaweb-icon.png',
+    shortcut: '/brand/iaweb-icon.png',
+    apple: '/brand/iaweb-icon.png',
+  },
 }
 
 export default function RootLayout({
@@ -24,9 +36,11 @@ export default function RootLayout({
   return (
     <html
       lang="pt"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-950">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#030712] text-[#F8FAFC]">
+        {children}
+      </body>
     </html>
   )
 }

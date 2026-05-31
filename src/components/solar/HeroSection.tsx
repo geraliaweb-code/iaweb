@@ -1,198 +1,186 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 import { motion } from 'motion/react'
-import { AuroraBackground } from '@/components/ui/aurora-background'
 import { ShimmerButton } from '@/components/ui/shimmer-button'
-import { ArrowRight, ChevronDown } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
+
+/* ── Animation helper ────────────────────────────────────────────────────── */
+const fade = (delay = 0) => ({
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.48, delay, ease: [0.21, 0.47, 0.32, 0.98] as const },
+})
 
 const STATS = [
-  { value: '+500', label: 'leads qualificados/mês' },
-  { value: '€14M+', label: 'em contratos gerados' },
-  { value: '2 países', label: 'Portugal e Espanha' },
+  { value: '+500', label: 'leads / mês' },
+  { value: '€14M+', label: 'em contratos' },
+  { value: 'PT · ES', label: 'mercados activos' },
+]
+
+const NAV_LINKS = [
+  { label: 'Sistema', href: '#sistema' },
+  { label: 'Processo', href: '#processo' },
+  { label: 'Resultados', href: '#metricas' },
 ]
 
 export default function HeroSection() {
   return (
-    <div className="relative" id="inicio">
-      <AuroraBackground
-        className="!bg-slate-950 !h-auto min-h-screen text-white px-6 md:px-12 lg:px-16 pb-20"
-        showRadialGradient
-      >
-        {/* Amber depth glow */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[700px] rounded-full bg-amber-600/[0.06] blur-[120px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-amber-400/[0.04] blur-[80px]" />
-        </div>
+    <div className="relative flex flex-col min-h-screen bg-[#030712]" id="inicio">
 
-        {/* Nav bar */}
-        <nav className="relative z-10 w-full max-w-7xl mx-auto flex items-center justify-between py-7">
+      {/* ── Subtle background treatment ────────────────────────────────── */}
+      <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
+        {/* Single very faint top radial — warmth without glow */}
+        <div
+          className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full"
+          style={{ background: 'radial-gradient(ellipse at top, rgba(251,191,36,0.025) 0%, transparent 65%)' }}
+        />
+        {/* Dot grid — barely visible, adds depth like Linear */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+            opacity: 0.025,
+          }}
+        />
+      </div>
+
+      {/* ── Navbar ─────────────────────────────────────────────────────── */}
+      <header className="relative z-20 h-14 flex-shrink-0 border-b border-white/[0.06]">
+        <nav className="h-full max-w-6xl mx-auto px-6 md:px-10 flex items-center justify-between">
+
+          {/* Logo */}
           <motion.div
-            initial={{ opacity: 0, x: -16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.45 }}
-            className="flex items-center gap-2.5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="isolate flex-shrink-0"
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-slate-950">
-                <path d="M7 0L8.5 5.5L14 7L8.5 8.5L7 14L5.5 8.5L0 7L5.5 5.5L7 0Z" fill="currentColor" />
-              </svg>
-            </div>
-            <span className="text-white font-bold text-lg tracking-tight">IAWEB</span>
+            <Image
+              src="/brand/iaweb-logo.png"
+              alt="IAWEB"
+              width={180}
+              height={58}
+              priority
+              className="h-8 w-auto mix-blend-screen"
+            />
           </motion.div>
 
+          {/* Links — desktop */}
           <motion.div
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.45 }}
-            className="hidden md:flex items-center gap-6 text-sm text-slate-400"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.05 }}
+            className="hidden md:flex items-center gap-7"
           >
-            {['Sistema', 'Processo', 'Métricas'].map(item => (
+            {NAV_LINKS.map(link => (
               <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                className="hover:text-white transition-colors"
+                key={link.label}
+                href={link.href}
+                className="text-sm text-slate-400 hover:text-slate-100 transition-colors duration-200"
               >
-                {item}
+                {link.label}
               </a>
             ))}
+          </motion.div>
+
+          {/* CTA */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.08 }}
+          >
             <a
               href="#contacto"
-              className="px-4 py-2 rounded-lg border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 transition-all text-xs font-semibold tracking-wide uppercase"
+              className="inline-flex items-center text-sm font-medium text-slate-300 hover:text-white border border-white/[0.1] hover:border-white/[0.2] px-4 py-1.5 rounded-lg transition-all duration-200 bg-white/[0.02] hover:bg-white/[0.05]"
             >
-              Contacto
+              Diagnóstico gratuito
             </a>
           </motion.div>
         </nav>
+      </header>
 
-        {/* Hero content */}
-        <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center text-center gap-8 pt-16 pb-12">
+      {/* ── Hero ───────────────────────────────────────────────────────── */}
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-10 py-20 md:py-28">
+        <div className="w-full max-w-3xl mx-auto flex flex-col items-center gap-0">
 
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-500/20 bg-amber-500/[0.07] text-amber-300 text-sm font-medium"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse flex-shrink-0" />
-            Aquisição inteligente para empresas solares
+          {/* Label */}
+          <motion.div {...fade(0)} className="mb-10">
+            <span className="inline-flex items-center gap-3 text-[11px] font-medium text-slate-500 tracking-[0.18em] uppercase">
+              <span className="block w-5 h-px bg-amber-400/40 flex-shrink-0" />
+              Aquisição digital premium
+              <span className="block w-5 h-px bg-amber-400/40 flex-shrink-0" />
+            </span>
           </motion.div>
 
           {/* H1 */}
           <motion.h1
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-            className="text-5xl sm:text-6xl lg:text-7xl xl:text-[5rem] font-black leading-[1.0] tracking-tight"
+            {...fade(0.07)}
+            className="text-[clamp(2.5rem,5.5vw,4.25rem)] font-bold text-white leading-[1.06] tracking-[-0.025em] mb-6"
           >
-            <span className="text-white">Geramos clientes</span>
-            <br />
-            <span className="relative inline-block">
-              <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-200 bg-clip-text text-transparent">
-                qualificados
-              </span>
-            </span>
-            <br />
-            <span className="text-slate-200/90">para empresas solares</span>
+            Geramos clientes{' '}
+            <span className="text-amber-300/90">qualificados</span>
+            {' '}para empresas modernas
           </motion.h1>
 
           {/* Subheadline */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="max-w-2xl text-lg md:text-xl text-slate-400 leading-relaxed"
+            {...fade(0.14)}
+            className="max-w-xl text-base md:text-lg text-slate-400/80 leading-[1.7] mb-10"
           >
-            A IAWEB combina IA, automação e distribuição digital para criar
-            oportunidades comerciais reais para empresas de energia solar em{' '}
-            <span className="text-slate-200 font-medium">Portugal e Espanha</span>.
+            A IAWEB combina websites premium, automação e inteligência artificial
+            para transformar presença digital em oportunidades comerciais reais.
           </motion.p>
 
           {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
+          <motion.div {...fade(0.21)} className="flex flex-col sm:flex-row items-center gap-3 mb-24">
             <ShimmerButton
               shimmerColor="#fbbf24"
-              background="rgba(2, 6, 23, 0.9)"
-              borderRadius="12px"
-              className="px-8 py-4 text-base font-bold border-white/[0.1] gap-2.5"
+              background="rgba(3, 7, 18, 0.97)"
+              borderRadius="10px"
+              className="px-6 py-3 text-sm font-semibold border-white/[0.1] gap-2"
             >
-              Quero Mais Clientes
-              <ArrowRight className="w-4 h-4 flex-shrink-0" />
+              Pedir diagnóstico gratuito
+              <ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
             </ShimmerButton>
 
-            <motion.a
+            <a
               href="#sistema"
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center gap-2 px-8 py-4 text-base font-semibold text-slate-300 border border-white/[0.08] rounded-xl hover:border-white/[0.15] hover:text-white transition-all bg-white/[0.02] hover:bg-white/[0.05] backdrop-blur-sm cursor-pointer"
+              className="px-5 py-3 text-sm font-medium text-slate-400 hover:text-slate-200 rounded-lg hover:bg-white/[0.04] transition-all duration-200"
             >
-              Ver Como Funciona
-            </motion.a>
+              Ver como funciona →
+            </a>
           </motion.div>
 
-          {/* Trust divider */}
+          {/* Stats row */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.55, duration: 0.6 }}
-            className="flex flex-wrap items-center justify-center gap-x-10 gap-y-5 pt-4"
+            transition={{ delay: 0.45, duration: 0.55 }}
+            className="w-full flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-0 border-t border-white/[0.06] pt-8"
           >
             {STATS.map((stat, i) => (
               <React.Fragment key={stat.label}>
-                <div className="text-center">
-                  <p className="text-2xl sm:text-3xl font-black text-white tabular-nums">{stat.value}</p>
-                  <p className="text-xs text-slate-500 mt-1 tracking-wide">{stat.label}</p>
+                <div className="flex flex-col items-center gap-1 sm:flex-1">
+                  <span className="text-xl font-semibold text-white tabular-nums tracking-tight">
+                    {stat.value}
+                  </span>
+                  <span className="text-xs text-slate-600 font-medium">
+                    {stat.label}
+                  </span>
                 </div>
                 {i < STATS.length - 1 && (
-                  <div className="hidden sm:block w-px h-10 bg-white/[0.08]" />
+                  <div className="hidden sm:block w-px h-7 bg-white/[0.07] flex-shrink-0" />
                 )}
               </React.Fragment>
             ))}
           </motion.div>
 
-          {/* Partner logos placeholder */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
-            className="flex flex-wrap items-center justify-center gap-6 pt-2"
-          >
-            <p className="text-xs text-slate-600 tracking-widest uppercase w-full text-center mb-1">
-              Confiado por empresas solares em
-            </p>
-            {['Portugal', 'Espanha', 'Itália'].map(country => (
-              <span
-                key={country}
-                className="text-sm text-slate-600/60 font-medium tracking-wide"
-              >
-                {country}
-              </span>
-            ))}
-          </motion.div>
         </div>
-      </AuroraBackground>
+      </main>
 
-      {/* Scroll cue */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.3 }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10"
-      >
-        <motion.div
-          animate={{ y: [0, 7, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="flex flex-col items-center gap-1.5 text-slate-600"
-        >
-          <ChevronDown className="w-5 h-5" />
-        </motion.div>
-      </motion.div>
     </div>
   )
 }
