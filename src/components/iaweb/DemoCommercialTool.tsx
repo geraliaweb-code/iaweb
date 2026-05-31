@@ -8,12 +8,18 @@ import {
   CheckCircle2,
   ClipboardList,
   ExternalLink,
+  Flame,
+  Gem,
+  KeyRound,
   Loader2,
   Mail,
+  MoveRight,
   Phone,
   RefreshCcw,
   Send,
   Sparkles,
+  Target,
+  XCircle,
 } from "lucide-react"
 import DemoOpportunityLoss from "@/components/iaweb/DemoOpportunityLoss"
 import DemoRecommendedPlan from "@/components/iaweb/DemoRecommendedPlan"
@@ -181,7 +187,7 @@ function calculateDemoAnalysis(form: DemoFormData): DemoAnalysis {
 }
 
 function inputClass() {
-  return "mt-2 h-12 w-full rounded-2xl border border-white/10 bg-white/[0.065] px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-200/40 focus:bg-white/[0.095] focus:ring-4 focus:ring-cyan-300/10"
+  return "mt-2 h-12 w-full rounded-2xl border border-white/10 bg-[#050816]/70 px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-[#00A3FF]/60 focus:bg-[#081120]/90 focus:ring-4 focus:ring-[#00A3FF]/10"
 }
 
 function DemoField({
@@ -232,9 +238,9 @@ function DemoSelect({
 
 function FinanceMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-      <div className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{label}</div>
-      <div className="mt-2 text-xl font-black tracking-[-0.04em] text-white">{value}</div>
+    <div className="demo-metric-card rounded-2xl border border-[#00A3FF]/30 bg-[#050816]/70 p-4">
+      <div className="text-xs font-black uppercase tracking-[0.18em] text-[#3AB8FF]">{label}</div>
+      <div className="demo-count mt-2 text-xl font-black tracking-[-0.04em] text-white">{value}</div>
     </div>
   )
 }
@@ -244,6 +250,7 @@ export default function DemoCommercialTool() {
   const [analysis, setAnalysis] = useState<DemoAnalysis | null>(null)
   const [crmStatus, setCrmStatus] = useState("")
   const [savingLead, setSavingLead] = useState(false)
+  const nicheInsight = useMemo(() => getNicheEngine(form.nicho), [form.nicho])
 
   const futureParams = useMemo(() => {
     const params = new URLSearchParams()
@@ -326,14 +333,106 @@ export default function DemoCommercialTool() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#030712] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[#050816] text-white">
+      <style jsx global>{`
+        @keyframes demo-drift {
+          0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.42; }
+          50% { transform: translate3d(18px, -22px, 0) scale(1.08); opacity: 0.78; }
+        }
+        @keyframes demo-grid-flow {
+          from { background-position: 0 0; }
+          to { background-position: 72px 72px; }
+        }
+        @keyframes demo-slide-up {
+          from { opacity: 0; transform: translateY(18px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes demo-pulse-glow {
+          0%, 100% { box-shadow: 0 0 28px rgba(0, 163, 255, 0.22), inset 0 0 24px rgba(0, 123, 255, 0.08); }
+          50% { box-shadow: 0 0 54px rgba(0, 163, 255, 0.42), inset 0 0 34px rgba(255, 184, 0, 0.12); }
+        }
+        @keyframes demo-shine {
+          from { transform: translateX(-120%) skewX(-18deg); }
+          to { transform: translateX(220%) skewX(-18deg); }
+        }
+        @keyframes demo-energy {
+          from { transform: translateX(-30%); opacity: 0; }
+          20%, 80% { opacity: 0.8; }
+          to { transform: translateX(130%); opacity: 0; }
+        }
+        .demo-grid-bg {
+          background-image:
+            linear-gradient(90deg, rgba(0, 163, 255, 0.08) 1px, transparent 1px),
+            linear-gradient(180deg, rgba(0, 163, 255, 0.08) 1px, transparent 1px);
+          background-size: 72px 72px;
+          animation: demo-grid-flow 22s linear infinite;
+          mask-image: radial-gradient(circle at center, black, transparent 78%);
+        }
+        .demo-particle {
+          position: absolute;
+          width: 3px;
+          height: 3px;
+          border-radius: 999px;
+          background: #3AB8FF;
+          box-shadow: 0 0 18px #00A3FF;
+          animation: demo-drift 9s ease-in-out infinite;
+        }
+        .demo-premium-card,
+        .demo-metric-card {
+          position: relative;
+          overflow: hidden;
+          animation: demo-slide-up 0.55s ease both;
+          box-shadow: 0 0 0 1px rgba(0, 163, 255, 0.08), 0 24px 90px rgba(0, 0, 0, 0.38);
+          transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .demo-premium-card::before,
+        .demo-metric-card::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.12) 38%, transparent 58%);
+          transform: translateX(-120%) skewX(-18deg);
+        }
+        .demo-premium-card:hover,
+        .demo-metric-card:hover {
+          transform: translateY(-3px);
+          border-color: rgba(0, 163, 255, 0.48);
+          box-shadow: 0 0 42px rgba(0, 163, 255, 0.2), 0 24px 90px rgba(0, 0, 0, 0.42);
+        }
+        .demo-premium-card:hover::before,
+        .demo-metric-card:hover::before {
+          animation: demo-shine 0.9s ease;
+        }
+        .demo-gold-glow {
+          box-shadow: 0 0 38px rgba(255, 184, 0, 0.2), inset 0 0 26px rgba(255, 184, 0, 0.08);
+        }
+        .demo-blue-glow {
+          box-shadow: 0 0 38px rgba(0, 163, 255, 0.22), inset 0 0 26px rgba(0, 123, 255, 0.08);
+        }
+        .demo-count {
+          animation: demo-slide-up 0.7s ease both;
+        }
+      `}</style>
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(14,165,233,0.18),transparent_30%),radial-gradient(circle_at_80%_20%,rgba(245,158,11,0.12),transparent_28%),linear-gradient(180deg,rgba(3,7,18,0),#030712_78%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(180deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:radial-gradient(circle_at_center,black,transparent_78%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_17%_22%,rgba(0,163,255,0.32),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(255,184,0,0.18),transparent_26%),radial-gradient(circle_at_72%_78%,rgba(0,123,255,0.18),transparent_30%),linear-gradient(180deg,#050816_0%,#081120_48%,#0B1325_100%)]" />
+        <div className="demo-grid-bg absolute inset-0" />
+        <div className="absolute left-0 top-1/3 h-px w-full bg-gradient-to-r from-transparent via-[#00A3FF]/55 to-transparent opacity-60 [animation:demo-energy_7s_linear_infinite]" />
+        <div className="absolute bottom-1/4 left-0 h-px w-full bg-gradient-to-r from-transparent via-[#FFB800]/45 to-transparent opacity-50 [animation:demo-energy_9s_linear_infinite_1.8s]" />
+        {[
+          ["left-[4%] top-[16%]", "0s"],
+          ["left-[24%] top-[78%]", "1.4s"],
+          ["left-[46%] top-[18%]", "2.2s"],
+          ["left-[68%] top-[70%]", "0.8s"],
+          ["left-[88%] top-[35%]", "3s"],
+          ["left-[12%] top-[55%]", "2.8s"],
+        ].map(([position, delay]) => (
+          <span key={position} className={`demo-particle ${position}`} style={{ animationDelay: delay }} />
+        ))}
       </div>
 
       <section className="relative z-10 px-5 py-6 sm:px-8 lg:px-12">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between rounded-2xl border border-white/10 bg-white/[0.055] px-4 py-3 shadow-[0_18px_70px_rgba(0,0,0,0.32)] backdrop-blur-2xl">
+        <nav className="demo-premium-card mx-auto flex max-w-7xl items-center justify-between rounded-2xl border border-[#00A3FF]/25 bg-[#050816]/70 px-4 py-3 shadow-[0_18px_70px_rgba(0,0,0,0.32)] backdrop-blur-2xl">
           <Link href="/" className="text-sm font-black tracking-[-0.02em] text-white">
             IAWEB
           </Link>
@@ -344,7 +443,7 @@ export default function DemoCommercialTool() {
 
         <div className="mx-auto grid max-w-7xl gap-8 py-12 lg:grid-cols-[0.92fr_1.08fr] lg:py-16">
           <div className="lg:sticky lg:top-6 lg:self-start">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/[0.08] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-cyan-100">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#00A3FF]/35 bg-[#007BFF]/15 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-[#BFEAFF] shadow-[0_0_24px_rgba(0,163,255,0.18)]">
               <Sparkles size={14} />
               Ferramenta presencial
             </div>
@@ -356,7 +455,7 @@ export default function DemoCommercialTool() {
               recomendado numa unica tela.
             </p>
 
-            <form onSubmit={handleSubmit} className="mt-8 rounded-[26px] border border-white/10 bg-white/[0.055] p-5 shadow-[0_24px_100px_rgba(0,0,0,0.34)] backdrop-blur-2xl sm:p-6">
+            <form onSubmit={handleSubmit} className="demo-premium-card mt-8 rounded-[26px] border border-[#00A3FF]/20 bg-[#050816]/75 p-5 shadow-[0_24px_100px_rgba(0,0,0,0.34)] backdrop-blur-2xl sm:p-6">
               <div className="grid gap-5 sm:grid-cols-2">
                 <DemoField label="Nome da empresa" value={form.empresa} onChange={(value) => updateField("empresa", value)} placeholder="Ex: Clinica Central" />
                 <DemoSelect label="Nicho" value={form.nicho} options={nicheOptions} onChange={(value) => updateField("nicho", value)} />
@@ -368,12 +467,50 @@ export default function DemoCommercialTool() {
 
               <button
                 type="submit"
-                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-6 py-4 text-sm font-black text-[#07111F] shadow-[0_16px_60px_rgba(78,140,255,0.22)] transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white/30"
+                className="demo-blue-glow mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#00A3FF]/50 bg-gradient-to-r from-[#007BFF] via-[#00A3FF] to-[#FFB800] px-6 py-4 text-sm font-black text-white shadow-[0_16px_60px_rgba(0,163,255,0.28)] transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#3AB8FF]/40"
               >
                 Analisar Empresa
                 <ArrowRight size={16} />
               </button>
             </form>
+
+            {analysis ? (
+              <section className="demo-premium-card mt-5 rounded-[26px] border border-[#00A3FF]/20 bg-[#050816]/75 p-5 backdrop-blur-2xl sm:p-6">
+                <div className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-[0.16em] text-[#3AB8FF]">
+                  <Gem size={16} />
+                  Inteligencia do nicho
+                </div>
+                <div className="grid gap-3">
+                  <div className="rounded-2xl border border-[#FFB800]/20 bg-[#FFB800]/[0.06] p-4">
+                    <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-[#FFB800]">
+                      <Flame size={14} />
+                      Dor principal
+                    </div>
+                    <p className="text-sm leading-6 text-slate-200">{nicheInsight.pains[0]}</p>
+                  </div>
+                  <div className="rounded-2xl border border-[#00A3FF]/20 bg-[#00A3FF]/[0.06] p-4">
+                    <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-[#3AB8FF]">
+                      <Target size={14} />
+                      Oportunidade
+                    </div>
+                    <p className="text-sm leading-6 text-slate-200">{nicheInsight.opportunities[0]}</p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                    <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-slate-400">
+                      <KeyRound size={14} />
+                      Palavras-chave valiosas
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {nicheInsight.keywords.slice(0, 5).map((keyword) => (
+                        <span key={keyword} className="rounded-full border border-[#00A3FF]/20 bg-[#00A3FF]/10 px-3 py-1 text-xs font-bold text-[#BFEAFF]">
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            ) : null}
           </div>
 
           <div className="space-y-5">
@@ -390,7 +527,7 @@ export default function DemoCommercialTool() {
                   ]}
                 />
 
-                <section className="rounded-[26px] border border-white/10 bg-white/[0.055] p-5 backdrop-blur-2xl sm:p-6">
+                <section className="demo-premium-card rounded-[26px] border border-[#00A3FF]/20 bg-[#050816]/75 p-5 backdrop-blur-2xl sm:p-6">
                   <div className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.16em] text-sky-100">
                     <ClipboardList size={16} />
                     Diagnostico comercial
@@ -398,13 +535,13 @@ export default function DemoCommercialTool() {
                   <p className="text-lg font-semibold leading-8 text-white">{analysis.diagnostico}</p>
                 </section>
 
-                <section className="rounded-[26px] border border-white/10 bg-white/[0.055] p-5 backdrop-blur-2xl sm:p-6">
+                <section className="demo-premium-card rounded-[26px] border border-[#00A3FF]/20 bg-[#050816]/75 p-5 backdrop-blur-2xl sm:p-6">
                   <div className="mb-4 text-sm font-bold uppercase tracking-[0.16em] text-cyan-100">
                     Oportunidades por nicho
                   </div>
                   <div className="grid gap-3 md:grid-cols-3">
                     {analysis.opportunities.map((opportunity) => (
-                      <div key={opportunity} className="rounded-2xl border border-cyan-200/15 bg-cyan-300/[0.07] p-4 text-sm font-semibold leading-6 text-cyan-50">
+                      <div key={opportunity} className="demo-premium-card rounded-2xl border border-[#00A3FF]/25 bg-[#00A3FF]/[0.07] p-4 text-sm font-semibold leading-6 text-cyan-50">
                         {opportunity}
                       </div>
                     ))}
@@ -418,8 +555,8 @@ export default function DemoCommercialTool() {
                   reason={analysis.lossReason}
                 />
 
-                <section className="rounded-[26px] border border-emerald-300/15 bg-emerald-300/[0.055] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-2xl sm:p-6">
-                  <div className="mb-4 text-sm font-bold uppercase tracking-[0.16em] text-emerald-100">
+                <section className="demo-premium-card rounded-[26px] border border-[#00A3FF]/30 bg-[#050816]/80 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-2xl sm:p-6">
+                  <div className="mb-4 text-sm font-black uppercase tracking-[0.16em] text-[#3AB8FF]">
                     Impacto Financeiro
                   </div>
                   <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -450,18 +587,29 @@ export default function DemoCommercialTool() {
                   </p>
                 </section>
 
-                <section className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-[24px] border border-white/10 bg-white/[0.055] p-5 backdrop-blur-2xl">
-                    <div className="text-sm font-bold uppercase tracking-[0.16em] text-amber-100">Antes</div>
-                    <p className="mt-3 text-sm leading-7 text-slate-300">
-                      Pedidos, marcacoes, reservas ou contratos chegam por canais dispersos, com seguimento manual e oportunidades nao capturadas.
-                    </p>
-                  </div>
-                  <div className="rounded-[24px] border border-cyan-200/15 bg-cyan-300/[0.07] p-5 backdrop-blur-2xl">
-                    <div className="text-sm font-bold uppercase tracking-[0.16em] text-cyan-100">Depois</div>
-                    <p className="mt-3 text-sm leading-7 text-cyan-50">
-                      A marca apresenta valor com clareza, capta contactos qualificados e conduz cada oportunidade para o proximo passo comercial.
-                    </p>
+                <section className="demo-premium-card rounded-[26px] border border-white/10 bg-[#050816]/75 p-5 backdrop-blur-2xl">
+                  <div className="grid items-center gap-4 md:grid-cols-[1fr_auto_1fr]">
+                    <div className="rounded-[24px] border border-[#FFB800]/25 bg-[#FFB800]/[0.06] p-5">
+                      <div className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-[0.16em] text-[#FFB800]">
+                        <XCircle size={17} />
+                        Antes
+                      </div>
+                      <p className="text-sm leading-7 text-slate-300">
+                        Pedidos, marcacoes, reservas ou contratos chegam por canais dispersos, com seguimento manual e oportunidades nao capturadas.
+                      </p>
+                    </div>
+                    <div className="demo-gold-glow flex h-12 w-12 items-center justify-center rounded-full border border-[#FFB800]/40 bg-[#FFB800]/15 text-[#FFB800]">
+                      <MoveRight size={24} />
+                    </div>
+                    <div className="rounded-[24px] border border-[#00A3FF]/30 bg-[#00A3FF]/[0.07] p-5">
+                      <div className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-[0.16em] text-[#3AB8FF]">
+                        <CheckCircle2 size={17} />
+                        Depois
+                      </div>
+                      <p className="text-sm leading-7 text-cyan-50">
+                        A marca apresenta valor com clareza, capta contactos qualificados e conduz cada oportunidade para o proximo passo comercial.
+                      </p>
+                    </div>
                   </div>
                 </section>
 
@@ -472,21 +620,21 @@ export default function DemoCommercialTool() {
                     type="button"
                     onClick={handleSaveLead}
                     disabled={savingLead}
-                    className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-emerald-300/20 bg-emerald-300/10 px-4 py-3 text-sm font-black text-emerald-100 transition hover:bg-emerald-300/15 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="demo-premium-card inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-4 py-3 text-sm font-black text-emerald-100 transition hover:bg-emerald-300/15 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {savingLead ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
                     Guardar Lead no CRM
                   </button>
                   <Link
                     href={`/simulador-site${futureParams ? `?${futureParams}` : ""}`}
-                    className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-cyan-200/20 bg-cyan-300/10 px-4 py-3 text-sm font-black text-cyan-100 transition hover:bg-cyan-300/15"
+                    className="demo-premium-card inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-[#00A3FF]/30 bg-[#00A3FF]/10 px-4 py-3 text-sm font-black text-cyan-100 transition hover:bg-cyan-300/15"
                   >
                     <ExternalLink size={16} />
                     Simular Novo Website
                   </Link>
                   <Link
                     href={`/proposta${futureParams ? `?${futureParams}` : ""}`}
-                    className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-black text-[#07111F] transition hover:-translate-y-0.5"
+                    className="demo-gold-glow inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-[#FFB800]/40 bg-gradient-to-r from-[#FFB800] to-[#D79B00] px-4 py-3 text-sm font-black text-[#050816] transition hover:-translate-y-0.5"
                   >
                     <Send size={16} />
                     Gerar Proposta
@@ -498,7 +646,7 @@ export default function DemoCommercialTool() {
                 ) : null}
               </>
             ) : (
-              <section className="flex min-h-[34rem] flex-col justify-between rounded-[26px] border border-white/10 bg-white/[0.055] p-6 shadow-[0_24px_100px_rgba(0,0,0,0.34)] backdrop-blur-2xl">
+              <section className="demo-premium-card flex min-h-[34rem] flex-col justify-between rounded-[26px] border border-[#00A3FF]/20 bg-[#050816]/75 p-6 shadow-[0_24px_100px_rgba(0,0,0,0.34)] backdrop-blur-2xl">
                 <div>
                   <div className="inline-flex items-center gap-2 rounded-full border border-sky-300/20 bg-sky-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-sky-100">
                     <Building2 size={14} />
@@ -517,7 +665,7 @@ export default function DemoCommercialTool() {
                     [Mail, "Nicho", "Perda estimada por setor"],
                     [RefreshCcw, "Plano", "Pacote recomendado na hora"],
                   ].map(([Icon, title, text]) => (
-                    <div key={String(title)} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                    <div key={String(title)} className="demo-premium-card rounded-2xl border border-white/10 bg-black/20 p-4">
                       <Icon size={18} className="text-cyan-100" />
                       <div className="mt-3 font-bold text-white">{String(title)}</div>
                       <p className="mt-2 text-sm leading-6 text-slate-400">{String(text)}</p>

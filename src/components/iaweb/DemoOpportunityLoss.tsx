@@ -20,14 +20,14 @@ function formatEuro(value: number) {
 
 export default function DemoOpportunityLoss({ niche, lossRange, monthlyLoss, reason }: DemoOpportunityLossProps) {
   return (
-    <section className="rounded-[26px] border border-amber-300/15 bg-amber-300/[0.06] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.28)] backdrop-blur-2xl sm:p-6">
+    <section className="demo-premium-card demo-gold-glow rounded-[26px] border border-[#FFB800]/30 bg-[#050816]/80 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.28)] backdrop-blur-2xl sm:p-6">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-amber-100">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#FFB800]/35 bg-[#FFB800]/10 px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-[#FFE3A3]">
             <TrendingDown size={14} />
             Perda mensal estimada
           </div>
-          <h2 className="mt-4 text-2xl font-black tracking-[-0.04em] text-white sm:text-3xl">
+          <h2 className="demo-count mt-4 text-3xl font-black tracking-[-0.05em] text-white sm:text-4xl">
             {formatEuro(monthlyLoss)} / mes
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-amber-50/80">
@@ -36,9 +36,9 @@ export default function DemoOpportunityLoss({ niche, lossRange, monthlyLoss, rea
           </p>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-black/25 p-4 text-sm leading-6 text-slate-300 lg:max-w-sm">
+        <div className="rounded-2xl border border-[#FFB800]/20 bg-black/30 p-4 text-sm leading-6 text-slate-300 lg:max-w-sm">
           <div className="mb-2 flex items-center gap-2 font-bold text-white">
-            <Euro size={16} className="text-amber-200" />
+            <Euro size={16} className="text-[#FFB800]" />
             Leitura comercial
           </div>
           {reason}
