@@ -50,7 +50,7 @@ export function validateCrmCredential(value: string) {
 }
 
 export async function getCrmAccessContext(): Promise<CrmAccessContext> {
-  const enabled = process.env.CRM_AUTH_ENABLED === "true"
+  const enabled = process.env.CRM_AUTH_ENABLED === "true" || (process.env.NODE_ENV === "production" && process.env.CRM_AUTH_ENABLED !== "false")
 
   return {
     enabled,

@@ -26,6 +26,7 @@ import DemoRecommendedPlan from "@/components/iaweb/DemoRecommendedPlan"
 import DemoScoreCard from "@/components/iaweb/DemoScoreCard"
 import { calculateFinanceImpact, formatEuro, type FinanceImpact } from "@/lib/finance-impact"
 import { getNicheEngine } from "@/lib/niches"
+import { generateWebsiteTransformation } from "@/lib/website-generator"
 
 type DemoFormData = {
   empresa: string
@@ -258,8 +259,9 @@ export default function DemoCommercialTool() {
     if (form.nicho.trim()) params.set("nicho", form.nicho.trim())
     if (form.objetivo.trim()) params.set("objetivo", form.objetivo.trim())
     if (form.website.trim()) params.set("website", form.website.trim())
+    if (analysis) params.set("scoreAtual", String(analysis.scoreFinal))
     return params.toString()
-  }, [form.empresa, form.nicho, form.objetivo, form.website])
+  }, [analysis, form.empresa, form.nicho, form.objetivo, form.website])
 
   useEffect(() => {
     if (!analysis) return
@@ -282,6 +284,13 @@ export default function DemoCommercialTool() {
 
     setSavingLead(true)
     setCrmStatus("")
+    const websiteTransformation = generateWebsiteTransformation({
+      company: form.empresa,
+      niche: form.nicho,
+      objective: form.objetivo,
+      website: form.website,
+      currentScore: analysis.scoreFinal,
+    })
 
     const payload = {
       formData: {
@@ -321,6 +330,10 @@ export default function DemoCommercialTool() {
           perdaMensalEstimada: analysis.monthlyLoss,
           impactoFinanceiro: analysis.financeImpact,
           planoRecomendado: analysis.packageName,
+          homepageGerada: websiteTransformation.homepage,
+          scoreProjetado: websiteTransformation.projection.projectedScore,
+          melhoriaPrevista: websiteTransformation.projection.improvementPoints,
+          templateUtilizado: websiteTransformation.homepage.templateId,
         },
       },
     }

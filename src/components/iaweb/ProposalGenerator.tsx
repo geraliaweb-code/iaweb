@@ -24,6 +24,10 @@ const defaultData: ProposalData = {
   setupValue: "EUR 799",
   monthlyValue: "EUR 99/mes",
   notes: "",
+  scoreAtual: "",
+  scoreProjetado: "",
+  template: "",
+  headline: "",
 }
 
 const nicheOptions = ["clinicas", "construcao", "imobiliario", "restaurantes", "industria", "servicos B2B", "advocacia", "contabilidade", "comercio local", "outro"]
@@ -74,6 +78,10 @@ export default function ProposalGenerator() {
     const nicho = searchParams.get("nicho") ?? defaultData.nicho
     const objetivo = searchParams.get("objetivo") ?? defaultData.objetivo
     const website = searchParams.get("website") ?? ""
+    const scoreAtual = searchParams.get("scoreAtual") ?? ""
+    const scoreProjetado = searchParams.get("scoreProjetado") ?? ""
+    const template = searchParams.get("template") ?? ""
+    const headline = searchParams.get("headline") ?? ""
     const packageParam = searchParams.get("pacote")
     const selectedPlan = packageParam ? getPlanByName(packageParam) : getInitialPlan(nicho, objetivo)
 
@@ -84,6 +92,10 @@ export default function ProposalGenerator() {
       nicho,
       objetivo,
       website,
+      scoreAtual,
+      scoreProjetado,
+      template,
+      headline,
       setupValue: setupFromPlan(selectedPlan),
       monthlyValue: monthlyFromPlan(selectedPlan),
     }))

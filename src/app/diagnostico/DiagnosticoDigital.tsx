@@ -421,7 +421,7 @@ export default function DiagnosticoDigital() {
                   whileTap={{ scale: 0.99 }}
                   className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white px-6 py-4 text-sm font-black text-[#07111F] shadow-[0_18px_70px_rgba(255,255,255,0.12)] transition focus:outline-none focus:ring-2 focus:ring-white/40"
                 >
-                  Baixar Relatório Estratégico
+                  Baixar Relatorio Estrategico
                   <Download size={16} />
                 </motion.button>
 

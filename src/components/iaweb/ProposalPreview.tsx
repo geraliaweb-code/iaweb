@@ -2,6 +2,7 @@ import { ArrowRight, CalendarDays, CheckCircle2, FileText, ShieldCheck, Sparkles
 import type { ProposalPlan } from "@/components/iaweb/ProposalPlanSelector"
 import { calculateFinanceImpact, formatEuro } from "@/lib/finance-impact"
 import { getNicheEngine } from "@/lib/niches"
+import { generateWebsiteTransformation } from "@/lib/website-generator"
 
 export type ProposalData = {
   empresa: string
@@ -14,6 +15,10 @@ export type ProposalData = {
   setupValue: string
   monthlyValue: string
   notes: string
+  scoreAtual?: string
+  scoreProjetado?: string
+  template?: string
+  headline?: string
 }
 
 type ProposalPreviewProps = {
@@ -33,6 +38,17 @@ function getOpportunity(data: ProposalData) {
 
 export default function ProposalPreview({ data, plan }: ProposalPreviewProps) {
   const niche = getNicheEngine(data.nicho)
+  const transformation = generateWebsiteTransformation({
+    company: data.empresa,
+    niche: data.nicho,
+    objective: data.objetivo,
+    website: data.website,
+    currentScore: Number(data.scoreAtual) || undefined,
+  })
+  const currentScore = Number(data.scoreAtual) || transformation.projection.currentScore
+  const projectedScore = Number(data.scoreProjetado) || transformation.projection.projectedScore
+  const improvement = projectedScore - currentScore
+  const headline = data.headline?.trim() || transformation.homepage.copy.headline
   const scopedIncludes = Array.from(new Set([...plan.includes, ...niche.salesArguments.slice(0, 3)]))
   const financeImpact = calculateFinanceImpact({
     niche: data.nicho,
@@ -109,6 +125,34 @@ export default function ProposalPreview({ data, plan }: ProposalPreviewProps) {
             Implementacao focada em {niche.opportunities[0].toLowerCase()}, com acompanhamento mensal e argumentos
             comerciais alinhados ao nicho.
           </p>
+        </div>
+      </section>
+
+      <section className="px-6 pb-6 sm:px-8">
+        <div className="rounded-2xl border border-sky-100 bg-sky-50 p-5">
+          <h3 className="text-sm font-black uppercase tracking-[0.14em] text-sky-700">Transformacao visual proposta</h3>
+          <div className="mt-4 grid gap-3 sm:grid-cols-4">
+            <div className="rounded-xl bg-white p-3">
+              <div className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Score atual</div>
+              <div className="mt-2 text-2xl font-black text-slate-950">{currentScore}/100</div>
+            </div>
+            <div className="rounded-xl bg-white p-3">
+              <div className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Score projetado</div>
+              <div className="mt-2 text-2xl font-black text-slate-950">{projectedScore}/100</div>
+            </div>
+            <div className="rounded-xl bg-white p-3">
+              <div className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Melhoria</div>
+              <div className="mt-2 text-2xl font-black text-slate-950">+{improvement} pts</div>
+            </div>
+            <div className="rounded-xl bg-white p-3">
+              <div className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Template</div>
+              <div className="mt-2 text-lg font-black text-slate-950">{data.template || transformation.homepage.templateId}</div>
+            </div>
+          </div>
+          <div className="mt-4 rounded-xl bg-slate-950 p-4 text-white">
+            <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Homepage gerada</div>
+            <p className="mt-2 text-lg font-black leading-7">{headline}</p>
+          </div>
         </div>
       </section>
 

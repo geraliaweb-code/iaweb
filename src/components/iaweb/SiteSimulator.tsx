@@ -7,7 +7,8 @@ import { ArrowLeft, ArrowRight, ImagePlus, Loader2, Save, Send, Sparkles } from 
 import SitePaletteSelector, { type SitePalette } from "@/components/iaweb/SitePaletteSelector"
 import SitePreviewMockup, { type SiteCopy } from "@/components/iaweb/SitePreviewMockup"
 import SiteStructurePreview from "@/components/iaweb/SiteStructurePreview"
-import { getNicheEngine } from "@/lib/niches"
+import WebsiteBeforeAfterComparison from "@/components/iaweb/WebsiteBeforeAfterComparison"
+import { generateWebsiteTransformation, type WebsiteGenerationResult } from "@/lib/website-generator"
 
 type SimulatorForm = {
   empresa: string
@@ -17,12 +18,7 @@ type SimulatorForm = {
   website: string
 }
 
-type SimulatorResult = {
-  palette: SitePalette
-  structure: string[]
-  copy: SiteCopy
-  packageName: string
-}
+type SimulatorResult = WebsiteGenerationResult
 
 const nicheOptions = ["clinicas", "construcao", "imobiliario", "restaurantes", "industria", "servicos B2B", "advocacia", "contabilidade", "comercio local", "outro"]
 const toneOptions = ["Premium e confiavel", "Direto e comercial", "Humano e proximo", "Tecnico e especialista", "Moderno e ousado"]
@@ -114,54 +110,15 @@ function normalizeNiche(value: string | null) {
   return nicheOptions.includes(normalized) ? normalized : "outro"
 }
 
-function getPackage(niche: string, objective: string) {
-  if (objective.includes("orcamento")) return "Sistema Comercial"
-  if (objective.includes("funil")) return "IAWEB Growth Engine"
-  if (niche === "comercio local" || niche === "restaurantes") return "Homepage Premium desde EUR 299"
-  if (niche === "industria" || niche === "servicos B2B") return "IAWEB Growth Engine"
-  return "Website Profissional"
-}
-
-function buildSimulation(form: SimulatorForm): SimulatorResult {
-  const company = form.empresa.trim() || "A sua empresa"
-  const label = nicheLabels[form.nicho] ?? "empresa"
-  const objective = form.objetivo.toLowerCase()
-  const nicheEngine = getNicheEngine(form.nicho)
-  const palette = palettes[form.nicho] ?? palettes.outro
-
-  const structure = [
-    "Hero com promessa clara e CTA direto",
-    `Blocos orientados a ${nicheEngine.opportunities[0].toLowerCase()}`,
-    `Diferenciais baseados em: ${nicheEngine.salesArguments[0]}`,
-    "Prova social e resultados ficticios para mockup",
-    "CTA final com contacto ou pedido de proposta",
-  ]
-  const services = [
-    ...nicheEngine.opportunities.slice(0, 3),
-    nicheEngine.keywords[0] ? `Captacao por ${nicheEngine.keywords[0]}` : "Contacto rapido",
-  ].slice(0, 4)
-
-  const copy: SiteCopy = {
-    headline:
-      objective.includes("marcacoes")
-        ? `${company}: mais marcacoes com ${nicheEngine.keywords[0] ?? "presenca digital"} e confianca imediata.`
-        : objective.includes("orcamento")
-          ? `${company}: transformar procura por ${nicheEngine.keywords[1] ?? label} em pedidos qualificados.`
-          : `${company}: uma homepage premium para capturar ${nicheEngine.opportunities[0].toLowerCase()}.`,
-    subheadline: `${nicheEngine.personalizedDiagnosis} Simulacao com tom ${form.tom.toLowerCase()}, pensada para responder a dor: ${nicheEngine.pains[0].toLowerCase()}`,
-    cta: objective.includes("orcamento") ? "Pedir orcamento" : objective.includes("marcacoes") ? "Marcar avaliacao" : `Resolver: ${nicheEngine.pains[0].split(".")[0]}`,
-    services,
-    differentiators: nicheEngine.salesArguments.slice(0, 3),
-    testimonial: `A equipa percebeu rapidamente o valor da ${company}: ${nicheEngine.salesArguments[0].toLowerCase()}`,
-    finalCta: `Pronto para transformar ${nicheEngine.opportunities[0].toLowerCase()} numa conversa comercial?`,
-  }
-
-  return {
-    palette,
-    structure,
-    copy,
-    packageName: getPackage(form.nicho, form.objetivo),
-  }
+function buildSimulation(form: SimulatorForm, currentScore?: number): SimulatorResult {
+  return generateWebsiteTransformation({
+    company: form.empresa,
+    niche: form.nicho,
+    objective: form.objetivo,
+    tone: form.tom,
+    website: form.website,
+    currentScore,
+  })
 }
 
 function inputClass() {
@@ -175,8 +132,12 @@ export default function SiteSimulator() {
   const [logoPreview, setLogoPreview] = useState("")
   const [saveStatus, setSaveStatus] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
+  const [incomingScore, setIncomingScore] = useState<number | undefined>(undefined)
 
   useEffect(() => {
+    const scoreParam = Number(searchParams.get("scoreAtual"))
+
+    setIncomingScore(Number.isFinite(scoreParam) && scoreParam > 0 ? scoreParam : undefined)
     setForm((current) => ({
       ...current,
       empresa: searchParams.get("empresa") ?? current.empresa,
@@ -192,8 +153,15 @@ export default function SiteSimulator() {
     if (form.nicho.trim()) params.set("nicho", form.nicho.trim())
     if (form.objetivo.trim()) params.set("objetivo", form.objetivo.trim())
     if (form.website.trim()) params.set("website", form.website.trim())
+    if (result) {
+      params.set("scoreAtual", String(result.projection.currentScore))
+      params.set("scoreProjetado", String(result.projection.projectedScore))
+      params.set("template", result.homepage.templateId)
+      params.set("pacote", result.homepage.packageName)
+      params.set("headline", result.homepage.copy.headline)
+    }
     return params.toString()
-  }, [form])
+  }, [form, result])
 
   function updateField(field: keyof SimulatorForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }))
@@ -215,8 +183,76 @@ export default function SiteSimulator() {
     setSaveStatus("")
     setIsGenerating(true)
     await new Promise((resolve) => setTimeout(resolve, 320))
-    setResult(buildSimulation(form))
+    setResult(buildSimulation(form, incomingScore))
     setIsGenerating(false)
+  }
+
+  async function handleSaveSimulation() {
+    if (!result) return
+
+    setSaveStatus("A guardar simulacao no CRM...")
+
+    const payload = {
+      formData: {
+        nome: form.empresa || "Lead Simulador",
+        empresa: form.empresa || "Empresa sem nome",
+        email: "simulador@iaweb.pt",
+        whatsapp: "000000000",
+        website: form.website || "nao indicado",
+        setor: form.nicho,
+        objetivo: form.objetivo,
+      },
+      result: {
+        scoreFinal: result.projection.currentScore,
+        categorias: {
+          website: result.projection.currentScore,
+          google: Math.max(0, result.projection.currentScore - 8),
+          conversao: Math.max(0, result.projection.currentScore - 4),
+          automacao: Math.max(0, result.projection.currentScore - 18),
+        },
+        classificacao: {
+          label: result.projection.currentScore <= 40 ? "Critico" : result.projection.currentScore <= 70 ? "Em Desenvolvimento" : "Forte",
+          message: "Simulacao visual criada a partir do Website Generator IAWEB.",
+        },
+        potencialEstimado: `Score projetado: ${result.projection.projectedScore}/100`,
+        recomendacoes: result.comparison.after.improvements,
+        createdAt: new Date().toISOString(),
+        crm: {
+          origem: "simulador-site",
+          proximaAcao: "Apresentar proposta com homepage gerada e score projetado",
+          notas: [
+            `Template utilizado: ${result.homepage.templateId}`,
+            `Score atual: ${result.projection.currentScore}`,
+            `Score projetado: ${result.projection.projectedScore}`,
+            `Melhoria prevista: +${result.projection.improvementPoints} pontos`,
+            `Headline: ${result.homepage.copy.headline}`,
+          ].join("\n"),
+          planoRecomendado: result.homepage.packageName,
+          homepageGerada: result.homepage,
+          scoreProjetado: result.projection.projectedScore,
+          melhoriaPrevista: result.projection.improvementPoints,
+          templateUtilizado: result.homepage.templateId,
+        },
+      },
+    }
+
+    try {
+      const response = await fetch("/api/diagnostico/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      const data = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        setSaveStatus(data?.error ?? "Nao foi possivel guardar a simulacao no CRM.")
+        return
+      }
+
+      setSaveStatus("Simulacao guardada no CRM com homepage, score projetado, melhoria e template.")
+    } catch {
+      setSaveStatus("CRM indisponivel. A simulacao continua pronta no browser.")
+    }
   }
 
   return (
@@ -315,16 +351,17 @@ export default function SiteSimulator() {
           <div className="space-y-5">
             {result ? (
               <>
+                <WebsiteBeforeAfterComparison comparison={result.comparison} projection={result.projection} />
                 <SitePreviewMockup
                   company={form.empresa}
                   niche={form.nicho}
                   logoPreview={logoPreview}
-                  palette={result.palette}
-                  copy={result.copy}
+                  palette={result.homepage.palette as SitePalette}
+                  copy={result.homepage.copy as SiteCopy}
                 />
                 <div className="grid gap-5 xl:grid-cols-2">
-                  <SitePaletteSelector palette={result.palette} />
-                  <SiteStructurePreview structure={result.structure} packageName={result.packageName} />
+                  <SitePaletteSelector palette={result.homepage.palette as SitePalette} />
+                  <SiteStructurePreview structure={result.homepage.structure} packageName={result.homepage.packageName} />
                 </div>
                 <section className="grid gap-3 md:grid-cols-3">
                   <Link
@@ -336,7 +373,7 @@ export default function SiteSimulator() {
                   </Link>
                   <button
                     type="button"
-                    onClick={() => setSaveStatus("TODO: guardar simulacao quando existir backend/schema proprio.")}
+                    onClick={handleSaveSimulation}
                     className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-emerald-300/20 bg-emerald-300/10 px-4 py-3 text-sm font-black text-emerald-100 transition hover:bg-emerald-300/15"
                   >
                     <Save size={16} />

@@ -38,8 +38,21 @@ export type CrmLead = {
   perda_mensal_estimada: number
   impacto_financeiro: Record<string, unknown> | null
   plano_recomendado: string
+  homepage_gerada: Record<string, unknown> | null
+  score_projetado: number
+  melhoria_prevista: number
+  template_utilizado: string
   whatsapp_status: string | null
   whatsapp_message: string | null
+  email_subject: string | null
+  email_body: string | null
+  followup_3d: string | null
+  followup_7d: string | null
+  followup_15d: string | null
+  objection_responses: Record<string, string> | null
+  post_proposal_message: string | null
+  post_meeting_message: string | null
+  sales_agent_status: string | null
   created_at: string
   updated_at: string
 }
@@ -104,7 +117,7 @@ export async function listCrmLeads(options: ListCrmLeadsOptions = {}) {
   let query = client.supabase
     .from("diagnosticos")
     .select(
-      "id,empresa,nome_contacto,email,telefone,website,setor,objetivo,score_geral,score_website,score_google,score_conversao,score_automacao,score_crm,status,origem,proxima_acao,notas,perda_mensal_estimada,impacto_financeiro,plano_recomendado,whatsapp_status,whatsapp_message,created_at,updated_at",
+      "id,empresa,nome_contacto,email,telefone,website,setor,objetivo,score_geral,score_website,score_google,score_conversao,score_automacao,score_crm,status,origem,proxima_acao,notas,perda_mensal_estimada,impacto_financeiro,plano_recomendado,homepage_gerada,score_projetado,melhoria_prevista,template_utilizado,whatsapp_status,whatsapp_message,email_subject,email_body,followup_3d,followup_7d,followup_15d,objection_responses,post_proposal_message,post_meeting_message,sales_agent_status,created_at,updated_at",
     )
     .order(sort, { ascending: direction === "asc" })
 

@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js"
 import type { DiagnosticoFormData, DiagnosticoResult } from "@/lib/diagnostico"
 import { sendDiagnosticoLeadEmail } from "@/lib/diagnostico-email"
 import { generateDiagnosticoWhatsAppMessage } from "@/lib/diagnostico-whatsapp"
+import { generateSalesAgentMessages } from "@/lib/sales-agent"
 
 type LeadPayload = {
   formData?: Partial<DiagnosticoFormData>
@@ -18,6 +19,10 @@ type CommercialCrmFields = {
     perdaMensalEstimada?: number
     impactoFinanceiro?: Record<string, unknown>
     planoRecomendado?: string
+    homepageGerada?: Record<string, unknown>
+    scoreProjetado?: number
+    melhoriaPrevista?: number
+    templateUtilizado?: string
   }
 }
 
@@ -99,9 +104,28 @@ export async function POST(request: Request) {
 
     let whatsappMessage: string | null = null
     let whatsappStatus = "pendente"
+    const salesAgentMessages = generateSalesAgentMessages({
+      company: formData.empresa,
+      contactName: formData.nome,
+      niche: formData.setor,
+      currentScore: result.scoreFinal,
+      projectedScore: result.crm?.scoreProjetado,
+      improvementPoints: result.crm?.melhoriaPrevista,
+      financialImpact: result.crm?.impactoFinanceiro as {
+        lostRevenueMonthly?: { min?: number; max?: number }
+        lostRevenueAnnual?: { min?: number; max?: number }
+        impactPhrase?: string
+        opportunityLabel?: string
+      } | null,
+      recommendedPlan: result.crm?.planoRecomendado,
+      generatedHomepage: result.crm?.homepageGerada,
+      templateUsed: result.crm?.templateUtilizado,
+      problems: [result.classificacao.message],
+      opportunities: result.recomendacoes,
+    })
 
     try {
-      whatsappMessage = generateDiagnosticoWhatsAppMessage({
+      whatsappMessage = salesAgentMessages.whatsappMessage || generateDiagnosticoWhatsAppMessage({
         lead: formData,
         result,
       })
@@ -134,7 +158,20 @@ export async function POST(request: Request) {
       perda_mensal_estimada: result.crm?.perdaMensalEstimada ?? 0,
       impacto_financeiro: result.crm?.impactoFinanceiro ?? {},
       plano_recomendado: result.crm?.planoRecomendado ?? "",
+      homepage_gerada: result.crm?.homepageGerada ?? {},
+      score_projetado: result.crm?.scoreProjetado ?? 0,
+      melhoria_prevista: result.crm?.melhoriaPrevista ?? 0,
+      template_utilizado: result.crm?.templateUtilizado ?? "",
       whatsapp_message: whatsappMessage,
+      email_subject: salesAgentMessages.emailSubject,
+      email_body: salesAgentMessages.emailBody,
+      followup_3d: salesAgentMessages.followup3d,
+      followup_7d: salesAgentMessages.followup7d,
+      followup_15d: salesAgentMessages.followup15d,
+      objection_responses: salesAgentMessages.objectionResponses,
+      post_proposal_message: salesAgentMessages.postProposalMessage,
+      post_meeting_message: salesAgentMessages.postMeetingMessage,
+      sales_agent_status: salesAgentMessages.status,
       whatsapp_status: whatsappStatus,
       status: "novo",
       updated_at: new Date().toISOString(),

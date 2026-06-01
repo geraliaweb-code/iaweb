@@ -199,6 +199,176 @@ select option {
   background-clip: text;
 }
 
+.iaweb-cinematic-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 16% 14%, rgba(0, 163, 255, 0.18), transparent 32%),
+    radial-gradient(circle at 84% 18%, rgba(255, 184, 0, 0.13), transparent 28%),
+    linear-gradient(180deg, #050816 0%, #081120 48%, #0b1325 100%);
+  color: #f8fafc;
+  isolation: isolate;
+}
+
+.iaweb-cinematic-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.iaweb-cinematic-bg::before,
+.iaweb-cinematic-bg::after {
+  content: "";
+  position: absolute;
+  inset: -12%;
+  background-repeat: no-repeat;
+  will-change: transform, opacity;
+}
+
+.iaweb-cinematic-bg::before {
+  background:
+    radial-gradient(circle at 16% 20%, rgba(0, 163, 255, 0.34), transparent 11%),
+    radial-gradient(circle at 82% 52%, rgba(255, 184, 0, 0.28), transparent 10%),
+    linear-gradient(112deg, transparent 0 22%, rgba(0, 163, 255, 0.18) 23%, transparent 27% 62%, rgba(255, 184, 0, 0.16) 64%, transparent 69%),
+    linear-gradient(18deg, transparent 0 42%, rgba(58, 184, 255, 0.14) 43%, transparent 46% 74%, rgba(255, 184, 0, 0.1) 76%, transparent 79%);
+  filter: blur(0.5px);
+  opacity: 0.72;
+  animation: iaweb-energy-drift 20s ease-in-out infinite alternate;
+}
+
+.iaweb-cinematic-bg::after {
+  background-image:
+    radial-gradient(circle, rgba(58, 184, 255, 0.95) 0 1px, transparent 1.7px),
+    radial-gradient(circle, rgba(255, 184, 0, 0.78) 0 1px, transparent 1.6px);
+  background-size: 118px 118px, 172px 172px;
+  background-position: 0 0, 48px 36px;
+  opacity: 0.26;
+  animation: iaweb-particles 28s linear infinite;
+}
+
+.iaweb-cinematic-grid {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(0, 163, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(0, 163, 255, 0.055) 1px, transparent 1px),
+    radial-gradient(circle at 50% 120%, rgba(0, 123, 255, 0.2), transparent 42%);
+  background-size: 72px 72px, 72px 72px, auto;
+  mask-image: radial-gradient(circle at center, black, transparent 82%);
+}
+
+.iaweb-lightning {
+  position: absolute;
+  width: 52vw;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(0, 163, 255, 0.82), rgba(255, 184, 0, 0.45), transparent);
+  box-shadow: 0 0 26px rgba(0, 163, 255, 0.38), 0 0 44px rgba(255, 184, 0, 0.18);
+  opacity: 0.42;
+  transform: rotate(-18deg);
+  animation: iaweb-lightning-sweep 9s ease-in-out infinite;
+}
+
+.iaweb-lightning:nth-child(2) {
+  top: 30%;
+  left: -12%;
+  animation-delay: -2.4s;
+}
+
+.iaweb-lightning:nth-child(3) {
+  right: -12%;
+  bottom: 23%;
+  transform: rotate(-11deg);
+  animation-delay: -5.5s;
+}
+
+.iaweb-premium-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(0, 163, 255, 0.22);
+  background: linear-gradient(145deg, rgba(5, 8, 22, 0.82), rgba(8, 17, 32, 0.62));
+  box-shadow:
+    0 24px 90px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 0 34px rgba(0, 163, 255, 0.08);
+  backdrop-filter: blur(24px);
+}
+
+.iaweb-premium-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(110deg, transparent, rgba(255, 255, 255, 0.08), transparent),
+    radial-gradient(circle at 12% 0%, rgba(0, 163, 255, 0.18), transparent 28%),
+    radial-gradient(circle at 100% 18%, rgba(255, 184, 0, 0.12), transparent 26%);
+  opacity: 0.75;
+}
+
+.iaweb-premium-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.iaweb-premium-card:hover {
+  border-color: rgba(58, 184, 255, 0.46);
+  box-shadow:
+    0 28px 110px rgba(0, 0, 0, 0.42),
+    0 0 42px rgba(0, 163, 255, 0.14),
+    0 0 34px rgba(255, 184, 0, 0.08);
+}
+
+.iaweb-hero-title {
+  letter-spacing: -0.055em;
+  text-shadow: 0 0 40px rgba(0, 163, 255, 0.2);
+}
+
+.iaweb-glow-text {
+  background: linear-gradient(135deg, #ffffff 0%, #3ab8ff 45%, #007bff 68%, #ffb800 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.iaweb-orbit {
+  position: relative;
+  border-radius: 999px;
+  background: conic-gradient(from 210deg, #00a3ff, #007bff, rgba(58, 184, 255, 0.2), #ffb800, #00a3ff);
+  box-shadow: 0 0 34px rgba(0, 163, 255, 0.26), 0 0 24px rgba(255, 184, 0, 0.14);
+}
+
+.iaweb-orbit::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: inherit;
+  background: radial-gradient(circle at 34% 20%, rgba(0, 163, 255, 0.35), #050816 62%);
+}
+
+.iaweb-orbit > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes iaweb-energy-drift {
+  from { transform: translate3d(-2%, -1%, 0) scale(1); }
+  to { transform: translate3d(2%, 1.5%, 0) scale(1.04); }
+}
+
+@keyframes iaweb-particles {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-90px, -110px, 0); }
+}
+
+@keyframes iaweb-lightning-sweep {
+  0%, 100% { opacity: 0.1; transform: translate3d(-4%, 0, 0) rotate(-18deg) scaleX(0.75); }
+  45%, 55% { opacity: 0.48; transform: translate3d(4%, -2%, 0) rotate(-18deg) scaleX(1); }
+}
+
 /* ── Keyframe Animations ───────────────────────────────────────────────────── */
 @keyframes shimmer-slide {
   to { transform: translate(calc(100cqw - 100%), 0); }

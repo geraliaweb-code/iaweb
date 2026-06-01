@@ -7,9 +7,17 @@ export type SiteCopy = {
   subheadline: string
   cta: string
   services: string[]
+  about?: string
   differentiators: string[]
-  testimonial: string
-  finalCta: string
+  testimonial?: string
+  testimonials?: string[]
+  faq?: Array<{
+    question: string
+    answer: string
+  }>
+  finalCta?: string
+  contactCta?: string
+  footer?: string
 }
 
 type SitePreviewMockupProps = {
@@ -83,6 +91,14 @@ export default function SitePreviewMockup({ company, niche, logoPreview, palette
         </div>
 
         <div className="bg-white px-5 py-8 text-slate-950 sm:px-8">
+          {copy.about ? (
+            <div className="mb-5 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Sobre</p>
+              <h2 className="mt-2 text-2xl font-black tracking-[-0.04em]">Uma marca mais clara antes da primeira conversa.</h2>
+              <p className="mt-3 text-sm leading-7 text-slate-600">{copy.about}</p>
+            </div>
+          ) : null}
+
           <div className="grid gap-4 md:grid-cols-3">
             {copy.differentiators.map((item) => (
               <div key={item} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -94,14 +110,27 @@ export default function SitePreviewMockup({ company, niche, logoPreview, palette
 
           <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-950 p-5 text-white">
             <Quote size={20} style={{ color: accent }} />
-            <p className="mt-3 text-sm leading-7 text-slate-200">{copy.testimonial}</p>
+            <p className="mt-3 text-sm leading-7 text-slate-200">{copy.testimonials?.[0] ?? copy.testimonial}</p>
             <p className="mt-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Prova social ficticia para mockup</p>
           </div>
 
+          {copy.faq?.length ? (
+            <div className="mt-5 grid gap-3 md:grid-cols-2">
+              {copy.faq.map((item) => (
+                <div key={item.question} className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <p className="text-sm font-black text-slate-950">{item.question}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{item.answer}</p>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
           <div className="mt-5 rounded-2xl p-5" style={{ background: accent, color: primary }}>
-            <h3 className="text-xl font-black tracking-[-0.03em]">{copy.finalCta}</h3>
+            <h3 className="text-xl font-black tracking-[-0.03em]">{copy.contactCta ?? copy.finalCta}</h3>
             <p className="mt-2 text-sm font-semibold opacity-80">CTA final para transformar visitantes em contactos qualificados.</p>
           </div>
+
+          {copy.footer ? <footer className="mt-5 text-center text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{copy.footer}</footer> : null}
         </div>
       </div>
     </section>
