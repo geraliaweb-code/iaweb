@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import type { CrmLead, CrmSortDirection, CrmSortField, CrmStatus } from "@/lib/crm"
 import { crmStatuses, getCrmStatusLabel } from "@/lib/crm"
+import OfficialLogo from "@/components/iaweb/OfficialLogo"
 
 type CrmDashboardClientProps = {
   initialLeads: CrmLead[]
@@ -325,6 +326,7 @@ export function CrmDashboardClient({ initialLeads, authEnabled = false }: CrmDas
       <div className="relative z-10 mx-auto flex w-full max-w-[96rem] flex-col gap-6">
         <header className="iaweb-premium-card flex flex-col justify-between gap-4 rounded-2xl p-5 md:flex-row md:items-end">
           <div>
+            <OfficialLogo compact className="mb-5 max-w-[190px]" />
             <p className="inline-flex items-center gap-2 rounded-full border border-[#00A3FF]/30 bg-[#007BFF]/15 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-[#BFEAFF]">
               <LayoutDashboard size={14} />
               IAWEB CRM

@@ -20,6 +20,7 @@ import {
   Workflow,
 } from "lucide-react"
 import type { DiagnosticoFormData, DiagnosticoResult, ScoreCategory } from "@/lib/diagnostico"
+import OfficialLogo from "@/components/iaweb/OfficialLogo"
 import { downloadDiagnosticoPdf } from "./pdf"
 
 const setores = [
@@ -165,8 +166,8 @@ export default function DiagnosticoDigital() {
 
       <section className="relative px-5 py-6 sm:px-8 lg:px-12">
         <nav className="relative z-10 mx-auto flex max-w-7xl items-center justify-between rounded-2xl border border-white/10 bg-white/[0.055] px-4 py-3 shadow-[0_18px_70px_rgba(0,0,0,0.32)] backdrop-blur-2xl">
-          <a href="/" className="text-sm font-black tracking-[-0.02em] text-white">
-            IAWEB
+          <a href="/" aria-label="IAWEB">
+            <OfficialLogo compact className="max-w-[170px]" />
           </a>
           <a
             href="#diagnostico-form"

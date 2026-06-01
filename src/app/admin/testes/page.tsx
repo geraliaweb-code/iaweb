@@ -7,6 +7,7 @@ import { calculateDiagnostico, type DiagnosticoFormData, type DiagnosticoResult 
 import { calculateFinanceImpact } from "@/lib/finance-impact"
 import { generateSalesAgentMessages } from "@/lib/sales-agent"
 import { generateWebsiteTransformation } from "@/lib/website-generator"
+import OfficialLogo from "@/components/iaweb/OfficialLogo"
 import { redirect } from "next/navigation"
 
 export const dynamic = "force-dynamic"
@@ -253,6 +254,7 @@ export default async function AdminTestesPage() {
 
       <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-6">
         <header className="iaweb-premium-card rounded-2xl p-6">
+          <OfficialLogo compact className="mb-5 max-w-[190px]" />
           <p className="inline-flex items-center gap-2 rounded-full border border-[#00A3FF]/30 bg-[#007BFF]/15 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-[#BFEAFF]">
             <HeartPulse size={14} />
             Ambiente de testes IAWEB

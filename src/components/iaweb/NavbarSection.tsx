@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { motion, useScroll } from "motion/react"
-import Image from "next/image"
 import { MessageCircle, Mail } from "lucide-react"
+import OfficialLogo from "./OfficialLogo"
 
 const navLinks = [
   { label: "Sistema", href: "#sistema" },
@@ -65,14 +65,8 @@ export default function NavbarSection() {
         }}
       >
         {/* Logo */}
-        <a href="/" style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-          <Image
-            src="/brand/iaweb-logo.png"
-            alt="IAWEB"
-            width={120}
-            height={32}
-            style={{ height: "32px", width: "auto", objectFit: "contain" }}
-          />
+        <a href="/" style={{ display: "flex", alignItems: "center", flexShrink: 0 }} aria-label="IAWEB">
+          <OfficialLogo priority className="max-w-[180px] sm:max-w-[220px]" />
         </a>
 
         {/* Nav links — desktop */}

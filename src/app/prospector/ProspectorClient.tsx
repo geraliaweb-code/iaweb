@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import { ArrowRight, Building2, Database, Loader2, Radar, Search, Send, Sparkles, Target, Zap } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
+import OfficialLogo from "@/components/iaweb/OfficialLogo"
 
 type Prospect = {
   id?: string
@@ -142,6 +143,7 @@ export default function ProspectorClient({ initialProspects, initialWarning }: P
 
       <div className="relative z-10 mx-auto grid max-w-[96rem] gap-6">
         <header className="iaweb-premium-card rounded-2xl p-6">
+          <OfficialLogo compact className="mb-5 max-w-[190px]" />
           <p className="inline-flex items-center gap-2 rounded-full border border-[#00A3FF]/30 bg-[#007BFF]/15 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-[#BFEAFF]">
             <Radar size={14} />
             Prospector IA

@@ -1,7 +1,7 @@
 "use client"
 
-import Image from "next/image"
 import { Mail, Phone, MessageCircle } from "lucide-react"
+import OfficialLogo from "./OfficialLogo"
 
 const navLinks = [
   { label: "Sistema", href: "#sistema" },
@@ -84,13 +84,7 @@ export default function FooterSection() {
         >
           {/* Brand */}
           <div>
-            <Image
-              src="/brand/iaweb-logo.png"
-              alt="IAWEB"
-              width={120}
-              height={32}
-              style={{ height: "32px", width: "auto", objectFit: "contain", marginBottom: "16px" }}
-            />
+            <OfficialLogo compact className="mb-4 max-w-[190px]" />
             <p
               style={{
                 fontSize: "14px",

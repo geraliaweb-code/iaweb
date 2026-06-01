@@ -5,6 +5,7 @@ import OpportunityTable from "./OpportunityTable"
 import PipelineOverview from "./PipelineOverview"
 import ProspectorInsights from "./ProspectorInsights"
 import type { ExecutiveDashboardData } from "./types"
+import OfficialLogo from "../OfficialLogo"
 
 export default function ExecutiveDashboard({ data }: { data: ExecutiveDashboardData }) {
   const whatsapps = data.leads.filter((lead) => lead.whatsapp_message).length
@@ -44,6 +45,7 @@ export default function ExecutiveDashboard({ data }: { data: ExecutiveDashboardD
 
       <div className="relative z-10 mx-auto flex max-w-[96rem] flex-col gap-6">
         <header className="iaweb-premium-card rounded-2xl p-6">
+          <OfficialLogo compact className="mb-5 max-w-[190px]" />
           <p className="inline-flex items-center gap-2 rounded-full border border-[#00A3FF]/30 bg-[#007BFF]/15 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-[#BFEAFF]">
             <BrainCircuit size={14} />
             IAWEB Intelligence
