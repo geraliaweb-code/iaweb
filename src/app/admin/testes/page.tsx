@@ -8,6 +8,8 @@ import { calculateFinanceImpact } from "@/lib/finance-impact"
 import { generateSalesAgentMessages } from "@/lib/sales-agent"
 import { generateWebsiteTransformation } from "@/lib/website-generator"
 import OfficialLogo from "@/components/iaweb/OfficialLogo"
+import { getEmailHealth } from "@/lib/admin-email"
+import EmailControlPanel from "./EmailControlPanel"
 import { redirect } from "next/navigation"
 
 export const dynamic = "force-dynamic"
@@ -213,6 +215,7 @@ export default async function AdminTestesPage() {
   }
 
   const snapshot = await getSupabaseSnapshot()
+  const emailHealth = await getEmailHealth()
   const validations = runLocalValidations()
   const leads = snapshot.leads
   const totalHomepages = leads.filter((lead) => lead.homepage_gerada && Object.keys(lead.homepage_gerada).length > 0).length
@@ -333,6 +336,8 @@ export default async function AdminTestesPage() {
             </p>
           </section>
         ) : null}
+
+        <EmailControlPanel initialHealth={emailHealth} />
 
         <section className="iaweb-premium-card rounded-2xl p-5">
           <h2 className="text-2xl font-black tracking-[-0.04em] text-white">Checklist de teste</h2>

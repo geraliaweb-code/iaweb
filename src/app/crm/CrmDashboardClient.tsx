@@ -637,6 +637,35 @@ export function CrmDashboardClient({ initialLeads, authEnabled = false }: CrmDas
               <p className="mt-2 font-semibold text-white">{selectedLead.plano_recomendado || "Plano a definir"}</p>
             </section>
 
+            <section className="rounded-2xl border border-[#00A3FF]/20 bg-[#00A3FF]/[0.045] p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[#BFEAFF]">Relatorio entregue</p>
+                  <p className="mt-1 text-xs text-slate-500">PDF e email transacional via Resend.</p>
+                </div>
+                <span className="rounded-full border border-white/10 bg-white/[0.05] px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-300">
+                  {selectedLead.email_status || "pendente"}
+                </span>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+                  <p className="text-xs text-slate-500">PDF</p>
+                  <p className="mt-1 text-sm font-black text-white">{selectedLead.pdf_status || "pendente"}</p>
+                  {selectedLead.pdf_filename ? <p className="mt-1 truncate text-xs text-slate-500">{selectedLead.pdf_filename}</p> : null}
+                </div>
+                <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+                  <p className="text-xs text-slate-500">Resend</p>
+                  <p className="mt-1 text-sm font-black text-white">{selectedLead.email_resend_id || "sem id"}</p>
+                  {selectedLead.email_sent_at ? <p className="mt-1 text-xs text-slate-500">{formatDate(selectedLead.email_sent_at)}</p> : null}
+                </div>
+              </div>
+              {selectedLead.email_error ? (
+                <p className="mt-3 rounded-xl border border-rose-300/20 bg-rose-300/10 p-3 text-xs leading-5 text-rose-100">
+                  {selectedLead.email_error}
+                </p>
+              ) : null}
+            </section>
+
             <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
               <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500">Diagnostico</p>
               <div className="grid gap-2 sm:grid-cols-2">

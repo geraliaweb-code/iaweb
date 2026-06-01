@@ -1,8 +1,10 @@
 import type { DiagnosticoFormData, DiagnosticoResult } from "@/lib/diagnostico"
+import { createDiagnosticoPdf } from "@/app/diagnostico/pdf"
 
 type SendDiagnosticoEmailParams = {
   lead: DiagnosticoFormData
   result: DiagnosticoResult
+  idempotencyKey?: string
 }
 
 const RESEND_API_URL = "https://api.resend.com/emails"
@@ -22,6 +24,15 @@ function getResumo(result: DiagnosticoResult) {
 
 function getTopOportunidades(result: DiagnosticoResult) {
   return result.recomendacoes.slice(0, 3)
+}
+
+function sanitizeFilename(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .toLowerCase()
 }
 
 function buildPlainTextEmail(lead: DiagnosticoFormData, result: DiagnosticoResult, bookingUrl?: string) {
@@ -88,39 +99,86 @@ function buildHtmlEmail(lead: DiagnosticoFormData, result: DiagnosticoResult, bo
         }
       </p>
 
+      <p>O relatorio executivo segue em anexo em PDF.</p>
+
       <p>Cumprimentos,<br /><strong>Equipa IAWEB</strong></p>
     </div>
   `
 }
 
-export async function sendDiagnosticoLeadEmail({ lead, result }: SendDiagnosticoEmailParams) {
+function createPdfAttachment(lead: DiagnosticoFormData, result: DiagnosticoResult) {
+  const generatedAt = new Date().toISOString()
+  const filename = `relatorio-executivo-iaweb-${sanitizeFilename(lead.empresa || "empresa")}.pdf`
+  const doc = createDiagnosticoPdf({ formData: lead, result })
+  const pdfBuffer = Buffer.from(doc.output("arraybuffer"))
+
+  return {
+    filename,
+    content: pdfBuffer.toString("base64"),
+    contentType: "application/pdf",
+    size: pdfBuffer.byteLength,
+    generatedAt,
+  }
+}
+
+export async function sendDiagnosticoLeadEmail({ lead, result, idempotencyKey }: SendDiagnosticoEmailParams) {
   const apiKey = process.env.RESEND_API_KEY
   const from = process.env.DIAGNOSTICO_EMAIL_FROM
   const replyTo = process.env.DIAGNOSTICO_EMAIL_REPLY_TO
-  const bookingUrl = process.env.DIAGNOSTICO_BOOKING_URL
+  const bookingUrl = process.env.DIAGNOSTICO_BOOKING_URL || process.env.NEXT_PUBLIC_DIAGNOSTICO_BOOKING_URL
 
   if (!apiKey || !from) {
     throw new Error("Resend email is not configured.")
   }
 
+  const attachment = createPdfAttachment(lead, result)
+  const subject = `Relatorio Executivo IAWEB - ${lead.empresa}`
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${apiKey}`,
+    "Content-Type": "application/json",
+  }
+
+  if (idempotencyKey) {
+    headers["Idempotency-Key"] = idempotencyKey
+  }
+
   const response = await fetch(RESEND_API_URL, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify({
       from,
       to: [lead.email],
       reply_to: replyTo,
-      subject: `Diagnostico Digital da ${lead.empresa}`,
+      subject,
       text: buildPlainTextEmail(lead, result, bookingUrl),
       html: buildHtmlEmail(lead, result, bookingUrl),
+      attachments: [
+        {
+          filename: attachment.filename,
+          content: attachment.content,
+          content_type: attachment.contentType,
+        },
+      ],
     }),
   })
 
+  const responseText = await response.text()
+
   if (!response.ok) {
-    const details = await response.text()
-    throw new Error(`Resend email failed: ${response.status} ${details}`)
+    throw new Error(`Resend email failed: ${response.status} ${responseText}`)
+  }
+
+  const data = responseText ? (JSON.parse(responseText) as { id?: string }) : {}
+
+  return {
+    provider: "resend",
+    resendEmailId: data.id ?? null,
+    subject,
+    sentAt: new Date().toISOString(),
+    attachment: {
+      filename: attachment.filename,
+      size: attachment.size,
+      generatedAt: attachment.generatedAt,
+    },
   }
 }

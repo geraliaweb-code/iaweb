@@ -28,6 +28,16 @@ type CommercialCrmFields = {
 
 const scoreFields = ["website", "google", "conversao", "automacao"] as const
 
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Erro desconhecido."
+}
+
+function buildEmailIdempotencyKey(formData: DiagnosticoFormData, result: DiagnosticoResult) {
+  const source = result.id ?? `${formData.email}-${result.createdAt ?? result.scoreFinal}`
+
+  return `diagnostico-${source}`
+}
+
 function isValidScore(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100
 }
@@ -173,6 +183,10 @@ export async function POST(request: Request) {
       post_meeting_message: salesAgentMessages.postMeetingMessage,
       sales_agent_status: salesAgentMessages.status,
       whatsapp_status: whatsappStatus,
+      email_provider: "resend",
+      email_status: "pendente",
+      email_error: null,
+      pdf_status: "pendente",
       status: "novo",
       updated_at: new Date().toISOString(),
     }
@@ -193,19 +207,114 @@ export async function POST(request: Request) {
       )
     }
 
+    const diagnosticoId = data?.id
+    let emailStatus: "pendente" | "a_enviar" | "enviado" | "erro" = "pendente"
+
+    if (diagnosticoId) {
+      const attemptAt = new Date().toISOString()
+
+      await supabase
+        .from("diagnosticos")
+        .update({
+          email_status: "a_enviar",
+          email_last_attempt_at: attemptAt,
+          email_error: null,
+          pdf_status: "a_gerar",
+          updated_at: attemptAt,
+        })
+        .eq("id", diagnosticoId)
+
+      await supabase.from("diagnostico_email_events").insert({
+        diagnostico_id: diagnosticoId,
+        diagnostico_digital_lead_id: result.id ?? null,
+        provider: "resend",
+        recipient_email: formData.email,
+        subject: `Relatorio Executivo IAWEB - ${formData.empresa}`,
+        status: "a_enviar",
+        payload: {
+          score: result.scoreFinal,
+          empresa: formData.empresa,
+          origem: "diagnostico",
+        },
+      })
+    }
+
     try {
-      await sendDiagnosticoLeadEmail({
+      const emailResult = await sendDiagnosticoLeadEmail({
         lead: formData,
         result: {
           ...result,
           createdAt: result.createdAt ?? new Date().toISOString(),
         },
+        idempotencyKey: buildEmailIdempotencyKey(formData, result),
       })
+
+      emailStatus = "enviado"
+
+      if (diagnosticoId) {
+        await supabase
+          .from("diagnosticos")
+          .update({
+            email_status: "enviado",
+            email_sent_at: emailResult.sentAt,
+            email_error: null,
+            email_resend_id: emailResult.resendEmailId,
+            pdf_status: "gerado",
+            pdf_filename: emailResult.attachment.filename,
+            pdf_generated_at: emailResult.attachment.generatedAt,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", diagnosticoId)
+
+        await supabase.from("diagnostico_email_events").insert({
+          diagnostico_id: diagnosticoId,
+          diagnostico_digital_lead_id: result.id ?? null,
+          provider: emailResult.provider,
+          resend_email_id: emailResult.resendEmailId,
+          recipient_email: formData.email,
+          subject: emailResult.subject,
+          status: "enviado",
+          pdf_filename: emailResult.attachment.filename,
+          payload: {
+            attachment_size: emailResult.attachment.size,
+            score: result.scoreFinal,
+            empresa: formData.empresa,
+          },
+        })
+      }
     } catch (emailError) {
+      const errorMessage = getErrorMessage(emailError)
+      emailStatus = "erro"
       console.error("Nao foi possivel enviar o email pos-diagnostico.", emailError)
+
+      if (diagnosticoId) {
+        await supabase
+          .from("diagnosticos")
+          .update({
+            email_status: "erro",
+            email_error: errorMessage,
+            pdf_status: errorMessage.includes("Resend email is not configured") ? "pendente" : "erro",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", diagnosticoId)
+
+        await supabase.from("diagnostico_email_events").insert({
+          diagnostico_id: diagnosticoId,
+          diagnostico_digital_lead_id: result.id ?? null,
+          provider: "resend",
+          recipient_email: formData.email,
+          subject: `Relatorio Executivo IAWEB - ${formData.empresa}`,
+          status: "erro",
+          error_message: errorMessage,
+          payload: {
+            score: result.scoreFinal,
+            empresa: formData.empresa,
+          },
+        })
+      }
     }
 
-    return NextResponse.json({ ok: true, id: data?.id, status: data?.status ?? "novo" })
+    return NextResponse.json({ ok: true, id: data?.id, status: data?.status ?? "novo", emailStatus })
   } catch {
     return NextResponse.json({ error: "Pedido invalido." }, { status: 400 })
   }

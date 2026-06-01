@@ -43,6 +43,15 @@ export type CrmLead = {
   melhoria_prevista: number
   template_utilizado: string
   whatsapp_status: string | null
+  email_provider: string | null
+  email_status: string | null
+  email_last_attempt_at: string | null
+  email_sent_at: string | null
+  email_error: string | null
+  email_resend_id: string | null
+  pdf_status: string | null
+  pdf_filename: string | null
+  pdf_generated_at: string | null
   whatsapp_message: string | null
   email_subject: string | null
   email_body: string | null
@@ -117,7 +126,7 @@ export async function listCrmLeads(options: ListCrmLeadsOptions = {}) {
   let query = client.supabase
     .from("diagnosticos")
     .select(
-      "id,empresa,nome_contacto,email,telefone,website,setor,objetivo,score_geral,score_website,score_google,score_conversao,score_automacao,score_crm,status,origem,proxima_acao,notas,perda_mensal_estimada,impacto_financeiro,plano_recomendado,homepage_gerada,score_projetado,melhoria_prevista,template_utilizado,whatsapp_status,whatsapp_message,email_subject,email_body,followup_3d,followup_7d,followup_15d,objection_responses,post_proposal_message,post_meeting_message,sales_agent_status,created_at,updated_at",
+      "id,empresa,nome_contacto,email,telefone,website,setor,objetivo,score_geral,score_website,score_google,score_conversao,score_automacao,score_crm,status,origem,proxima_acao,notas,perda_mensal_estimada,impacto_financeiro,plano_recomendado,homepage_gerada,score_projetado,melhoria_prevista,template_utilizado,whatsapp_status,email_provider,email_status,email_last_attempt_at,email_sent_at,email_error,email_resend_id,pdf_status,pdf_filename,pdf_generated_at,whatsapp_message,email_subject,email_body,followup_3d,followup_7d,followup_15d,objection_responses,post_proposal_message,post_meeting_message,sales_agent_status,created_at,updated_at",
     )
     .order(sort, { ascending: direction === "asc" })
 
