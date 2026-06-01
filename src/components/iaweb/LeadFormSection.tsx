@@ -178,7 +178,7 @@ export default function LeadFormSection() {
       id="contacto"
       ref={ref}
       style={{
-        background: "#0A0F1E",
+        background: "rgba(2, 4, 11, 0.52)",
         padding: "120px 24px",
         position: "relative",
         overflow: "hidden",

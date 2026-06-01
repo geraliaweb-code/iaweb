@@ -248,6 +248,7 @@ export default async function AdminTestesPage() {
         <div className="iaweb-lightning top-[16%] left-[-10%]" />
         <div className="iaweb-lightning" />
         <div className="iaweb-lightning" />
+        <div className="iaweb-lightning-field" />
       </div>
 
       <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-6">

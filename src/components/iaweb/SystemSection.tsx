@@ -171,7 +171,7 @@ export default function SystemSection() {
       id="sistema"
       ref={ref}
       style={{
-        background: "#030712",
+        background: "transparent",
         padding: "120px 24px",
         position: "relative",
         overflow: "hidden",

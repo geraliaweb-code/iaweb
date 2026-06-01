@@ -305,7 +305,7 @@ export default function HeroSection() {
       style={{
         position: "relative",
         minHeight: "100dvh",
-        background: "#030712",
+        background: "transparent",
         display: "flex",
         alignItems: "center",
         overflow: "hidden",
@@ -362,7 +362,7 @@ export default function HeroSection() {
           left: 0,
           right: 0,
           height: "200px",
-          background: "linear-gradient(to bottom, transparent, #030712)",
+          background: "linear-gradient(to bottom, transparent, rgba(2,4,11,0.88))",
           pointerEvents: "none",
         }}
       />

@@ -204,9 +204,11 @@ select option {
   min-height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(circle at 16% 14%, rgba(0, 163, 255, 0.18), transparent 32%),
-    radial-gradient(circle at 84% 18%, rgba(255, 184, 0, 0.13), transparent 28%),
-    linear-gradient(180deg, #050816 0%, #081120 48%, #0b1325 100%);
+    radial-gradient(circle at 2% 92%, rgba(0, 163, 255, 0.2), transparent 22%),
+    radial-gradient(circle at 100% 38%, rgba(255, 184, 0, 0.22), transparent 30%),
+    radial-gradient(circle at 16% 14%, rgba(0, 163, 255, 0.2), transparent 32%),
+    radial-gradient(circle at 84% 18%, rgba(255, 184, 0, 0.16), transparent 28%),
+    linear-gradient(180deg, #02040b 0%, #050816 34%, #081120 68%, #0b1325 100%);
   color: #f8fafc;
   isolation: isolate;
 }
@@ -230,13 +232,15 @@ select option {
 
 .iaweb-cinematic-bg::before {
   background:
+    radial-gradient(ellipse at 0% 84%, rgba(0, 163, 255, 0.42), transparent 18%),
+    radial-gradient(ellipse at 100% 48%, rgba(255, 184, 0, 0.42), transparent 20%),
     radial-gradient(circle at 16% 20%, rgba(0, 163, 255, 0.34), transparent 11%),
     radial-gradient(circle at 82% 52%, rgba(255, 184, 0, 0.28), transparent 10%),
-    linear-gradient(112deg, transparent 0 22%, rgba(0, 163, 255, 0.18) 23%, transparent 27% 62%, rgba(255, 184, 0, 0.16) 64%, transparent 69%),
-    linear-gradient(18deg, transparent 0 42%, rgba(58, 184, 255, 0.14) 43%, transparent 46% 74%, rgba(255, 184, 0, 0.1) 76%, transparent 79%);
-  filter: blur(0.5px);
-  opacity: 0.72;
-  animation: iaweb-energy-drift 20s ease-in-out infinite alternate;
+    linear-gradient(112deg, transparent 0 20%, rgba(0, 163, 255, 0.24) 22%, transparent 27% 58%, rgba(255, 184, 0, 0.2) 61%, transparent 68%),
+    linear-gradient(18deg, transparent 0 36%, rgba(58, 184, 255, 0.18) 41%, transparent 46% 70%, rgba(255, 184, 0, 0.16) 76%, transparent 82%);
+  filter: blur(0.4px) saturate(1.2);
+  opacity: 0.86;
+  animation: iaweb-energy-drift 18s ease-in-out infinite alternate;
 }
 
 .iaweb-cinematic-bg::after {
@@ -262,14 +266,32 @@ select option {
 
 .iaweb-lightning {
   position: absolute;
-  width: 52vw;
+  width: 58vw;
   height: 2px;
   border-radius: 999px;
-  background: linear-gradient(90deg, transparent, rgba(0, 163, 255, 0.82), rgba(255, 184, 0, 0.45), transparent);
-  box-shadow: 0 0 26px rgba(0, 163, 255, 0.38), 0 0 44px rgba(255, 184, 0, 0.18);
-  opacity: 0.42;
+  background: linear-gradient(90deg, transparent, rgba(0, 163, 255, 0.96), rgba(255, 255, 255, 0.72), rgba(255, 184, 0, 0.62), transparent);
+  box-shadow: 0 0 22px rgba(0, 163, 255, 0.55), 0 0 46px rgba(255, 184, 0, 0.26), 0 0 90px rgba(0, 123, 255, 0.16);
+  opacity: 0.5;
   transform: rotate(-18deg);
   animation: iaweb-lightning-sweep 9s ease-in-out infinite;
+}
+
+.iaweb-lightning::before,
+.iaweb-lightning::after {
+  content: "";
+  position: absolute;
+  inset: -28px 12%;
+  background:
+    linear-gradient(115deg, transparent 0 42%, rgba(0, 163, 255, 0.34) 43%, transparent 45%),
+    linear-gradient(72deg, transparent 0 54%, rgba(255, 184, 0, 0.24) 55%, transparent 57%);
+  filter: blur(1px);
+  opacity: 0.5;
+}
+
+.iaweb-lightning::after {
+  inset: -46px 22%;
+  transform: rotate(4deg);
+  opacity: 0.26;
 }
 
 .iaweb-lightning:nth-child(2) {
@@ -283,6 +305,41 @@ select option {
   bottom: 23%;
   transform: rotate(-11deg);
   animation-delay: -5.5s;
+}
+
+.iaweb-lightning-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.iaweb-lightning-field::before,
+.iaweb-lightning-field::after {
+  content: "";
+  position: absolute;
+  width: min(44rem, 58vw);
+  height: min(44rem, 58vw);
+  border-radius: 999px;
+  background:
+    linear-gradient(132deg, transparent 0 42%, rgba(0, 163, 255, 0.42) 43%, transparent 45%),
+    linear-gradient(28deg, transparent 0 52%, rgba(255, 184, 0, 0.35) 53%, transparent 56%),
+    radial-gradient(circle at 52% 52%, rgba(255, 184, 0, 0.18), transparent 56%);
+  filter: blur(1px) saturate(1.28);
+  opacity: 0.46;
+  animation: iaweb-lightning-sweep 11s ease-in-out infinite alternate;
+}
+
+.iaweb-lightning-field::before {
+  right: -18rem;
+  top: 10%;
+}
+
+.iaweb-lightning-field::after {
+  left: -18rem;
+  bottom: 4%;
+  transform: rotate(180deg);
+  animation-delay: -5s;
 }
 
 .iaweb-premium-card {

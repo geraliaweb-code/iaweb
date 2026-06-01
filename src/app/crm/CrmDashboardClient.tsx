@@ -319,6 +319,7 @@ export function CrmDashboardClient({ initialLeads, authEnabled = false }: CrmDas
         <div className="iaweb-lightning top-[16%] left-[-10%]" />
         <div className="iaweb-lightning" />
         <div className="iaweb-lightning" />
+        <div className="iaweb-lightning-field" />
       </div>
 
       <div className="relative z-10 mx-auto flex w-full max-w-[96rem] flex-col gap-6">

@@ -159,7 +159,7 @@ export default function DiagnosticoDigital() {
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#04070f] text-white">
+    <main className="iaweb-cinematic-shell min-h-screen overflow-hidden text-white">
       <ScrollProgress />
       <PremiumBackground />
 
@@ -513,19 +513,24 @@ export default function DiagnosticoDigital() {
 function PremiumBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(34,211,238,0.18),transparent_30%),radial-gradient(circle_at_82%_18%,rgba(80,92,255,0.24),transparent_30%),radial-gradient(circle_at_50%_85%,rgba(14,165,233,0.12),transparent_34%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(180deg,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:radial-gradient(circle_at_center,black,transparent_78%)]" />
+      <div className="iaweb-cinematic-bg">
+        <div className="iaweb-cinematic-grid" />
+        <div className="iaweb-lightning top-[14%] left-[-12%]" />
+        <div className="iaweb-lightning" />
+        <div className="iaweb-lightning" />
+        <div className="iaweb-lightning-field" />
+      </div>
       <motion.div
         animate={{ x: [0, 28, -12, 0], y: [0, -24, 18, 0], scale: [1, 1.08, 0.98, 1] }}
         transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute left-[-10rem] top-24 h-80 w-80 rounded-full bg-cyan-400/20 blur-3xl"
+        className="absolute left-[-10rem] top-24 h-80 w-80 rounded-full bg-[#00A3FF]/20 blur-3xl"
       />
       <motion.div
         animate={{ x: [0, -24, 16, 0], y: [0, 30, -14, 0], scale: [1, 0.96, 1.08, 1] }}
         transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-10 right-[-8rem] h-96 w-96 rounded-full bg-blue-600/25 blur-3xl"
+        className="absolute bottom-10 right-[-8rem] h-96 w-96 rounded-full bg-[#FFB800]/20 blur-3xl"
       />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,7,15,0)_0%,rgba(4,7,15,0.74)_72%,#04070f_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,4,11,0)_0%,rgba(2,4,11,0.42)_72%,#02040b_100%)]" />
     </div>
   )
 }

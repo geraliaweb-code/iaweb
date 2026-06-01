@@ -137,6 +137,7 @@ export default function ProspectorClient({ initialProspects, initialWarning }: P
         <div className="iaweb-lightning top-[16%] left-[-10%]" />
         <div className="iaweb-lightning" />
         <div className="iaweb-lightning" />
+        <div className="iaweb-lightning-field" />
       </div>
 
       <div className="relative z-10 mx-auto grid max-w-[96rem] gap-6">
