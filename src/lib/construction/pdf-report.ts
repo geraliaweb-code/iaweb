@@ -424,10 +424,23 @@ function addEstimatePage(doc: jsPDF, health: ConstructionHealthCheckResult, copy
 
   const confidence = Math.round(((cost?.costConfidence ?? 0) + (schedule?.scheduleConfidence ?? 0)) / (cost && schedule ? 2 : 1))
   metricBar(doc, copy.estimateConfidence, confidence, page.margin, 196, colors.sky)
+  if (cost?.calculationBasis) {
+    setText(doc, colors.white)
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(13)
+    doc.text("Base de Mercado Utilizada", page.margin, 224)
+    setText(doc, colors.muted)
+    doc.setFont("helvetica", "normal")
+    doc.setFontSize(9)
+    doc.text(`Pais: ${cost.calculationBasis.technicalCountry}`, page.margin, 238)
+    doc.text(`Fornecedor(es): ${(cost.calculationBasis.suppliers ?? []).join(", ") || "Base interna IAWEB"}`, page.margin, 246, { maxWidth: 170 })
+    doc.text(`Segmento: ${cost.calculationBasis.marketSegment ?? "Normal"}`, page.margin, 254)
+    doc.text(`Categoria Principal: ${cost.calculationBasis.dominantCategory ?? "Estrutura"}`, page.margin, 262)
+  }
   setText(doc, colors.gold)
   doc.setFont("helvetica", "bold")
   doc.setFontSize(11)
-  writeWrapped(doc, copy.mandatoryNote, page.margin, 232, 172)
+  writeWrapped(doc, copy.mandatoryNote, page.margin, cost?.calculationBasis ? 276 : 232, 172)
 }
 
 function addRisksPage(doc: jsPDF, health: ConstructionHealthCheckResult, copy = pdfCopy.pt) {

@@ -1,6 +1,6 @@
 import type { ConstructionCostEstimate, ConstructionProject } from "./types"
-import { getConstructionCostRange } from "./dataset"
 import { buildCostScenarios, getCountryPriceFactor } from "./cost-intelligence"
+import { getConstructionMarketCostReference } from "./cost-database"
 import { getConstructionCountryProfile } from "./country-intelligence"
 
 type CostContext = {
@@ -27,7 +27,15 @@ function clampScore(value: number) {
 export function generateConstructionCostEstimate(project: ConstructionProject, context: CostContext): ConstructionCostEstimate {
   const area = project.estimated_area_m2 ?? 0
   const technicalCountry = project.technical_country ?? project.country
-  const matrix = getConstructionCostRange(project.project_type, technicalCountry)
+  const marketReference = getConstructionMarketCostReference({
+    country: technicalCountry,
+    projectType: project.project_type,
+    maturityScore: context.maturityScore,
+    riskScore: context.riskScore,
+    complexityScore: context.complexityScore,
+    confidenceScore: context.confidenceScore,
+  })
+  const matrix = marketReference.range
   const countryFactor = getCountryPriceFactor(technicalCountry)
   const countryProfile = getConstructionCountryProfile(technicalCountry)
   const riskFactor = 1 + Math.max(0, context.riskScore - 45) / 220
@@ -54,6 +62,10 @@ export function generateConstructionCostEstimate(project: ConstructionProject, c
     `Base €/m2 usada: ${matrix.min} a ${matrix.max} ajustada por pais, risco, complexidade, maturidade e confianca.`,
   ]
 
+  costNotes.push(`Segmento de mercado usado: ${marketReference.segmentLabel}.`)
+  costNotes.push(`Fornecedores de referencia: ${marketReference.suppliers.join(", ")}.`)
+  costNotes.push(`Categoria dominante do custo: ${marketReference.dominantCategory}.`)
+
   if (!area) {
     costNotes.push("Area estimada ausente; usado valor tecnico conservador de 100 m2 apenas para nao bloquear o motor V1.")
   }
@@ -76,6 +88,10 @@ export function generateConstructionCostEstimate(project: ConstructionProject, c
     calculationBasis: {
       technicalCountry: countryProfile.id,
       marketReference: countryProfile.publicSources.slice(0, 3).join(", "),
+      marketSegment: marketReference.segmentLabel,
+      dominantCategory: marketReference.dominantCategory,
+      suppliers: marketReference.suppliers,
+      averageLaborRate: marketReference.averageLaborRate,
       documentsAnalyzed: project.analyses_count ?? 0,
       benchmarkUsed: "Benchmark V1 / dataset interno",
       missingDocuments: [],

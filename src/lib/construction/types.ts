@@ -187,6 +187,10 @@ export type ConstructionCostEstimate = {
   calculationBasis?: {
     technicalCountry: string
     marketReference: string
+    marketSegment?: string
+    dominantCategory?: string
+    suppliers?: string[]
+    averageLaborRate?: number
     documentsAnalyzed: number
     benchmarkUsed: string
     missingDocuments: string[]

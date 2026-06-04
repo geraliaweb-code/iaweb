@@ -312,6 +312,14 @@ function EstimateSection({ healthCheck, language = "pt" }: { healthCheck: Constr
                 ))}
               </div>
             ) : null}
+            {healthCheck.costEstimate.calculationBasis ? (
+              <div className="mt-4 grid gap-2 rounded-xl border border-white/10 bg-slate-950/30 p-3 text-xs leading-5 text-slate-300">
+                <p>Mercado de Referencia: {healthCheck.costEstimate.calculationBasis.marketReference}</p>
+                <p>Segmento: {healthCheck.costEstimate.calculationBasis.marketSegment ?? "Normal"}</p>
+                <p>Fornecedor Base: {healthCheck.costEstimate.calculationBasis.suppliers?.[0] ?? "Base interna IAWEB"}</p>
+                <p>Categoria Principal: {healthCheck.costEstimate.calculationBasis.dominantCategory ?? "Estrutura"}</p>
+              </div>
+            ) : null}
             <Notes notes={healthCheck.costEstimate.costNotes} />
           </div>
         ) : (
