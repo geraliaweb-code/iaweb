@@ -13,7 +13,7 @@ export default async function ConstructionBillingPage() {
   const { data, error } = await getConstructionBillingUsage()
 
   return (
-    <ConstructionShell>
+    <ConstructionShell surface="light">
       <BillingPanel usage={data} warning={error?.message} />
     </ConstructionShell>
   )
