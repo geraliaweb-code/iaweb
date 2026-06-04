@@ -31,7 +31,7 @@ export default function ProjectTabs({ project, demoMode = false }: ProjectTabsPr
   ]
 
   return (
-    <div className="py-10">
+    <div className="my-6 rounded-lg bg-slate-950 px-4 py-8 shadow-sm sm:px-6">
       <div className="iaweb-premium-card rounded-2xl p-6">
       <div className="flex flex-wrap items-start justify-between gap-6">
         <div>
