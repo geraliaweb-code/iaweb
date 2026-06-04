@@ -283,6 +283,18 @@ function EstimateSection({ healthCheck }: { healthCheck: ConstructionHealthCheck
               Faixa provavel: {formatEuro(healthCheck.costEstimate.estimatedCostMin)} a {formatEuro(healthCheck.costEstimate.estimatedCostMax)}
             </p>
             <p className="mt-3 text-sm text-sky-100">Confianca: {healthCheck.costEstimate.costConfidence}/100</p>
+            {healthCheck.costEstimate.scenarios?.length ? (
+              <div className="mt-4 grid gap-2">
+                {healthCheck.costEstimate.scenarios.map((scenario) => (
+                  <div key={scenario.id} className="rounded-xl border border-white/10 bg-slate-950/30 p-3">
+                    <p className="text-xs uppercase tracking-[0.16em] text-slate-500">{scenario.label}</p>
+                    <p className="mt-1 text-sm font-semibold text-white">
+                      {formatEuro(scenario.min)} a {formatEuro(scenario.max)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <Notes notes={healthCheck.costEstimate.costNotes} />
           </div>
         ) : (

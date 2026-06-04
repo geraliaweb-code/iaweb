@@ -1,0 +1,43 @@
+export const pt = {
+  billing: {
+    eyebrow: "IAWEB Construction Intelligence",
+    heroTitle: "A primeira plataforma europeia de Construction Intelligence para Portugal, Franca e Espanha.",
+    pillars: "Documentos. Riscos. Custos. Prazos. Orcamento. Confianca.",
+    heroText: "Tudo analisado por IA antes da primeira decisao.",
+    impactOne: "Transforme centenas de paginas de documentacao tecnica em decisoes claras em poucos minutos.",
+    impactTwo: "O que normalmente demora dias a analisar, a IAWEB Construction entrega em minutos.",
+    headline: "Planos Construction Intelligence",
+    subheadline: "A nossa IA analisa projetos, medicoes e documentacao tecnica para revelar riscos, maturidade, orcamento e prazo da sua obra antes de avancar para execucao.",
+    choose: "Escolha o nivel de inteligencia que pretende para a sua obra.",
+    activate: "Ativar Inteligencia",
+    manage: "Gerir plano",
+    trust: "Estimativa gerada com base na documentacao analisada, benchmark de mercado e referencias reais do setor da construcao.",
+    education: "Quanto melhor a documentacao, mais precisa a estimativa.",
+    problem: "A maioria dos problemas de uma obra nasce antes da obra comecar.",
+    problemDetail: "A diferenca esta na qualidade da documentacao recebida e nas decisoes tomadas antes da execucao.",
+  },
+  plans: {
+    home: "Particular",
+    builder: "Construtor",
+    architect: "Arquitetura & Engenharia",
+    engineering: "Business",
+    enterprise: "Enterprise",
+  },
+  actions: { accept: "Aceitar", reject: "Recusar", preferences: "Configurar preferencias" },
+  sections: {
+    healthCheck: "Health Check",
+    benchmark: "Benchmark",
+    pdf: "Relatorio",
+    upload: "Upload",
+    legal: "Avisos legais",
+    cookies: "Cookies",
+    privacy: "Privacidade",
+  },
+  legal: {
+    short: "Estimativa baseada na documentacao analisada e em dados de mercado disponiveis a data da analise. Nao constitui orcamento vinculativo nem garantia de custo final.",
+    full: "As estimativas, projecoes, analises e recomendacoes apresentadas pela IAWEB Construction Intelligence sao geradas com base na documentacao disponibilizada, informacao tecnica identificada, dados de mercado, referencias estatisticas e modelos de Inteligencia Artificial. Os valores de custo, prazo, materiais, mao de obra, risco e maturidade apresentados tem carater indicativo e destinam-se exclusivamente a apoiar processos de analise e tomada de decisao. Os resultados nao constituem orcamento vinculativo, proposta comercial, parecer tecnico certificado, projeto de execucao ou garantia de preco final de obra.",
+  },
+  cookies: {
+    banner: "Utilizamos cookies para melhorar a experiencia, analisar a utilizacao da plataforma e garantir o correto funcionamento dos servicos.",
+  },
+}

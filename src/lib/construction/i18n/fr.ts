@@ -1,0 +1,33 @@
+export const fr = {
+  billing: {
+    eyebrow: "IAWEB Construction Intelligence",
+    heroTitle: "La premiere plateforme europeenne de Construction Intelligence pour le Portugal, la France et l'Espagne.",
+    pillars: "Documents. Risques. Couts. Delais. Budget. Confiance.",
+    heroText: "Tout est analyse par IA avant la premiere decision.",
+    impactOne: "Transformez des centaines de pages techniques en decisions claires en quelques minutes.",
+    impactTwo: "Ce qui prend normalement plusieurs jours, IAWEB Construction le livre en quelques minutes.",
+    headline: "Plans Construction Intelligence",
+    subheadline: "Notre IA analyse projets, quantites et documents techniques pour reveler risques, maturite, budget et delai avant l'execution.",
+    choose: "Choisissez le niveau d'intelligence adapte a votre operation.",
+    activate: "Activer l'intelligence",
+    manage: "Gerer le plan",
+    trust: "Estimation generee a partir des documents analyses, du benchmark marche et de references reelles du secteur construction.",
+    education: "Plus la documentation est complete, plus l'estimation est precise.",
+    problem: "La plupart des problemes d'un chantier naissent avant le debut des travaux.",
+    problemDetail: "La difference vient de la qualite des documents recus et des decisions prises avant l'execution.",
+  },
+  plans: {
+    home: "Particulier",
+    builder: "Constructeur",
+    architect: "Architecture & Ingenierie",
+    engineering: "Business",
+    enterprise: "Enterprise",
+  },
+  actions: { accept: "Accepter", reject: "Refuser", preferences: "Configurer" },
+  sections: { healthCheck: "Health Check", benchmark: "Benchmark", pdf: "Rapport", upload: "Upload", legal: "Mentions legales", cookies: "Cookies", privacy: "Confidentialite" },
+  legal: {
+    short: "Estimation basee sur la documentation analysee et les donnees de marche disponibles a la date de l'analyse. Elle ne constitue pas un devis ferme ni une garantie de cout final.",
+    full: "Les estimations, projections, analyses et recommandations d'IAWEB Construction Intelligence sont indicatives et servent uniquement a soutenir l'analyse et la decision.",
+  },
+  cookies: { banner: "Nous utilisons des cookies pour ameliorer l'experience, analyser l'utilisation et assurer le fonctionnement des services." },
+}

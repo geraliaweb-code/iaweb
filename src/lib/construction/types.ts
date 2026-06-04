@@ -169,6 +169,21 @@ export type ConstructionCostEstimate = {
   estimatedCostMid: number
   costConfidence: number
   costNotes: string[]
+  scenarios?: Array<{
+    id: "economic" | "normal" | "premium"
+    label: string
+    min: number
+    max: number
+    confidenceScore: number
+    notes: string[]
+  }>
+  calculationBasis?: {
+    technicalCountry: string
+    marketReference: string
+    documentsAnalyzed: number
+    benchmarkUsed: string
+    missingDocuments: string[]
+  }
 }
 
 export type ConstructionScheduleEstimate = {

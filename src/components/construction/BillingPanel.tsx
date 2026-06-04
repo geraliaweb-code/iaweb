@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { AlertTriangle, ArrowUpRight, CheckCircle2, CreditCard, Gauge, Loader2 } from "lucide-react"
 import { constructionBillingPlans, formatConstructionPlanPrice } from "@/lib/construction/billing/plans"
+import { getConstructionCopy } from "@/lib/construction/i18n"
 import type { ConstructionBillingUsage } from "@/lib/construction/billing/usage"
 
 type BillingPanelProps = {
@@ -17,6 +18,14 @@ const statusLabels: Record<string, string> = {
   cancelled: "Cancelado",
 }
 
+const planCopy: Record<string, { label: string; body: string }> = {
+  home: { label: "Particular", body: "Para particulares e pequenas obras." },
+  builder: { label: "Construtor", body: "Para construtores e empreiteiros." },
+  architect: { label: "Arquitetura & Engenharia", body: "Para arquitetos e engenheiros." },
+  engineering: { label: "Business", body: "Para equipas e operacoes recorrentes." },
+  enterprise: { label: "Enterprise", body: "Para grupos, consultoras e grandes organizacoes." },
+}
+
 export default function BillingPanel({ usage, warning }: BillingPanelProps) {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
@@ -24,6 +33,7 @@ export default function BillingPanel({ usage, warning }: BillingPanelProps) {
   const limit = usage?.monthlyLimit ?? constructionBillingPlans[0].monthlyAnalysisLimit
   const remaining = usage?.remainingThisMonth ?? limit
   const width = limit ? Math.min(100, Math.round((used / limit) * 100)) : 0
+  const copy = getConstructionCopy("pt")
 
   async function startCheckout(planId: string) {
     setLoadingPlan(planId)
@@ -33,7 +43,7 @@ export default function BillingPanel({ usage, warning }: BillingPanelProps) {
       const response = await fetch("/api/construction/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId }),
+        body: JSON.stringify({ planId, language: "pt" }),
       })
       const result = (await response.json().catch(() => ({}))) as { url?: string; error?: string }
 
@@ -84,11 +94,22 @@ export default function BillingPanel({ usage, warning }: BillingPanelProps) {
     <div className="py-10">
       <div className="flex flex-wrap items-end justify-between gap-5">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-200">Billing & Trial</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white md:text-5xl">Planos Construction Intelligence</h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
-            Base de monetizacao preparada para Stripe, com trial de 7 dias, limites mensais e controlo de analises.
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-200">{copy.billing.eyebrow}</p>
+          <h1 className="mt-3 max-w-4xl text-3xl font-semibold tracking-tight text-white md:text-5xl">{copy.billing.heroTitle}</h1>
+          <p className="mt-4 text-lg font-semibold text-sky-100">{copy.billing.pillars}</p>
+          <p className="mt-2 max-w-3xl text-base leading-7 text-slate-300">{copy.billing.heroText}</p>
+          <div className="mt-5 grid gap-2 text-sm text-slate-300">
+            <p>{copy.billing.impactOne}</p>
+            <p>{copy.billing.impactTwo}</p>
+          </div>
+          <div className="mt-5 flex flex-wrap gap-2 text-xs font-bold uppercase tracking-[0.18em] text-sky-100">
+            <span className="rounded-full border border-white/10 px-3 py-1">PT</span>
+            <span className="rounded-full border border-white/10 px-3 py-1">FR</span>
+            <span className="rounded-full border border-white/10 px-3 py-1">ES</span>
+            <span className="rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1">Portugal</span>
+            <span className="rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1">France</span>
+            <span className="rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1">Espana</span>
+          </div>
         </div>
         <button
           type="button"
@@ -97,7 +118,7 @@ export default function BillingPanel({ usage, warning }: BillingPanelProps) {
           className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-300 to-amber-300 px-5 py-3 text-sm font-bold text-slate-950 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loadingPlan ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <CreditCard className="h-4 w-4" aria-hidden="true" />}
-          {usage?.stripeCustomerId ? "Gerir plano" : "Atualizar plano"}
+          {usage?.stripeCustomerId ? copy.billing.manage : copy.billing.activate}
           <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
@@ -148,6 +169,21 @@ export default function BillingPanel({ usage, warning }: BillingPanelProps) {
         </article>
       </section>
 
+      <section className="mt-8 rounded-2xl border border-sky-300/20 bg-sky-300/10 p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-200">+100 elementos construtivos analisados</p>
+        <h2 className="mt-3 text-2xl font-semibold text-white">{copy.billing.headline}</h2>
+        <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-200">{copy.billing.subheadline}</p>
+        <p className="mt-3 text-sm font-semibold text-sky-100">{copy.billing.choose}</p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-9">
+          {["Projetos", "Medicoes", "Especialidades", "Cadernos de Encargos", "Riscos", "Prazos", "Custos", "Orcamentos", "Documentacao Tecnica"].map((item) => (
+            <div key={item} className="rounded-xl border border-white/10 bg-slate-950/30 p-3 text-xs font-semibold text-white">
+              {item}
+            </div>
+          ))}
+        </div>
+        <p className="mt-5 text-sm text-slate-300">Tudo numa unica analise.</p>
+      </section>
+
       <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {constructionBillingPlans.map((plan) => {
           const active = usage?.planId === plan.id || (!usage && plan.id === "home")
@@ -155,9 +191,10 @@ export default function BillingPanel({ usage, warning }: BillingPanelProps) {
             <article key={plan.id} className={`rounded-2xl border p-5 ${active ? "border-sky-300/40 bg-sky-300/10" : "border-white/10 bg-white/[0.03]"}`}>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h3 className="font-semibold text-white">{plan.name}</h3>
+                  <h3 className="font-semibold text-white">{planCopy[plan.id]?.label ?? plan.name}</h3>
                   <p className="mt-2 text-2xl font-semibold text-white">{formatConstructionPlanPrice(plan.monthlyPriceEur)}</p>
                   <p className="mt-1 text-xs text-slate-400">por mes</p>
+                  <p className="mt-3 text-sm leading-5 text-slate-300">{planCopy[plan.id]?.body}</p>
                 </div>
                 {active ? <CheckCircle2 className="h-5 w-5 text-emerald-200" aria-hidden="true" /> : null}
               </div>
@@ -176,11 +213,33 @@ export default function BillingPanel({ usage, warning }: BillingPanelProps) {
                 className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-white transition hover:border-sky-300/50 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loadingPlan === plan.id ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-                {active ? "Renovar via Stripe" : "Atualizar plano"}
+                {active ? "Renovar via Stripe" : copy.billing.activate}
               </button>
             </article>
           )
         })}
+      </section>
+
+      <section className="mt-8 grid gap-4 lg:grid-cols-3">
+        {[
+          ["Moradia Unifamiliar - Portugal", "Documentacao analisada: 127 paginas", "Tempo tradicional: 3 a 5 dias", "Tempo IAWEB: poucos minutos", "Riscos encontrados: 11"],
+          ["Projeto Residencial - Franca", "Tempo tradicional: ate 1 semana", "Tempo IAWEB: poucos minutos", "Benchmark: mercado frances", "Nivel de confianca: elevado"],
+          ["Gabinete Tecnico - Espanha", "Analise documental multidisciplinar", "Documentos em falta identificados", "Cenarios economico, normal e premium", "Sem testemunhos reais nesta fase"],
+        ].map(([title, ...items]) => (
+          <article key={title} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Caso de uso</p>
+            <h3 className="mt-2 font-semibold text-white">{title}</h3>
+            <div className="mt-4 grid gap-2">
+              {items.map((item) => <p key={item} className="text-sm text-slate-300">{item}</p>)}
+            </div>
+          </article>
+        ))}
+      </section>
+
+      <section className="mt-8 rounded-2xl border border-amber-300/20 bg-amber-300/10 p-5">
+        <p className="text-sm font-semibold text-white">{copy.billing.trust}</p>
+        <p className="mt-2 text-sm text-amber-50">{copy.billing.education}</p>
+        <p className="mt-4 text-sm leading-6 text-slate-300">{copy.billing.problem} {copy.billing.problemDetail}</p>
       </section>
     </div>
   )

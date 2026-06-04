@@ -1,5 +1,6 @@
 import type { ConstructionDetectedDocument, ConstructionFileRecord } from "./types"
 import { getConstructionProject, getConstructionSupabaseClient } from "./db"
+import { buildCountryAwarePrompt } from "./country-intelligence"
 import { getDocumentClassificationRules } from "./dataset"
 import { getConstructionFileExtension } from "./file-rules"
 import { listConstructionProjectFiles } from "./storage"
@@ -132,8 +133,9 @@ export function classifyConstructionFile(file: ConstructionFileRecord): Document
   }
 }
 
-function buildAIPrompt(file: ConstructionFileRecord, localClassification: DocumentClassification) {
+function buildAIPrompt(file: ConstructionFileRecord, localClassification: DocumentClassification, country?: string | null, language = "pt") {
   return [
+    buildCountryAwarePrompt(country, language === "fr" || language === "es" ? language : "pt"),
     "És um especialista europeu em documentação técnica de construção.",
     "Classifica o documento usando apenas filename, extensão, MIME e metadata fornecida.",
     "Não assumas leitura OCR, não inventes conteúdo interno e não faças análise BIM/CAD.",
@@ -171,7 +173,7 @@ function parseAIJson(content: string): AIDocumentAnalysis | null {
   }
 }
 
-export async function analyzeDocumentWithAI(file: ConstructionFileRecord, localClassification: DocumentClassification): Promise<DocumentClassification> {
+export async function analyzeDocumentWithAI(file: ConstructionFileRecord, localClassification: DocumentClassification, country?: string | null, language = "pt"): Promise<DocumentClassification> {
   const apiKey = process.env.OPENAI_API_KEY
 
   if (!apiKey) {
@@ -205,7 +207,7 @@ export async function analyzeDocumentWithAI(file: ConstructionFileRecord, localC
           },
           {
             role: "user",
-            content: buildAIPrompt(file, localClassification),
+            content: buildAIPrompt(file, localClassification, country, language),
           },
         ],
       }),
@@ -303,7 +305,7 @@ export async function analyzeConstructionProjectDocuments(projectId: string) {
 
   for (const file of filesResult.data) {
     const localClassification = classifyConstructionFile(file)
-    const classification = await analyzeDocumentWithAI(file, localClassification)
+    const classification = await analyzeDocumentWithAI(file, localClassification, project.data?.country)
 
     await client.supabase.from("construction_files").update({ processing_status: "processing" }).eq("id", file.id)
     await client.supabase.from("construction_detected_documents").delete().eq("project_id", projectId).eq("file_id", file.id)

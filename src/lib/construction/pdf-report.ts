@@ -34,6 +34,9 @@ const colors = {
   green: [52, 211, 153] as const,
 }
 
+const legalDisclaimer =
+  "Estimativa baseada na documentacao analisada e em dados de mercado disponiveis a data da analise. Nao constitui orcamento vinculativo nem garantia de custo final."
+
 function setFill(doc: jsPDF, color: readonly number[]) {
   doc.setFillColor(color[0], color[1], color[2])
 }
@@ -52,6 +55,8 @@ function addBackground(doc: jsPDF) {
   setText(doc, colors.slate)
   doc.setFontSize(8)
   doc.text("IAWEB Construction Intelligence", page.margin, page.height - 10)
+  doc.setFontSize(6.5)
+  doc.text(doc.splitTextToSize(legalDisclaimer, 160), page.margin, page.height - 6)
 }
 
 function addHeader(doc: jsPDF, title: string) {
@@ -233,9 +238,15 @@ function addEstimatePage(doc: jsPDF, health: ConstructionHealthCheckResult) {
   setText(doc, colors.muted)
   doc.setFontSize(12)
   const cost = health.costEstimate
-  doc.text(`Minimo: ${cost ? formatEuro(cost.estimatedCostMin) : "Por gerar"}`, page.margin, 72)
-  doc.text(`Medio: ${cost ? formatEuro(cost.estimatedCostMid) : "Por gerar"}`, page.margin, 84)
-  doc.text(`Maximo: ${cost ? formatEuro(cost.estimatedCostMax) : "Por gerar"}`, page.margin, 96)
+  if (cost?.scenarios?.length) {
+    let scenarioY = 72
+    for (const scenario of cost.scenarios) {
+      doc.text(`${scenario.label}: ${formatEuro(scenario.min)} a ${formatEuro(scenario.max)} (${scenario.confidenceScore}/100)`, page.margin, scenarioY)
+      scenarioY += 12
+    }
+  } else {
+    doc.text(`Faixa provavel: ${cost ? `${formatEuro(cost.estimatedCostMin)} a ${formatEuro(cost.estimatedCostMax)}` : "Por gerar"}`, page.margin, 72)
+  }
 
   setText(doc, colors.white)
   doc.setFont("helvetica", "bold")
@@ -253,7 +264,7 @@ function addEstimatePage(doc: jsPDF, health: ConstructionHealthCheckResult) {
   setText(doc, colors.gold)
   doc.setFont("helvetica", "bold")
   doc.setFontSize(11)
-  writeWrapped(doc, "Esta estimativa é indicativa e baseada exclusivamente na documentação analisada.", page.margin, 232, 172)
+  writeWrapped(doc, "Esta estimativa e indicativa e baseada exclusivamente na documentacao analisada.", page.margin, 232, 172)
 }
 
 function addRisksPage(doc: jsPDF, health: ConstructionHealthCheckResult) {

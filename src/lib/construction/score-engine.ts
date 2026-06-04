@@ -249,7 +249,15 @@ export async function listConstructionHealthCheck(projectId: string) {
             estimatedCostMax: Number(cost.high_amount ?? 0),
             estimatedCostMid: Number(cost.expected_amount ?? 0),
             costConfidence: cost.confidence_score ?? 0,
-            costNotes: Array.isArray(cost.assumptions) ? cost.assumptions.map(String) : [],
+            costNotes: Array.isArray(cost.assumptions)
+              ? cost.assumptions.map(String)
+              : Array.isArray((cost.assumptions as Record<string, unknown>)?.notes)
+                ? ((cost.assumptions as Record<string, unknown>).notes as unknown[]).map(String)
+                : [],
+            scenarios: Array.isArray((cost.assumptions as Record<string, unknown>)?.scenarios)
+              ? ((cost.assumptions as Record<string, unknown>).scenarios as NonNullable<ConstructionHealthCheckResult["costEstimate"]>["scenarios"])
+              : undefined,
+            calculationBasis: ((cost.assumptions as Record<string, unknown>)?.calculation_basis as NonNullable<ConstructionHealthCheckResult["costEstimate"]>["calculationBasis"]) ?? undefined,
           }
         : null,
       scheduleEstimate: schedule
@@ -393,7 +401,11 @@ export async function runConstructionScores(projectId: string) {
         expected_amount: costEstimate.estimatedCostMid,
         high_amount: costEstimate.estimatedCostMax,
         confidence_score: costEstimate.costConfidence,
-        assumptions: costEstimate.costNotes,
+        assumptions: {
+          notes: costEstimate.costNotes,
+          scenarios: costEstimate.scenarios ?? [],
+          calculation_basis: costEstimate.calculationBasis ?? {},
+        },
       },
       {
         project_id: projectId,

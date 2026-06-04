@@ -1,5 +1,6 @@
 import Stripe from "stripe"
 import { getConstructionSupabaseClient } from "../db"
+import { getConstructionLanguage } from "../i18n"
 import { constructionTrialDays, getConstructionBillingPlan, type ConstructionBillingPlanId, type ConstructionBillingStatus } from "./plans"
 
 export const stripeApiVersion = "2026-05-27.dahlia"
@@ -104,6 +105,7 @@ export async function createConstructionCheckoutSession(input: {
   requestUrl: string
   customerEmail?: string | null
   organizationId?: string | null
+  language?: string | null
 }) {
   const { stripe, error } = getConstructionStripe()
 
@@ -118,8 +120,10 @@ export async function createConstructionCheckoutSession(input: {
   }
 
   const baseUrl = getConstructionStripeBaseUrl(input.requestUrl)
+  const language = getConstructionLanguage(input.language)
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
+    locale: language,
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${baseUrl}/construction/billing?stripe=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/construction/billing?stripe=cancelled`,

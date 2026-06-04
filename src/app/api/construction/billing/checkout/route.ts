@@ -14,6 +14,7 @@ export async function POST(request: Request) {
     planId?: string
     customerEmail?: string
     organizationId?: string
+    language?: string
   }
 
   if (!body.planId || !isPlanId(body.planId)) {
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
     requestUrl: request.url,
     customerEmail: body.customerEmail,
     organizationId: body.organizationId,
+    language: body.language,
   })
 
   if (error || !data?.url) {

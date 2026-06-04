@@ -1,5 +1,6 @@
 import Link from "next/link"
 import OfficialLogo from "@/components/iaweb/OfficialLogo"
+import ConstructionCookieBanner from "./ConstructionCookieBanner"
 
 type ConstructionShellProps = {
   children: React.ReactNode
@@ -37,6 +38,17 @@ export default function ConstructionShell({ children, eyebrow = "Construction In
           </nav>
         </header>
         {children}
+        <footer className="mt-auto border-t border-white/10 py-6 text-sm text-slate-400">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <p>Estimativa indicativa. Nao constitui orcamento vinculativo nem garantia de custo final.</p>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/construction/privacy" className="hover:text-white">Privacidade</Link>
+              <Link href="/construction/cookies" className="hover:text-white">Cookies</Link>
+              <Link href="/construction/security" className="hover:text-white">Seguranca</Link>
+            </div>
+          </div>
+        </footer>
+        <ConstructionCookieBanner />
       </div>
     </main>
   )
