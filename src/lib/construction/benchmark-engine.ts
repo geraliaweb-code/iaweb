@@ -1,5 +1,6 @@
 import { getConstructionProject, getConstructionSupabaseClient } from "./db"
 import { listConstructionHealthCheck, runConstructionScores } from "./score-engine"
+import { normalizeConstructionCountry } from "./country-intelligence"
 import type { ConstructionBenchmarkRecord, ConstructionBenchmarkResult, ConstructionHealthCheckResult, ConstructionProject, ConstructionProjectType } from "./types"
 
 type BenchmarkSample = {
@@ -36,7 +37,7 @@ const mockBenchmarks: BenchmarkSample[] = [
 ]
 
 function normalizeCountry(country: string) {
-  return country === "França" ? "França" : country
+  return normalizeConstructionCountry(country)
 }
 
 function isSimilarArea(projectArea: number | null, sample: BenchmarkSample) {
@@ -95,8 +96,9 @@ function getMetrics(project: ConstructionProject, health: ConstructionHealthChec
 }
 
 function computeBenchmarkRows(project: ConstructionProject, health: ConstructionHealthCheckResult) {
+  const projectTechnicalCountry = normalizeConstructionCountry(project.technical_country ?? project.country)
   const sameTypeCountryArea = mockBenchmarks.filter(
-    (sample) => sample.projectType === project.project_type && normalizeCountry(sample.country) === normalizeCountry(project.country) && isSimilarArea(project.estimated_area_m2, sample),
+    (sample) => sample.projectType === project.project_type && normalizeCountry(sample.country) === projectTechnicalCountry && isSimilarArea(project.estimated_area_m2, sample),
   )
   const sameType = mockBenchmarks.filter((sample) => sample.projectType === project.project_type)
   const matches = sameTypeCountryArea.length ? sameTypeCountryArea : sameType.length ? sameType : mockBenchmarks

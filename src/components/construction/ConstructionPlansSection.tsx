@@ -4,6 +4,7 @@ import { useState } from "react"
 import { AlertTriangle, ArrowRight, CheckCircle2, CreditCard, Loader2 } from "lucide-react"
 import { constructionBillingPlans, formatConstructionPlanPrice } from "@/lib/construction/billing/plans"
 import type { ConstructionBillingUsage } from "@/lib/construction/billing/usage"
+import { readConstructionLocalePreference } from "./ConstructionLocaleSelector"
 
 type ConstructionPlansSectionProps = {
   usage?: ConstructionBillingUsage | null
@@ -57,7 +58,7 @@ export default function ConstructionPlansSection({ usage, warning, compact = fal
       const response = await fetch("/api/construction/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId, language: "pt" }),
+        body: JSON.stringify({ planId, language: readConstructionLocalePreference().language }),
       })
       const result = (await response.json().catch(() => ({}))) as { url?: string; error?: string }
 

@@ -25,7 +25,8 @@ export const constructionDocumentTaxonomy: ConstructionDocumentTaxonomySeed[] = 
 ]
 
 export function getCriticalDocumentsForCountry(country: string) {
-  const normalizedCountry = country.includes("Fran") ? "Franca" : country
+  const value = country.toLowerCase()
+  const normalizedCountry = value === "france" || value.includes("fran") ? "Franca" : value === "spain" || value.includes("esp") ? "Espanha" : "Portugal"
   return constructionDocumentTaxonomy
     .filter((item) => item.country === normalizedCountry && item.criticality === "critical")
     .map((item) => item.documentType)

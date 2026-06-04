@@ -26,9 +26,10 @@ function clampScore(value: number) {
 
 export function generateConstructionCostEstimate(project: ConstructionProject, context: CostContext): ConstructionCostEstimate {
   const area = project.estimated_area_m2 ?? 0
-  const matrix = getConstructionCostRange(project.project_type, project.country)
-  const countryFactor = getCountryPriceFactor(project.country)
-  const countryProfile = getConstructionCountryProfile(project.country)
+  const technicalCountry = project.technical_country ?? project.country
+  const matrix = getConstructionCostRange(project.project_type, technicalCountry)
+  const countryFactor = getCountryPriceFactor(technicalCountry)
+  const countryProfile = getConstructionCountryProfile(technicalCountry)
   const riskFactor = 1 + Math.max(0, context.riskScore - 45) / 220
   const complexityFactor = 1 + Math.max(0, context.complexityScore - 50) / 260
   const lowMaturitySpread = Math.max(0, 70 - context.maturityScore) / 220
@@ -45,7 +46,7 @@ export function generateConstructionCostEstimate(project: ConstructionProject, c
   const scenarios = buildCostScenarios({
     baseMin: estimatedCostMin,
     baseMax: estimatedCostMax,
-    country: project.country,
+    country: technicalCountry,
     confidenceScore: costConfidence,
   })
   const costNotes = [

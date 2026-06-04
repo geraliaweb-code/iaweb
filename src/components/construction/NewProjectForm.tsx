@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2, Plus } from "lucide-react"
 import { getConstructionRequestError, readConstructionApiJson } from "@/lib/construction/client-api"
@@ -9,12 +9,31 @@ import {
   constructionCountryLabels,
   constructionProjectTypeLabels,
 } from "@/lib/construction/constants"
-import { constructionClientTypes, constructionCountries, constructionProjectTypes } from "@/lib/construction/types"
+import { constructionClientTypes, constructionProjectTypes } from "@/lib/construction/types"
+import type { ConstructionLanguage, ConstructionTechnicalCountry } from "@/lib/construction/types"
+import ConstructionLocaleSelector, { constructionLocaleEvent, getLegacyConstructionCountry, readConstructionLocalePreference } from "./ConstructionLocaleSelector"
 
 export default function NewProjectForm() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [language, setLanguage] = useState<ConstructionLanguage>("pt")
+  const [technicalCountry, setTechnicalCountry] = useState<ConstructionTechnicalCountry>("portugal")
+
+  useEffect(() => {
+    const preference = readConstructionLocalePreference()
+    setLanguage(preference.language)
+    setTechnicalCountry(preference.technicalCountry)
+
+    function handleLocale(event: Event) {
+      const detail = (event as CustomEvent<{ language: ConstructionLanguage; technicalCountry: ConstructionTechnicalCountry }>).detail
+      if (detail?.language) setLanguage(detail.language)
+      if (detail?.technicalCountry) setTechnicalCountry(detail.technicalCountry)
+    }
+
+    window.addEventListener(constructionLocaleEvent, handleLocale)
+    return () => window.removeEventListener(constructionLocaleEvent, handleLocale)
+  }, [])
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -25,7 +44,9 @@ export default function NewProjectForm() {
     const payload = {
       name: String(formData.get("name") ?? ""),
       projectType: String(formData.get("projectType") ?? ""),
-      country: String(formData.get("country") ?? ""),
+      country: String(formData.get("country") ?? getLegacyConstructionCountry(technicalCountry)),
+      language: String(formData.get("language") ?? language),
+      technicalCountry: String(formData.get("technicalCountry") ?? technicalCountry),
       city: String(formData.get("city") ?? ""),
       estimatedAreaM2: String(formData.get("estimatedAreaM2") ?? ""),
       clientType: String(formData.get("clientType") ?? ""),
@@ -56,6 +77,13 @@ export default function NewProjectForm() {
 
   return (
     <form onSubmit={handleSubmit} className="iaweb-premium-card mx-auto w-full max-w-4xl rounded-2xl p-6 sm:p-8">
+      <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+        <p className="mb-3 text-sm font-semibold text-white">Idioma e pais tecnico da analise</p>
+        <ConstructionLocaleSelector />
+        <input type="hidden" name="language" value={language} />
+        <input type="hidden" name="technicalCountry" value={technicalCountry} />
+        <input type="hidden" name="country" value={getLegacyConstructionCountry(technicalCountry)} />
+      </div>
       <div className="grid gap-5 md:grid-cols-2">
         <label className="md:col-span-2">
           <span className="text-sm font-medium text-slate-200">Nome do projeto</span>
@@ -80,13 +108,9 @@ export default function NewProjectForm() {
 
         <label>
           <span className="text-sm font-medium text-slate-200">País</span>
-          <select name="country" required defaultValue="Portugal" className="mt-2 w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none focus:border-sky-300/60">
-            {constructionCountries.map((country) => (
-              <option key={country} value={country}>
-                {constructionCountryLabels[country]}
-              </option>
-            ))}
-          </select>
+          <div className="mt-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white">
+            {constructionCountryLabels[getLegacyConstructionCountry(technicalCountry) as keyof typeof constructionCountryLabels] ?? getLegacyConstructionCountry(technicalCountry)}
+          </div>
         </label>
 
         <label>

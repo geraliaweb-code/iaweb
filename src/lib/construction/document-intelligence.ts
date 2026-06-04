@@ -1,6 +1,6 @@
 import type { ConstructionDetectedDocument, ConstructionFileRecord } from "./types"
 import { getConstructionProject, getConstructionSupabaseClient } from "./db"
-import { buildCountryAwarePrompt } from "./country-intelligence"
+import { buildCountryAwarePrompt, normalizeConstructionCountry } from "./country-intelligence"
 import { getDocumentClassificationRules } from "./dataset"
 import { getConstructionFileExtension } from "./file-rules"
 import { listConstructionProjectFiles } from "./storage"
@@ -97,8 +97,18 @@ function scoreRule(file: ConstructionFileRecord, rule: ClassificationRule) {
   }
 }
 
-export function classifyConstructionFile(file: ConstructionFileRecord): DocumentClassification {
-  const candidates = rules
+function taxonomyCountryFor(country?: string | null) {
+  const normalized = normalizeConstructionCountry(country)
+  if (normalized === "france") return "Franca"
+  if (normalized === "spain") return "Espanha"
+  return "Portugal"
+}
+
+export function classifyConstructionFile(file: ConstructionFileRecord, preferredCountry?: string | null): DocumentClassification {
+  const localCountry = taxonomyCountryFor(preferredCountry)
+  const preferredRules = rules.filter((rule) => rule.country === localCountry)
+  const candidateRules = preferredRules.length ? [...preferredRules, ...rules.filter((rule) => rule.country !== localCountry)] : rules
+  const candidates = candidateRules
     .map((rule) => scoreRule(file, rule))
     .filter((result): result is NonNullable<typeof result> => Boolean(result))
     .sort((a, b) => b.confidenceScore - a.confidenceScore)
@@ -304,8 +314,8 @@ export async function analyzeConstructionProjectDocuments(projectId: string) {
   const detected: ConstructionDetectedDocument[] = []
 
   for (const file of filesResult.data) {
-    const localClassification = classifyConstructionFile(file)
-    const classification = await analyzeDocumentWithAI(file, localClassification, project.data?.country)
+    const localClassification = classifyConstructionFile(file, project.data?.technical_country ?? project.data?.country)
+    const classification = await analyzeDocumentWithAI(file, localClassification, project.data?.technical_country ?? project.data?.country, project.data?.language ?? "pt")
 
     await client.supabase.from("construction_files").update({ processing_status: "processing" }).eq("id", file.id)
     await client.supabase.from("construction_detected_documents").delete().eq("project_id", projectId).eq("file_id", file.id)

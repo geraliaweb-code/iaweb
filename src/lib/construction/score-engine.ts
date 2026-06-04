@@ -4,6 +4,7 @@ import { listConstructionDetectedDocuments } from "./document-intelligence"
 import { generateConstructionCostEstimate } from "./cost-engine"
 import { buildProjectKnowledgeGraph } from "./knowledge-graph"
 import { generateConstructionScheduleEstimate } from "./schedule-engine"
+import { normalizeConstructionCountry } from "./country-intelligence"
 import type {
   ConstructionDetectedDocument,
   ConstructionEstimateRecord,
@@ -29,9 +30,9 @@ const projectTypeComplexity: Record<string, number> = Object.fromEntries(
 )
 
 const countryComplexity: Record<string, number> = {
-  Portugal: 42,
-  Franca: 54,
-  Espanha: 50,
+  portugal: 42,
+  france: 54,
+  spain: 50,
 }
 
 function clampScore(value: number) {
@@ -47,7 +48,7 @@ function normalize(value: string | null | undefined) {
 }
 
 function getCriticalDocuments(project: ConstructionProject) {
-  const documents = getCriticalDocumentsForCountry(project.country)
+  const documents = getCriticalDocumentsForCountry(project.technical_country ?? project.country)
   return documents.length ? documents : getCriticalDocumentsForCountry("Portugal")
 }
 
@@ -90,14 +91,15 @@ function computeScores(project: ConstructionProject, documents: ConstructionDete
     && !["medicoes", "mapa de quantidades", "DPGF", "DQE", "Mediciones", "Presupuesto"].some((documentType) => hasDocument(documents, documentType))
     ? 16
     : 0
-  const noStructuresRisk = !hasDocument(documents, "estruturas") && project.country === "Portugal" ? 14 : 0
+  const technicalCountry = normalizeConstructionCountry(project.technical_country ?? project.country)
+  const noStructuresRisk = !hasDocument(documents, "estruturas") && technicalCountry === "portugal" ? 14 : 0
   const unknownRisk = unknownDocuments * 5
   const riskScore = clampScore(12 + missingRisk + confidenceRisk + noMeasurementsRisk + noStructuresRisk + unknownRisk)
 
   const area = project.estimated_area_m2 ?? 0
   const areaComplexity = area >= 5000 ? 28 : area >= 1500 ? 20 : area >= 500 ? 12 : area > 0 ? 6 : 10
   const specialitiesComplexity = Math.min(identifiedSpecialties.length * 5, 25)
-  const country = project.country === "França" ? "Franca" : project.country
+  const country = technicalCountry
   const complexityScore = clampScore(
     (projectTypeComplexity[project.project_type] ?? 45) * 0.45 +
       (countryComplexity[country] ?? 45) * 0.2 +

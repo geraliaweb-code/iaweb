@@ -1,6 +1,7 @@
 import Link from "next/link"
 import OfficialLogo from "@/components/iaweb/OfficialLogo"
 import ConstructionCookieBanner from "./ConstructionCookieBanner"
+import ConstructionLocaleSelector from "./ConstructionLocaleSelector"
 
 type ConstructionShellProps = {
   children: React.ReactNode
@@ -38,6 +39,7 @@ export default function ConstructionShell({ children, eyebrow = "Construction In
             <span className={`text-xs font-semibold uppercase tracking-[0.28em] ${isLight ? "text-slate-600" : "text-sky-200"}`}>{eyebrow}</span>
           </Link>
           <nav className={`flex items-center gap-2 text-sm ${isLight ? "text-slate-600" : "text-slate-300"}`}>
+            <ConstructionLocaleSelector />
             <Link href="/construction/dashboard" className={`rounded-full border px-4 py-2 transition ${isLight ? "border-slate-200 bg-white hover:border-slate-400 hover:text-slate-950" : "border-white/10 hover:border-sky-300/50 hover:text-white"}`}>
               Dashboard
             </Link>

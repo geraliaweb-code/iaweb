@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useState } from "react"
 import { AlertTriangle, BarChart3, BrainCircuit, CalendarClock, CheckCircle2, Euro, Gauge, Loader2, ShieldAlert } from "lucide-react"
 import { getConstructionRequestError, readConstructionApiJson } from "@/lib/construction/client-api"
-import type { ConstructionHealthCheckResult } from "@/lib/construction/types"
+import type { ConstructionHealthCheckResult, ConstructionLanguage } from "@/lib/construction/types"
 import GenerateReportButton from "./GenerateReportButton"
 
 type HealthCheckPanelProps = {
   projectId: string
+  language?: ConstructionLanguage | null
 }
 
 type PanelState = {
@@ -17,13 +18,26 @@ type PanelState = {
 }
 
 const metricConfig = [
-  { key: "maturityScore", label: "Maturidade", icon: Gauge, tone: "text-sky-100" },
-  { key: "riskScore", label: "Risco", icon: ShieldAlert, tone: "text-amber-100" },
-  { key: "complexityScore", label: "Complexidade", icon: BarChart3, tone: "text-violet-100" },
-  { key: "confidenceScore", label: "Confianca", icon: BrainCircuit, tone: "text-emerald-100" },
+  { key: "maturityScore", labelKey: "maturity", icon: Gauge, tone: "text-sky-100" },
+  { key: "riskScore", labelKey: "risk", icon: ShieldAlert, tone: "text-amber-100" },
+  { key: "complexityScore", labelKey: "complexity", icon: BarChart3, tone: "text-violet-100" },
+  { key: "confidenceScore", labelKey: "confidence", icon: BrainCircuit, tone: "text-emerald-100" },
 ] as const
 
-export default function HealthCheckPanel({ projectId }: HealthCheckPanelProps) {
+const healthCopy = {
+  pt: { title: "Health Check documental", generate: "Gerar Health Check", maturity: "Maturidade", risk: "Risco", complexity: "Complexidade", confidence: "Confianca", documents: "Documentos encontrados", specialties: "Especialidades identificadas", missing: "Criticos em falta", cost: "Estimativa de custo", probable: "Faixa provavel", schedule: "Prazo estimado", months: "meses", alerts: "Alertas principais" },
+  fr: { title: "Health Check documentaire", generate: "Generer Health Check", maturity: "Maturite", risk: "Risque", complexity: "Complexite", confidence: "Confiance", documents: "Documents trouves", specialties: "Specialites identifiees", missing: "Critiques manquants", cost: "Estimation du cout", probable: "Fourchette probable", schedule: "Delai estime", months: "mois", alerts: "Alertes principales" },
+  es: { title: "Health Check documental", generate: "Generar Health Check", maturity: "Madurez", risk: "Riesgo", complexity: "Complejidad", confidence: "Confianza", documents: "Documentos encontrados", specialties: "Especialidades identificadas", missing: "Criticos faltantes", cost: "Estimacion de coste", probable: "Rango probable", schedule: "Plazo estimado", months: "meses", alerts: "Alertas principales" },
+}
+
+function localeFromLanguage(language?: ConstructionLanguage | null) {
+  if (language === "fr") return "fr-FR"
+  if (language === "es") return "es-ES"
+  return "pt-PT"
+}
+
+export default function HealthCheckPanel({ projectId, language = "pt" }: HealthCheckPanelProps) {
+  const copy = healthCopy[language ?? "pt"]
   const [healthCheck, setHealthCheck] = useState<ConstructionHealthCheckResult | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [state, setState] = useState<PanelState>({
@@ -100,7 +114,7 @@ export default function HealthCheckPanel({ projectId }: HealthCheckPanelProps) {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-200">Scores Engine V1</p>
-          <h2 className="mt-2 text-xl font-semibold text-white">Health Check documental</h2>
+          <h2 className="mt-2 text-xl font-semibold text-white">{copy.title}</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
             Calcula scores iniciais a partir dos documentos classificados. Sem custo detalhado, prazo detalhado, benchmark ou IA externa.
           </p>
@@ -112,7 +126,7 @@ export default function HealthCheckPanel({ projectId }: HealthCheckPanelProps) {
           className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-300 to-amber-300 px-5 py-3 text-sm font-bold text-slate-950 transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-70"
         >
           {state.isRunning ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Gauge className="h-4 w-4" aria-hidden="true" />}
-          Gerar Health Check
+          {copy.generate}
         </button>
       </div>
 
@@ -151,7 +165,7 @@ export default function HealthCheckPanel({ projectId }: HealthCheckPanelProps) {
               return (
                 <article key={metric.key} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
                   <div className="flex items-center justify-between gap-4">
-                    <p className="text-sm text-slate-300">{metric.label}</p>
+                    <p className="text-sm text-slate-300">{copy[metric.labelKey]}</p>
                     <Icon className={`h-5 w-5 ${metric.tone}`} aria-hidden="true" />
                   </div>
                   <p className="mt-5 text-4xl font-semibold tracking-tight text-white">
@@ -167,16 +181,16 @@ export default function HealthCheckPanel({ projectId }: HealthCheckPanelProps) {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">
-            <InfoCard title="Documentos encontrados" value={String(healthCheck.documentsFound)} />
-            <InfoCard title="Especialidades identificadas" value={healthCheck.identifiedSpecialties.length ? healthCheck.identifiedSpecialties.join(", ") : "Nenhuma"} />
-            <InfoCard title="Criticos em falta" value={healthCheck.missingCriticalDocuments.length ? healthCheck.missingCriticalDocuments.join(", ") : "Sem faltas criticas"} />
+            <InfoCard title={copy.documents} value={String(healthCheck.documentsFound)} />
+            <InfoCard title={copy.specialties} value={healthCheck.identifiedSpecialties.length ? healthCheck.identifiedSpecialties.join(", ") : "Nenhuma"} />
+            <InfoCard title={copy.missing} value={healthCheck.missingCriticalDocuments.length ? healthCheck.missingCriticalDocuments.join(", ") : "Sem faltas criticas"} />
           </div>
 
-          <EstimateSection healthCheck={healthCheck} />
+          <EstimateSection healthCheck={healthCheck} language={language} />
           <KnowledgeGraphSection healthCheck={healthCheck} />
 
           <div>
-            <h3 className="font-semibold text-white">Alertas principais</h3>
+            <h3 className="font-semibold text-white">{copy.alerts}</h3>
             {healthCheck.alerts.length ? (
               <div className="mt-4 grid gap-3">
                 {healthCheck.alerts.map((alert, index) => (
@@ -265,22 +279,25 @@ function GraphList({ title, items }: { title: string; items: string[] }) {
   )
 }
 
-function EstimateSection({ healthCheck }: { healthCheck: ConstructionHealthCheckResult }) {
+function EstimateSection({ healthCheck, language = "pt" }: { healthCheck: ConstructionHealthCheckResult; language?: ConstructionLanguage | null }) {
+  const copy = healthCopy[language ?? "pt"]
+  const locale = localeFromLanguage(language)
+
   return (
     <div className="grid gap-4 xl:grid-cols-2">
       <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Estimativa de custo</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{copy.cost}</p>
             <h3 className="mt-2 font-semibold text-white">Faixa preliminar inteligente</h3>
           </div>
           <Euro className="h-5 w-5 text-amber-100" aria-hidden="true" />
         </div>
         {healthCheck.costEstimate ? (
           <div className="mt-5">
-            <p className="text-3xl font-semibold tracking-tight text-white">{formatEuro(healthCheck.costEstimate.estimatedCostMid)}</p>
+            <p className="text-3xl font-semibold tracking-tight text-white">{formatEuro(healthCheck.costEstimate.estimatedCostMid, locale)}</p>
             <p className="mt-2 text-sm text-slate-300">
-              Faixa provavel: {formatEuro(healthCheck.costEstimate.estimatedCostMin)} a {formatEuro(healthCheck.costEstimate.estimatedCostMax)}
+              {copy.probable}: {formatEuro(healthCheck.costEstimate.estimatedCostMin, locale)} a {formatEuro(healthCheck.costEstimate.estimatedCostMax, locale)}
             </p>
             <p className="mt-3 text-sm text-sky-100">Confianca: {healthCheck.costEstimate.costConfidence}/100</p>
             {healthCheck.costEstimate.scenarios?.length ? (
@@ -289,7 +306,7 @@ function EstimateSection({ healthCheck }: { healthCheck: ConstructionHealthCheck
                   <div key={scenario.id} className="rounded-xl border border-white/10 bg-slate-950/30 p-3">
                     <p className="text-xs uppercase tracking-[0.16em] text-slate-500">{scenario.label}</p>
                     <p className="mt-1 text-sm font-semibold text-white">
-                      {formatEuro(scenario.min)} a {formatEuro(scenario.max)}
+                      {formatEuro(scenario.min, locale)} a {formatEuro(scenario.max, locale)}
                     </p>
                   </div>
                 ))}
@@ -305,16 +322,16 @@ function EstimateSection({ healthCheck }: { healthCheck: ConstructionHealthCheck
       <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Prazo estimado</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{copy.schedule}</p>
             <h3 className="mt-2 font-semibold text-white">Faixa provavel de prazo</h3>
           </div>
           <CalendarClock className="h-5 w-5 text-sky-100" aria-hidden="true" />
         </div>
         {healthCheck.scheduleEstimate ? (
           <div className="mt-5">
-            <p className="text-3xl font-semibold tracking-tight text-white">{healthCheck.scheduleEstimate.estimatedMonthsMid} meses</p>
+            <p className="text-3xl font-semibold tracking-tight text-white">{healthCheck.scheduleEstimate.estimatedMonthsMid} {copy.months}</p>
             <p className="mt-2 text-sm text-slate-300">
-              Faixa provavel: {healthCheck.scheduleEstimate.estimatedMonthsMin} a {healthCheck.scheduleEstimate.estimatedMonthsMax} meses
+              {copy.probable}: {healthCheck.scheduleEstimate.estimatedMonthsMin} a {healthCheck.scheduleEstimate.estimatedMonthsMax} {copy.months}
             </p>
             <p className="mt-3 text-sm text-sky-100">Confianca: {healthCheck.scheduleEstimate.scheduleConfidence}/100</p>
             <Notes notes={healthCheck.scheduleEstimate.scheduleNotes} />
@@ -341,8 +358,8 @@ function Notes({ notes }: { notes: string[] }) {
   )
 }
 
-function formatEuro(value: number) {
-  return new Intl.NumberFormat("pt-PT", {
+function formatEuro(value: number, locale = "pt-PT") {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "EUR",
     maximumFractionDigits: 0,

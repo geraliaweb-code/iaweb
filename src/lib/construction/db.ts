@@ -2,15 +2,19 @@ import { createClient } from "@supabase/supabase-js"
 import {
   constructionClientTypes,
   constructionCountries,
+  constructionLanguages,
   constructionProjectTypes,
+  constructionTechnicalCountries,
   type ConstructionClientType,
   type ConstructionCountry,
+  type ConstructionLanguage,
   type ConstructionProject,
   type ConstructionProjectInput,
   type ConstructionProjectType,
   type ConstructionQueryError,
   type ConstructionStats,
   type ConstructionSupabaseConfigError,
+  type ConstructionTechnicalCountry,
 } from "./types"
 
 type ConstructionSupabaseClient = ReturnType<typeof createClient<any, "public", any>>
@@ -62,12 +66,22 @@ export function isConstructionClientType(value: string): value is ConstructionCl
   return constructionClientTypes.includes(value as ConstructionClientType)
 }
 
+export function isConstructionLanguage(value: string): value is ConstructionLanguage {
+  return constructionLanguages.includes(value as ConstructionLanguage)
+}
+
+export function isConstructionTechnicalCountry(value: string): value is ConstructionTechnicalCountry {
+  return constructionTechnicalCountries.includes(value as ConstructionTechnicalCountry)
+}
+
 export function validateConstructionProjectInput(input: Record<string, unknown>):
   | { ok: true; data: ConstructionProjectInput }
   | { ok: false; error: ConstructionQueryError } {
   const name = typeof input.name === "string" ? input.name.trim() : ""
   const projectType = typeof input.projectType === "string" ? input.projectType : ""
   const country = typeof input.country === "string" ? input.country : ""
+  const language = typeof input.language === "string" ? input.language : "pt"
+  const technicalCountry = typeof input.technicalCountry === "string" ? input.technicalCountry : "portugal"
   const city = typeof input.city === "string" ? input.city.trim() : ""
   const clientType = typeof input.clientType === "string" ? input.clientType : ""
   const rawArea = input.estimatedAreaM2
@@ -90,6 +104,14 @@ export function validateConstructionProjectInput(input: Record<string, unknown>)
     return { ok: false, error: { code: "VALIDATION_FAILED", message: "Pais invalido." } }
   }
 
+  if (!isConstructionLanguage(language)) {
+    return { ok: false, error: { code: "VALIDATION_FAILED", message: "Idioma invalido." } }
+  }
+
+  if (!isConstructionTechnicalCountry(technicalCountry)) {
+    return { ok: false, error: { code: "VALIDATION_FAILED", message: "Pais tecnico invalido." } }
+  }
+
   if (!city) {
     return { ok: false, error: { code: "VALIDATION_FAILED", message: "Cidade obrigatoria." } }
   }
@@ -108,6 +130,8 @@ export function validateConstructionProjectInput(input: Record<string, unknown>)
       name,
       projectType,
       country,
+      language,
+      technicalCountry,
       city,
       estimatedAreaM2,
       clientType,
@@ -125,7 +149,7 @@ export async function listConstructionProjects(limit = 20) {
   const { data, error } = await client.supabase
     .from("construction_projects")
     .select(
-      "id,organization_id,name,project_type,country,city,estimated_area_m2,client_type,status,maturity_score,risk_score,complexity_score,confidence_score,analyses_count,created_at,updated_at",
+      "id,organization_id,name,project_type,country,language,technical_country,city,estimated_area_m2,client_type,status,maturity_score,risk_score,complexity_score,confidence_score,analyses_count,created_at,updated_at",
     )
     .order("created_at", { ascending: false })
     .limit(limit)
@@ -147,7 +171,7 @@ export async function getConstructionProject(id: string) {
   const { data, error } = await client.supabase
     .from("construction_projects")
     .select(
-      "id,organization_id,name,project_type,country,city,estimated_area_m2,client_type,status,maturity_score,risk_score,complexity_score,confidence_score,analyses_count,created_at,updated_at",
+      "id,organization_id,name,project_type,country,language,technical_country,city,estimated_area_m2,client_type,status,maturity_score,risk_score,complexity_score,confidence_score,analyses_count,created_at,updated_at",
     )
     .eq("id", id)
     .single()
@@ -172,12 +196,14 @@ export async function createConstructionProject(input: ConstructionProjectInput)
       name: input.name,
       project_type: input.projectType,
       country: input.country,
+      language: input.language,
+      technical_country: input.technicalCountry,
       city: input.city,
       estimated_area_m2: input.estimatedAreaM2,
       client_type: input.clientType,
     })
     .select(
-      "id,organization_id,name,project_type,country,city,estimated_area_m2,client_type,status,maturity_score,risk_score,complexity_score,confidence_score,analyses_count,created_at,updated_at",
+      "id,organization_id,name,project_type,country,language,technical_country,city,estimated_area_m2,client_type,status,maturity_score,risk_score,complexity_score,confidence_score,analyses_count,created_at,updated_at",
     )
     .single()
 

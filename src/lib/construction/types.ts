@@ -21,6 +21,9 @@ export const constructionClientTypes = [
   "gabinete_tecnico",
 ] as const
 
+export const constructionLanguages = ["pt", "fr", "es"] as const
+export const constructionTechnicalCountries = ["portugal", "france", "spain"] as const
+
 export const constructionEngineIds = [
   "document-intelligence",
   "maturity",
@@ -33,6 +36,8 @@ export const constructionEngineIds = [
 
 export type ConstructionProjectType = (typeof constructionProjectTypes)[number]
 export type ConstructionCountry = (typeof constructionCountries)[number]
+export type ConstructionLanguage = (typeof constructionLanguages)[number]
+export type ConstructionTechnicalCountry = (typeof constructionTechnicalCountries)[number]
 export type ConstructionClientType = (typeof constructionClientTypes)[number]
 export type ConstructionEngineId = (typeof constructionEngineIds)[number]
 
@@ -42,6 +47,8 @@ export type ConstructionProject = {
   name: string
   project_type: ConstructionProjectType
   country: ConstructionCountry
+  language: ConstructionLanguage
+  technical_country: ConstructionTechnicalCountry
   city: string
   estimated_area_m2: number | null
   client_type: ConstructionClientType
@@ -227,6 +234,8 @@ export type ConstructionProjectInput = {
   name: string
   projectType: ConstructionProjectType
   country: ConstructionCountry
+  language: ConstructionLanguage
+  technicalCountry: ConstructionTechnicalCountry
   city: string
   estimatedAreaM2?: number | null
   clientType: ConstructionClientType

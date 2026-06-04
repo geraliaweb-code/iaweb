@@ -112,7 +112,7 @@ export default function ProjectTabs({ project, demoMode = false }: ProjectTabsPr
             title="Transforma documentos em decisao"
             body="O Health Check resume maturidade, risco, complexidade, confianca, custo e prazo numa linguagem executiva."
           />
-          {demoMode ? <DemoHealthCheckPanel /> : <HealthCheckPanel projectId={project.id} />}
+          {demoMode ? <DemoHealthCheckPanel /> : <HealthCheckPanel projectId={project.id} language={project.language} />}
         </div>
       ) : null}
       {activeTab === "Benchmark" ? (
@@ -164,6 +164,8 @@ function OverviewPanel({ project }: { project: ConstructionProject }) {
         <h2 className="text-xl font-semibold text-white">Overview</h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Info label="Tipo de cliente" value={constructionClientTypeLabels[project.client_type]} />
+          <Info label="Idioma" value={project.language.toUpperCase()} />
+          <Info label="Pais tecnico" value={project.technical_country} />
           <Info label="Area estimada" value={project.estimated_area_m2 ? `${project.estimated_area_m2} m2` : "Por definir"} />
           <Info label="Maturidade" value={`${project.maturity_score ?? 0}/100`} />
           <Info label="Risco" value={`${project.risk_score ?? 0}/100`} />

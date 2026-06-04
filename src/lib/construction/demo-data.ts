@@ -6,6 +6,8 @@ export const constructionDemoProject: ConstructionProject = {
   name: "Hotel Atlântico - Licenciamento e Execução",
   project_type: "hotel",
   country: "Portugal",
+  language: "pt",
+  technical_country: "portugal",
   city: "Lisboa",
   estimated_area_m2: 4200,
   client_type: "promotor_imobiliario",

@@ -3,6 +3,7 @@ import { constructionProjectTypeLabels } from "./constants"
 import { getConstructionProject, getConstructionSupabaseClient } from "./db"
 import { listConstructionDetectedDocuments } from "./document-intelligence"
 import { listConstructionHealthCheck, runConstructionScores } from "./score-engine"
+import { getConstructionLanguage, type ConstructionLanguage } from "./i18n"
 import type {
   ConstructionDetectedDocument,
   ConstructionHealthCheckResult,
@@ -37,6 +38,168 @@ const colors = {
 const legalDisclaimer =
   "Estimativa baseada na documentacao analisada e em dados de mercado disponiveis a data da analise. Nao constitui orcamento vinculativo nem garantia de custo final."
 
+const pdfCopy: Record<ConstructionLanguage, {
+  locale: string
+  legal: string
+  constructionIntelligence: string
+  workType: string
+  country: string
+  date: string
+  executiveSummary: string
+  executiveBody: string
+  healthCheck: string
+  maturity: string
+  risk: string
+  complexity: string
+  confidence: string
+  classifications: string
+  foundDocuments: string
+  specialties: string
+  remainingDocuments: string
+  missingDocuments: string
+  critical: string
+  important: string
+  recommended: string
+  noCriticalMissing: string
+  estimate: string
+  cost: string
+  probableRange: string
+  schedule: string
+  minimum: string
+  average: string
+  maximum: string
+  months: string
+  estimateConfidence: string
+  mandatoryNote: string
+  mainRisks: string
+  noCriticalAlerts: string
+  potentialImpact: string
+  nextStep: string
+  generatedTitle: string
+}> = {
+  pt: {
+    locale: "pt-PT",
+    legal: legalDisclaimer,
+    constructionIntelligence: "Construction Intelligence",
+    workType: "Tipo de obra",
+    country: "Pais",
+    date: "Data",
+    executiveSummary: "Resumo executivo",
+    executiveBody: "Relatorio executivo gerado pelo modulo IAWEB Construction Intelligence a partir da documentacao classificada, Health Check, estimativas preliminares e alertas disponiveis no projeto.",
+    healthCheck: "Health Check",
+    maturity: "Maturidade",
+    risk: "Risco",
+    complexity: "Complexidade",
+    confidence: "Confianca",
+    classifications: "Classificacoes",
+    foundDocuments: "Documentos encontrados",
+    specialties: "Especialidades",
+    remainingDocuments: "Restantes documentos classificados",
+    missingDocuments: "Documentos em falta",
+    critical: "Criticos",
+    important: "Importantes",
+    recommended: "Recomendados",
+    noCriticalMissing: "Sem faltas criticas detetadas",
+    estimate: "Estimativa preliminar",
+    cost: "Custo",
+    probableRange: "Faixa provavel",
+    schedule: "Prazo",
+    minimum: "Minimo",
+    average: "Medio",
+    maximum: "Maximo",
+    months: "meses",
+    estimateConfidence: "Confianca da estimativa",
+    mandatoryNote: "Esta estimativa e indicativa e baseada exclusivamente na documentacao analisada.",
+    mainRisks: "Principais riscos",
+    noCriticalAlerts: "Sem alertas criticos",
+    potentialImpact: "Impacto potencial",
+    nextStep: "Proximo passo recomendado",
+    generatedTitle: "Relatorio Executivo Construction Intelligence",
+  },
+  fr: {
+    locale: "fr-FR",
+    legal: "Estimation basee sur la documentation analysee et les donnees de marche disponibles a la date de l'analyse. Elle ne constitue pas un devis ferme ni une garantie de cout final.",
+    constructionIntelligence: "Construction Intelligence",
+    workType: "Type d'operation",
+    country: "Pays",
+    date: "Date",
+    executiveSummary: "Resume executif",
+    executiveBody: "Rapport executif genere par IAWEB Construction Intelligence a partir des documents classes, du Health Check, des estimations preliminaires et des alertes disponibles.",
+    healthCheck: "Health Check",
+    maturity: "Maturite",
+    risk: "Risque",
+    complexity: "Complexite",
+    confidence: "Confiance",
+    classifications: "Classifications",
+    foundDocuments: "Documents trouves",
+    specialties: "Specialites",
+    remainingDocuments: "Autres documents classes",
+    missingDocuments: "Documents manquants",
+    critical: "Critiques",
+    important: "Importants",
+    recommended: "Recommandes",
+    noCriticalMissing: "Aucun manque critique detecte",
+    estimate: "Estimation preliminaire",
+    cost: "Cout",
+    probableRange: "Fourchette probable",
+    schedule: "Delai",
+    minimum: "Minimum",
+    average: "Moyen",
+    maximum: "Maximum",
+    months: "mois",
+    estimateConfidence: "Confiance de l'estimation",
+    mandatoryNote: "Cette estimation est indicative et basee exclusivement sur la documentation analysee.",
+    mainRisks: "Principaux risques",
+    noCriticalAlerts: "Aucune alerte critique",
+    potentialImpact: "Impact potentiel",
+    nextStep: "Prochaine etape recommandee",
+    generatedTitle: "Rapport Executif Construction Intelligence",
+  },
+  es: {
+    locale: "es-ES",
+    legal: "Estimacion basada en la documentacion analizada y datos de mercado disponibles en la fecha del analisis. No constituye presupuesto vinculante ni garantia de coste final.",
+    constructionIntelligence: "Construction Intelligence",
+    workType: "Tipo de obra",
+    country: "Pais",
+    date: "Fecha",
+    executiveSummary: "Resumen ejecutivo",
+    executiveBody: "Informe ejecutivo generado por IAWEB Construction Intelligence a partir de la documentacion clasificada, Health Check, estimaciones preliminares y alertas disponibles.",
+    healthCheck: "Health Check",
+    maturity: "Madurez",
+    risk: "Riesgo",
+    complexity: "Complejidad",
+    confidence: "Confianza",
+    classifications: "Clasificaciones",
+    foundDocuments: "Documentos encontrados",
+    specialties: "Especialidades",
+    remainingDocuments: "Otros documentos clasificados",
+    missingDocuments: "Documentos faltantes",
+    critical: "Criticos",
+    important: "Importantes",
+    recommended: "Recomendados",
+    noCriticalMissing: "Sin faltas criticas detectadas",
+    estimate: "Estimacion preliminar",
+    cost: "Coste",
+    probableRange: "Rango probable",
+    schedule: "Plazo",
+    minimum: "Minimo",
+    average: "Medio",
+    maximum: "Maximo",
+    months: "meses",
+    estimateConfidence: "Confianza de la estimacion",
+    mandatoryNote: "Esta estimacion es indicativa y se basa exclusivamente en la documentacion analizada.",
+    mainRisks: "Principales riesgos",
+    noCriticalAlerts: "Sin alertas criticas",
+    potentialImpact: "Impacto potencial",
+    nextStep: "Siguiente paso recomendado",
+    generatedTitle: "Informe Ejecutivo Construction Intelligence",
+  },
+}
+
+function getPdfCopy(project: ConstructionProject) {
+  return pdfCopy[getConstructionLanguage(project.language)]
+}
+
 function setFill(doc: jsPDF, color: readonly number[]) {
   doc.setFillColor(color[0], color[1], color[2])
 }
@@ -45,7 +208,7 @@ function setText(doc: jsPDF, color: readonly number[]) {
   doc.setTextColor(color[0], color[1], color[2])
 }
 
-function addBackground(doc: jsPDF) {
+function addBackground(doc: jsPDF, copy = pdfCopy.pt) {
   setFill(doc, colors.navy)
   doc.rect(0, 0, page.width, page.height, "F")
   setFill(doc, [4, 22, 43])
@@ -54,13 +217,13 @@ function addBackground(doc: jsPDF) {
   doc.circle(20, 262, 46, "F")
   setText(doc, colors.slate)
   doc.setFontSize(8)
-  doc.text("IAWEB Construction Intelligence", page.margin, page.height - 10)
+  doc.text(`IAWEB ${copy.constructionIntelligence}`, page.margin, page.height - 10)
   doc.setFontSize(6.5)
-  doc.text(doc.splitTextToSize(legalDisclaimer, 160), page.margin, page.height - 6)
+  doc.text(doc.splitTextToSize(copy.legal, 160), page.margin, page.height - 6)
 }
 
-function addHeader(doc: jsPDF, title: string) {
-  addBackground(doc)
+function addHeader(doc: jsPDF, title: string, copy = pdfCopy.pt) {
+  addBackground(doc, copy)
   setText(doc, colors.white)
   doc.setFont("helvetica", "bold")
   doc.setFontSize(16)
@@ -98,23 +261,23 @@ function gradeFor(value: number, inverse = false) {
   return "D"
 }
 
-function formatEuro(value: number) {
-  return new Intl.NumberFormat("pt-PT", {
+function formatEuro(value: number, locale = "pt-PT") {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "EUR",
     maximumFractionDigits: 0,
   }).format(value)
 }
 
-function addPageOne(doc: jsPDF, project: ConstructionProject) {
-  addBackground(doc)
+function addPageOne(doc: jsPDF, project: ConstructionProject, copy = getPdfCopy(project)) {
+  addBackground(doc, copy)
   setText(doc, colors.white)
   doc.setFont("helvetica", "bold")
   doc.setFontSize(34)
   doc.text("IAWEB", page.margin, 36)
   setText(doc, colors.sky)
   doc.setFontSize(18)
-  doc.text("Construction Intelligence", page.margin, 50)
+  doc.text(copy.constructionIntelligence, page.margin, 50)
 
   setFill(doc, colors.panel)
   doc.roundedRect(page.margin, 72, 178, 92, 4, 4, "F")
@@ -123,48 +286,48 @@ function addPageOne(doc: jsPDF, project: ConstructionProject) {
   doc.text(project.name, page.margin + 8, 92, { maxWidth: 160 })
   doc.setFontSize(11)
   setText(doc, colors.muted)
-  doc.text(`Tipo de obra: ${constructionProjectTypeLabels[project.project_type] ?? project.project_type}`, page.margin + 8, 118)
-  doc.text(`Pais: ${project.country}`, page.margin + 8, 128)
-  doc.text(`Data: ${new Date().toLocaleDateString("pt-PT")}`, page.margin + 8, 138)
+  doc.text(`${copy.workType}: ${constructionProjectTypeLabels[project.project_type] ?? project.project_type}`, page.margin + 8, 118)
+  doc.text(`${copy.country}: ${project.country}`, page.margin + 8, 128)
+  doc.text(`${copy.date}: ${new Date().toLocaleDateString(copy.locale)}`, page.margin + 8, 138)
 
   setText(doc, colors.white)
   doc.setFont("helvetica", "bold")
   doc.setFontSize(15)
-  doc.text("Resumo executivo", page.margin, 188)
+  doc.text(copy.executiveSummary, page.margin, 188)
   setText(doc, colors.muted)
   doc.setFont("helvetica", "normal")
   doc.setFontSize(11)
   writeWrapped(
     doc,
-    "Relatorio executivo gerado pelo modulo IAWEB Construction Intelligence a partir da documentacao classificada, Health Check, estimativas preliminares e alertas disponiveis no projeto.",
+    copy.executiveBody,
     page.margin,
     202,
   )
 }
 
-function addHealthPage(doc: jsPDF, health: ConstructionHealthCheckResult) {
+function addHealthPage(doc: jsPDF, health: ConstructionHealthCheckResult, copy = pdfCopy.pt) {
   doc.addPage()
-  addHeader(doc, "Health Check")
-  metricBar(doc, "Maturidade", health.maturityScore, page.margin, 54, colors.sky)
-  metricBar(doc, "Risco", health.riskScore, page.margin, 82, colors.red)
-  metricBar(doc, "Complexidade", health.complexityScore, page.margin, 110, colors.gold)
-  metricBar(doc, "Confianca", health.confidenceScore, page.margin, 138, colors.green)
+  addHeader(doc, copy.healthCheck, copy)
+  metricBar(doc, copy.maturity, health.maturityScore, page.margin, 54, colors.sky)
+  metricBar(doc, copy.risk, health.riskScore, page.margin, 82, colors.red)
+  metricBar(doc, copy.complexity, health.complexityScore, page.margin, 110, colors.gold)
+  metricBar(doc, copy.confidence, health.confidenceScore, page.margin, 138, colors.green)
 
   setText(doc, colors.white)
   doc.setFont("helvetica", "bold")
   doc.setFontSize(14)
-  doc.text("Classificacoes", page.margin, 178)
+  doc.text(copy.classifications, page.margin, 178)
   setText(doc, colors.muted)
   doc.setFontSize(11)
-  doc.text(`Maturidade: ${gradeFor(health.maturityScore)}`, page.margin, 194)
-  doc.text(`Risco: ${gradeFor(health.riskScore, true)}`, page.margin, 204)
-  doc.text(`Complexidade: ${gradeFor(health.complexityScore, true)}`, page.margin, 214)
-  doc.text(`Confianca: ${gradeFor(health.confidenceScore)}`, page.margin, 224)
+  doc.text(`${copy.maturity}: ${gradeFor(health.maturityScore)}`, page.margin, 194)
+  doc.text(`${copy.risk}: ${gradeFor(health.riskScore, true)}`, page.margin, 204)
+  doc.text(`${copy.complexity}: ${gradeFor(health.complexityScore, true)}`, page.margin, 214)
+  doc.text(`${copy.confidence}: ${gradeFor(health.confidenceScore)}`, page.margin, 224)
 }
 
-function addDocumentsPage(doc: jsPDF, documents: ConstructionDetectedDocument[], health: ConstructionHealthCheckResult) {
+function addDocumentsPage(doc: jsPDF, documents: ConstructionDetectedDocument[], health: ConstructionHealthCheckResult, copy = pdfCopy.pt) {
   doc.addPage()
-  addHeader(doc, "Documentos encontrados")
+  addHeader(doc, copy.foundDocuments, copy)
   const priority = ["arquitetura", "estruturas", "medicoes"]
   const found = new Set(documents.map((document) => document.document_type))
   let y = 52
@@ -177,7 +340,7 @@ function addDocumentsPage(doc: jsPDF, documents: ConstructionDetectedDocument[],
     y += 10
   }
 
-  doc.text("Especialidades", page.margin, y + 8)
+  doc.text(copy.specialties, page.margin, y + 8)
   y += 20
   setText(doc, colors.muted)
   doc.setFont("helvetica", "normal")
@@ -189,7 +352,7 @@ function addDocumentsPage(doc: jsPDF, documents: ConstructionDetectedDocument[],
   y += 8
   setText(doc, colors.white)
   doc.setFont("helvetica", "bold")
-  doc.text("Restantes documentos classificados", page.margin, y)
+  doc.text(copy.remainingDocuments, page.margin, y)
   y += 12
   setText(doc, colors.muted)
   doc.setFont("helvetica", "normal")
@@ -199,18 +362,18 @@ function addDocumentsPage(doc: jsPDF, documents: ConstructionDetectedDocument[],
   }
 }
 
-function addMissingPage(doc: jsPDF, health: ConstructionHealthCheckResult) {
+function addMissingPage(doc: jsPDF, health: ConstructionHealthCheckResult, copy = pdfCopy.pt) {
   doc.addPage()
-  addHeader(doc, "Documentos em falta")
+  addHeader(doc, copy.missingDocuments, copy)
   const critical = health.missingCriticalDocuments
   const important = health.riskScore >= 60 ? ["Medicoes detalhadas", "Caderno de encargos atualizado"] : ["Validacao tecnica de especialidades"]
   const recommended = ["Mapa de revisoes", "Lista de pressupostos", "Evidencias de compatibilizacao"]
   let y = 54
 
   for (const section of [
-    { title: "Criticos", items: critical.length ? critical : ["Sem faltas criticas detetadas"] },
-    { title: "Importantes", items: important },
-    { title: "Recomendados", items: recommended },
+    { title: copy.critical, items: critical.length ? critical : [copy.noCriticalMissing] },
+    { title: copy.important, items: important },
+    { title: copy.recommended, items: recommended },
   ]) {
     setText(doc, colors.white)
     doc.setFont("helvetica", "bold")
@@ -228,50 +391,50 @@ function addMissingPage(doc: jsPDF, health: ConstructionHealthCheckResult) {
   }
 }
 
-function addEstimatePage(doc: jsPDF, health: ConstructionHealthCheckResult) {
+function addEstimatePage(doc: jsPDF, health: ConstructionHealthCheckResult, copy = pdfCopy.pt) {
   doc.addPage()
-  addHeader(doc, "Estimativa preliminar")
+  addHeader(doc, copy.estimate, copy)
   setText(doc, colors.white)
   doc.setFont("helvetica", "bold")
   doc.setFontSize(15)
-  doc.text("Custo", page.margin, 54)
+  doc.text(copy.cost, page.margin, 54)
   setText(doc, colors.muted)
   doc.setFontSize(12)
   const cost = health.costEstimate
   if (cost?.scenarios?.length) {
     let scenarioY = 72
     for (const scenario of cost.scenarios) {
-      doc.text(`${scenario.label}: ${formatEuro(scenario.min)} a ${formatEuro(scenario.max)} (${scenario.confidenceScore}/100)`, page.margin, scenarioY)
+      doc.text(`${scenario.label}: ${formatEuro(scenario.min, copy.locale)} a ${formatEuro(scenario.max, copy.locale)} (${scenario.confidenceScore}/100)`, page.margin, scenarioY)
       scenarioY += 12
     }
   } else {
-    doc.text(`Faixa provavel: ${cost ? `${formatEuro(cost.estimatedCostMin)} a ${formatEuro(cost.estimatedCostMax)}` : "Por gerar"}`, page.margin, 72)
+    doc.text(`${copy.probableRange}: ${cost ? `${formatEuro(cost.estimatedCostMin, copy.locale)} a ${formatEuro(cost.estimatedCostMax, copy.locale)}` : "Por gerar"}`, page.margin, 72)
   }
 
   setText(doc, colors.white)
   doc.setFont("helvetica", "bold")
   doc.setFontSize(15)
-  doc.text("Prazo", page.margin, 124)
+  doc.text(copy.schedule, page.margin, 124)
   setText(doc, colors.muted)
   doc.setFontSize(12)
   const schedule = health.scheduleEstimate
-  doc.text(`Minimo: ${schedule ? `${schedule.estimatedMonthsMin} meses` : "Por gerar"}`, page.margin, 142)
-  doc.text(`Medio: ${schedule ? `${schedule.estimatedMonthsMid} meses` : "Por gerar"}`, page.margin, 154)
-  doc.text(`Maximo: ${schedule ? `${schedule.estimatedMonthsMax} meses` : "Por gerar"}`, page.margin, 166)
+  doc.text(`${copy.minimum}: ${schedule ? `${schedule.estimatedMonthsMin} ${copy.months}` : "Por gerar"}`, page.margin, 142)
+  doc.text(`${copy.average}: ${schedule ? `${schedule.estimatedMonthsMid} ${copy.months}` : "Por gerar"}`, page.margin, 154)
+  doc.text(`${copy.maximum}: ${schedule ? `${schedule.estimatedMonthsMax} ${copy.months}` : "Por gerar"}`, page.margin, 166)
 
   const confidence = Math.round(((cost?.costConfidence ?? 0) + (schedule?.scheduleConfidence ?? 0)) / (cost && schedule ? 2 : 1))
-  metricBar(doc, "Confianca da estimativa", confidence, page.margin, 196, colors.sky)
+  metricBar(doc, copy.estimateConfidence, confidence, page.margin, 196, colors.sky)
   setText(doc, colors.gold)
   doc.setFont("helvetica", "bold")
   doc.setFontSize(11)
-  writeWrapped(doc, "Esta estimativa e indicativa e baseada exclusivamente na documentacao analisada.", page.margin, 232, 172)
+  writeWrapped(doc, copy.mandatoryNote, page.margin, 232, 172)
 }
 
-function addRisksPage(doc: jsPDF, health: ConstructionHealthCheckResult) {
+function addRisksPage(doc: jsPDF, health: ConstructionHealthCheckResult, copy = pdfCopy.pt) {
   doc.addPage()
-  addHeader(doc, "Principais riscos")
+  addHeader(doc, copy.mainRisks, copy)
   let y = 54
-  const alerts = health.alerts.length ? health.alerts : [{ title: "Sem alertas criticos", severity: "low", recommendation: "Manter revisao documental antes de decisoes finais.", type: "none" }]
+  const alerts = health.alerts.length ? health.alerts : [{ title: copy.noCriticalAlerts, severity: "low", recommendation: copy.recommended, type: "none" }]
 
   for (const alert of alerts.slice(0, 8)) {
     setText(doc, alert.severity === "high" ? colors.red : colors.gold)
@@ -281,20 +444,21 @@ function addRisksPage(doc: jsPDF, health: ConstructionHealthCheckResult) {
     setText(doc, colors.muted)
     doc.setFont("helvetica", "normal")
     doc.setFontSize(10)
-    y = writeWrapped(doc, `Impacto potencial: ${alert.severity === "high" ? "Pode comprometer decisoes tecnicas, custo ou viabilidade." : "Pode reduzir confianca e previsibilidade."}`, page.margin + 4, y + 2, 168, 5)
-    y = writeWrapped(doc, `Proximo passo recomendado: ${alert.recommendation}`, page.margin + 4, y + 1, 168, 5)
+    y = writeWrapped(doc, `${copy.potentialImpact}: ${alert.severity === "high" ? "Pode comprometer decisoes tecnicas, custo ou viabilidade." : "Pode reduzir confianca e previsibilidade."}`, page.margin + 4, y + 2, 168, 5)
+    y = writeWrapped(doc, `${copy.nextStep}: ${alert.recommendation}`, page.margin + 4, y + 1, 168, 5)
     y += 8
   }
 }
 
 function buildPdf(project: ConstructionProject, health: ConstructionHealthCheckResult, documents: ConstructionDetectedDocument[]) {
   const doc = new jsPDF({ unit: "mm", format: "a4", compress: true })
-  addPageOne(doc, project)
-  addHealthPage(doc, health)
-  addDocumentsPage(doc, documents, health)
-  addMissingPage(doc, health)
-  addEstimatePage(doc, health)
-  addRisksPage(doc, health)
+  const copy = getPdfCopy(project)
+  addPageOne(doc, project, copy)
+  addHealthPage(doc, health, copy)
+  addDocumentsPage(doc, documents, health, copy)
+  addMissingPage(doc, health, copy)
+  addEstimatePage(doc, health, copy)
+  addRisksPage(doc, health, copy)
   return new Uint8Array(doc.output("arraybuffer"))
 }
 
@@ -337,14 +501,15 @@ export async function generateConstructionExecutivePdf(projectId: string): Promi
 
   const reportId = crypto.randomUUID()
   const reportUrl = `/api/construction/projects/${projectId}/report?reportId=${reportId}`
-  const summary = `Relatorio executivo Construction Intelligence para ${projectResult.data.name}.`
+  const copy = getPdfCopy(projectResult.data)
+  const summary = `${copy.generatedTitle} - ${projectResult.data.name}.`
   const { data: report, error } = await client.supabase
     .from("construction_reports")
     .insert({
       id: reportId,
       project_id: projectId,
       report_type: "executive_pdf",
-      title: "Relatorio Executivo Construction Intelligence",
+      title: copy.generatedTitle,
       status: "generated",
       summary,
       report_url: reportUrl,
