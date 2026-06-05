@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import InteractiveDemo from "@/components/construction/InteractiveDemo"
 import ConstructionShell from "@/components/construction/ConstructionShell"
 import ConstructionPlansSection from "@/components/construction/ConstructionPlansSection"
 import {
@@ -21,6 +22,7 @@ export default function ConstructionPage() {
   return (
     <ConstructionShell>
       <PremiumConstructionHero />
+      <InteractiveDemo />
       <ConstructionHowItWorks />
       <ConstructionElementLibrary />
       <div className="py-14">
