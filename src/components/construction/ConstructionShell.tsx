@@ -45,11 +45,14 @@ export default function ConstructionShell({ children, eyebrow = "Construction In
               <Link href="/construction/dashboard" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white md:inline-flex">
                 Dashboard
               </Link>
-              <Link href="/construction/billing" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white md:inline-flex">
-                Planos
+              <Link href="/construction/projects/new" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white md:inline-flex">
+                Projetos
               </Link>
-              <Link href="/construction#como-funciona" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white lg:inline-flex">
-                Recursos
+              <Link href="/construction/knowledge-vault" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white lg:inline-flex">
+                Knowledge Vault
+              </Link>
+              <Link href="/construction/billing" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white md:inline-flex">
+                Billing
               </Link>
               <Link href="/construction/security" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white lg:inline-flex">
                 Empresa
