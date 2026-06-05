@@ -109,9 +109,9 @@ export default function ConstructionPlansSection({ usage, warning, compact = fal
     <section className={compact ? "py-10" : "py-14"}>
       <div className="flex flex-wrap items-end justify-between gap-5">
         <div className="max-w-3xl">
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-amber-700">Planos Construction Intelligence</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 md:text-4xl">Escolha o nivel de inteligencia que pretende para a sua obra.</h2>
-          <p className="mt-4 text-base leading-7 text-slate-600">
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-amber-300">Planos Construction Intelligence</p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white md:text-4xl">Escolha o nivel de inteligencia que pretende para a sua obra.</h2>
+          <p className="mt-4 text-base leading-7 text-slate-300">
             Trial de 7 dias preparado para Stripe Checkout. Os limites sao aplicados antes de Document Intelligence, Health Check, Benchmark e PDF executivo.
           </p>
         </div>
@@ -120,7 +120,7 @@ export default function ConstructionPlansSection({ usage, warning, compact = fal
             type="button"
             onClick={openPortal}
             disabled={Boolean(loadingPlan)}
-            className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-700 px-5 py-3 text-sm font-bold text-white transition hover:from-amber-400 hover:to-amber-600 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {loadingPlan === "portal" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <CreditCard className="h-4 w-4" aria-hidden="true" />}
             Gerir plano
@@ -130,12 +130,12 @@ export default function ConstructionPlansSection({ usage, warning, compact = fal
 
       {usage || warning || actionError ? (
         <div className="mt-8 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-          <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <article className="construction-glass-card rounded-xl p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Plano atual</p>
-                <h3 className="mt-2 text-2xl font-semibold text-slate-950">{usage?.planName ?? "Home"}</h3>
-                <p className="mt-2 text-sm text-slate-600">Estado: {statusLabels[usage?.status ?? "trial"]}</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Plano atual</p>
+                <h3 className="mt-2 text-2xl font-semibold text-white">{usage?.planName ?? "Home"}</h3>
+                <p className="mt-2 text-sm text-slate-300">Estado: {statusLabels[usage?.status ?? "trial"]}</p>
               </div>
               <span className="rounded-full border border-amber-700/20 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800">
                 {remaining} restantes
@@ -146,13 +146,13 @@ export default function ConstructionPlansSection({ usage, warning, compact = fal
                 <span>Analises usadas este mes</span>
                 <span>{used}/{limit}</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                <div className="h-full rounded-full bg-slate-950" style={{ width: `${width}%` }} />
+              <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                <div className="h-full rounded-full bg-amber-400" style={{ width: `${width}%` }} />
               </div>
             </div>
           </article>
 
-          <article className="rounded-2xl border border-amber-700/20 bg-amber-50 p-6 text-sm leading-6 text-amber-950">
+          <article className="rounded-xl border border-amber-300/20 bg-amber-300/10 p-6 text-sm leading-6 text-amber-50">
             <div className="flex items-start gap-3">
               <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
               <p>{actionError ?? warning ?? "Trial ativo. O Customer Portal permite gerir ou cancelar a subscricao quando existir cliente Stripe associado."}</p>
@@ -165,27 +165,27 @@ export default function ConstructionPlansSection({ usage, warning, compact = fal
         {constructionBillingPlans.map((plan) => {
           const active = usage?.planId === plan.id || (!usage && plan.id === "home")
           return (
-            <article key={plan.id} className={`flex min-h-[25rem] flex-col rounded-2xl border bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-950/5 ${active ? "border-slate-950" : "border-slate-200"}`}>
+            <article key={plan.id} className={`construction-glass-card flex min-h-[25rem] flex-col rounded-xl p-5 transition hover:-translate-y-1 ${active ? "border-amber-300/40" : ""}`}>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-950">{planCopy[plan.id]?.label ?? plan.name}</h3>
-                  <p className="mt-2 text-3xl font-semibold text-slate-950">{formatConstructionPlanPrice(plan.monthlyPriceEur)}</p>
-                  <p className="mt-1 text-xs font-medium text-slate-500">por mes</p>
+                  <h3 className="text-lg font-semibold text-white">{planCopy[plan.id]?.label ?? plan.name}</h3>
+                  <p className="mt-2 text-3xl font-semibold text-white">{formatConstructionPlanPrice(plan.monthlyPriceEur)}</p>
+                  <p className="mt-1 text-xs font-medium text-slate-400">por mes</p>
                 </div>
                 {active ? <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden="true" /> : null}
               </div>
-              <p className="mt-5 text-sm leading-6 text-slate-600">{planCopy[plan.id]?.body}</p>
-              <p className="mt-5 text-sm font-bold text-slate-950">{plan.monthlyAnalysisLimit} analises/mes</p>
+              <p className="mt-5 text-sm leading-6 text-slate-300">{planCopy[plan.id]?.body}</p>
+              <p className="mt-5 text-sm font-bold text-white">{plan.monthlyAnalysisLimit} analises/mes</p>
               <div className="mt-4 grid gap-2">
                 {plan.features.map((feature) => (
-                  <p key={feature} className="text-sm leading-5 text-slate-600">{feature}</p>
+                  <p key={feature} className="text-sm leading-5 text-slate-300">{feature}</p>
                 ))}
               </div>
               <button
                 type="button"
                 onClick={() => startCheckout(plan.id)}
                 disabled={Boolean(loadingPlan)}
-                className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+                className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-700 px-4 py-3 text-sm font-bold text-white transition hover:from-amber-400 hover:to-amber-600 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loadingPlan === plan.id ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
                 Ativar Inteligencia

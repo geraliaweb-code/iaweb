@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { BrainCircuit, CheckCircle2, FileWarning, Lightbulb, MessageSquareText, Search, ShieldAlert } from "lucide-react"
 import type { ConstructionHealthCheckResult, ConstructionProject } from "@/lib/construction/types"
+import { useConstructionLocale } from "./useConstructionLocale"
 
 type ConstructionCopilotProps = {
   project: ConstructionProject
@@ -34,6 +35,8 @@ const technicalCountryLabels: Record<string, string> = {
 }
 
 export default function ConstructionCopilot({ project, healthCheck }: ConstructionCopilotProps) {
+  const { copy } = useConstructionLocale()
+  const ui = copy.ui
   const [input, setInput] = useState("")
   const [activeQuestion, setActiveQuestion] = useState<SupportedQuestion>("risk")
   const hasHealthCheck = Boolean(healthCheck)
@@ -61,9 +64,9 @@ export default function ConstructionCopilot({ project, healthCheck }: Constructi
           <p className="inline-flex rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-amber-200">
             Assistente baseado na análise atual do projeto
           </p>
-          <h2 className="mt-5 text-3xl font-semibold tracking-tight text-white">Construction Copilot</h2>
+          <h2 className="mt-5 text-3xl font-semibold tracking-tight text-white">{ui.pages.copilotTitle}</h2>
           <p className="mt-3 text-sm leading-6 text-slate-300">
-            Faça perguntas sobre a documentação, risco, maturidade, benchmark e estimativas da sua obra.
+            {ui.pages.copilotSubtitle}
           </p>
 
           <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.04] p-4">

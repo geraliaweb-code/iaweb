@@ -1,7 +1,10 @@
+"use client"
+
 import Link from "next/link"
 import { BadgeCheck, BrainCircuit, Building2, FileText, LockKeyhole, ShieldCheck } from "lucide-react"
 import ConstructionCookieBanner from "./ConstructionCookieBanner"
 import ConstructionLocaleSelector from "./ConstructionLocaleSelector"
+import { useConstructionLocale } from "./useConstructionLocale"
 
 type ConstructionShellProps = {
   children: React.ReactNode
@@ -11,6 +14,8 @@ type ConstructionShellProps = {
 
 export default function ConstructionShell({ children, eyebrow = "Construction Intelligence", surface = "dark" }: ConstructionShellProps) {
   void surface
+  const { copy } = useConstructionLocale()
+  const ui = copy.ui
   const seals = [
     { label: "IA Especializada", body: "Treinada em construcao", icon: BrainCircuit },
     { label: "Benchmark Europeu", body: "Referencias reais", icon: BadgeCheck },
@@ -34,31 +39,37 @@ export default function ConstructionShell({ children, eyebrow = "Construction In
         <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/82 backdrop-blur-xl">
           <div className="mx-auto flex w-full max-w-[96rem] flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
             <Link href="/construction" className="inline-flex min-w-0 items-center gap-4">
-              <img src="/brand/logo-iaweb-trans.png" alt="IAWEB" className="h-10 w-auto max-w-[9.5rem] object-contain" />
+              <span className="relative h-9 w-32 overflow-hidden sm:w-36">
+                <img
+                  src="/brand/logo-iaweb-black.png"
+                  alt="IAWEB"
+                  className="absolute left-1/2 top-1/2 w-44 max-w-none -translate-x-1/2 -translate-y-[45%] sm:w-48"
+                />
+              </span>
               <span className="hidden h-8 w-px bg-white/15 sm:block" />
-              <span className="hidden text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-white md:inline">{eyebrow}</span>
+              <span className="hidden text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-white md:inline">{eyebrow === "Construction Intelligence" ? ui.nav.intelligence : eyebrow}</span>
             </Link>
             <div className="min-w-0 flex-1 justify-center lg:flex">
               <ConstructionLocaleSelector />
             </div>
             <nav className="flex items-center gap-2 text-sm font-semibold text-slate-200">
               <Link href="/construction/dashboard" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white md:inline-flex">
-                Dashboard
-              </Link>
-              <Link href="/construction/projects/new" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white md:inline-flex">
-                Projetos
-              </Link>
-              <Link href="/construction/knowledge-vault" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white lg:inline-flex">
-                Knowledge Vault
+                {ui.nav.dashboard}
               </Link>
               <Link href="/construction/billing" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white md:inline-flex">
-                Billing
+                {ui.nav.plans}
+              </Link>
+              <Link href="/construction/knowledge-vault" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white lg:inline-flex">
+                {ui.nav.knowledgeVault}
+              </Link>
+              <Link href="/construction#como-funciona" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white lg:inline-flex">
+                {ui.nav.resources}
               </Link>
               <Link href="/construction/security" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white lg:inline-flex">
-                Empresa
+                {ui.nav.company}
               </Link>
               <Link href="/construction/projects/new" className="rounded-lg bg-gradient-to-r from-amber-500 to-amber-700 px-4 py-2.5 text-white shadow-lg shadow-amber-950/30 transition hover:-translate-y-0.5 hover:from-amber-400 hover:to-amber-600">
-                Novo Projeto
+                {ui.nav.newProject}
               </Link>
             </nav>
           </div>
@@ -82,12 +93,12 @@ export default function ConstructionShell({ children, eyebrow = "Construction In
               })}
             </div>
             <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-5">
-              <p>Estimativa baseada na documentacao analisada e em dados de mercado. Nao constitui orcamento vinculativo.</p>
+              <p>{ui.footer.disclaimer}</p>
               <div className="flex flex-wrap gap-3">
-                <Link href="/construction/privacy" className="hover:text-white">Privacidade</Link>
-                <Link href="/construction/cookies" className="hover:text-white">Cookies</Link>
-                <Link href="/construction/security" className="hover:text-white">Seguranca</Link>
-                <Link href="/construction/terms" className="hover:text-white">Termos</Link>
+                <Link href="/construction/privacy" className="hover:text-white">{ui.footer.privacy}</Link>
+                <Link href="/construction/cookies" className="hover:text-white">{ui.footer.cookies}</Link>
+                <Link href="/construction/security" className="hover:text-white">{ui.footer.security}</Link>
+                <Link href="/construction/terms" className="hover:text-white">{ui.footer.terms}</Link>
               </div>
             </div>
           </footer>

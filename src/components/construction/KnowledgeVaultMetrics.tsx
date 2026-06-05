@@ -1,3 +1,5 @@
+"use client"
+
 import { AlertTriangle, Boxes, Building2, FileText, Globe2, Layers3 } from "lucide-react"
 import { constructionElements } from "@/lib/construction/dataset/construction-elements"
 import { constructionDocumentTaxonomy } from "@/lib/construction/dataset/document-taxonomy"

@@ -23,6 +23,12 @@ const flagClasses: Record<string, string> = {
   ES: "bg-[linear-gradient(180deg,#dc2626_0_25%,#facc15_25%_75%,#dc2626_75%)]",
 }
 
+const technicalCountryLabels: Record<ConstructionTechnicalCountry, string> = {
+  portugal: "Portugal",
+  france: "France",
+  spain: "España",
+}
+
 export function getLegacyConstructionCountry(country: ConstructionTechnicalCountry) {
   return countryOptions.find((option) => option.value === country)?.legacyCountry ?? "Portugal"
 }
@@ -75,15 +81,13 @@ export default function ConstructionLocaleSelector() {
   }
 
   function chooseCountry(value: ConstructionTechnicalCountry) {
-    const nextLanguage = getLanguageForTechnicalCountry(value)
     setTechnicalCountry(value)
-    setLanguage(nextLanguage)
-    persistLocale(nextLanguage, value)
+    persistLocale(language, value)
   }
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-2" aria-label="Construction language and country selectors">
-      <div className="inline-flex rounded-full border border-white/10 bg-white/[0.04] p-1 shadow-sm backdrop-blur">
+      <div className="inline-flex rounded-full border border-white/10 bg-white/[0.04] p-1 shadow-sm backdrop-blur" aria-label="Language selector">
         {languageOptions.map((option) => (
           <button
             key={option.value}
@@ -99,7 +103,7 @@ export default function ConstructionLocaleSelector() {
           </button>
         ))}
       </div>
-      <div className="inline-flex rounded-full border border-white/10 bg-white/[0.04] p-1 shadow-sm backdrop-blur">
+      <div className="hidden rounded-full border border-white/10 bg-white/[0.04] p-1 shadow-sm backdrop-blur xl:inline-flex" aria-label="Technical country selector">
         {countryOptions.map((option) => (
           <button
             key={option.value}
@@ -111,7 +115,7 @@ export default function ConstructionLocaleSelector() {
             aria-pressed={technicalCountry === option.value}
           >
             <Flag code={option.flag} />
-            {option.label}
+            {technicalCountryLabels[option.value]}
           </button>
         ))}
       </div>

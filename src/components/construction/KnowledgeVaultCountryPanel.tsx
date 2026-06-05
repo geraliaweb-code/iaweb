@@ -1,3 +1,5 @@
+"use client"
+
 import { Building2 } from "lucide-react"
 
 const flagClasses: Record<string, string> = {

@@ -1,3 +1,5 @@
+"use client"
+
 import { Boxes } from "lucide-react"
 import { constructionElements } from "@/lib/construction/dataset/construction-elements"
 import { constructionGraphSeedNodes } from "@/lib/construction/knowledge-graph/graph-nodes"

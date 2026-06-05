@@ -1,5 +1,8 @@
+"use client"
+
 import Link from "next/link"
-import { ArrowRight, BadgeCheck, BarChart3, Boxes, BrainCircuit, Building2, CloudUpload, Gauge, Globe2, Landmark, LockKeyhole, Play, ShieldCheck } from "lucide-react"
+import { ArrowRight, BadgeCheck, BarChart3, Boxes, BrainCircuit, Building2, CloudUpload, Gauge, Globe2, Landmark, LockKeyhole, Maximize, Play, Settings, ShieldCheck, Volume2 } from "lucide-react"
+import { useConstructionLocale } from "./useConstructionLocale"
 
 const trustBadges = [
   "IA Especializada em Construcao",
@@ -47,11 +50,13 @@ function Flag({ code }: { code: string }) {
 }
 
 export function ConstructionTrustBadges() {
+  const { copy } = useConstructionLocale()
+  const ui = copy.ui
   const badges = [
-    { label: "Plataforma Europeia", body: "Desenvolvida na UE", icon: Globe2 },
-    { label: "Dados Protegidos", body: "RGPD compliant", icon: ShieldCheck },
-    { label: "Benchmark Europeu", body: "Mercados reais", icon: BarChart3 },
-    { label: "+100 Elementos", body: "Construtivos", icon: Boxes },
+    { label: ui.trust.platform, body: ui.trust.platformBody, icon: Globe2 },
+    { label: ui.trust.data, body: ui.trust.dataBody, icon: ShieldCheck },
+    { label: ui.trust.benchmark, body: ui.trust.benchmarkBody, icon: BarChart3 },
+    { label: ui.trust.elements, body: ui.trust.elementsBody, icon: Boxes },
   ]
 
   return (
@@ -75,9 +80,11 @@ export function ConstructionTrustBadges() {
 }
 
 export function ConstructionCountrySelector() {
+  const { copy } = useConstructionLocale()
+  const ui = copy.ui
   return (
     <div className="grid gap-4 border-y border-white/10 py-5 lg:grid-cols-[0.6fr_1fr_1fr_1fr_0.7fr]">
-      <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-400">Inteligencia localizada por pais</p>
+      <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-400">{ui.countries.eyebrow}</p>
       {countryDocuments.map((country) => (
         <div key={country.country} className="flex items-start gap-3">
           <Flag code={country.flag} />
@@ -87,29 +94,31 @@ export function ConstructionCountrySelector() {
           </div>
         </div>
       ))}
-      <p className="text-xs leading-5 text-slate-300">Interpretacao tecnica adaptada a cada pais.</p>
+      <p className="text-xs leading-5 text-slate-300">{ui.countries.helper}</p>
     </div>
   )
 }
 
 export function PremiumConstructionHero() {
+  const { copy } = useConstructionLocale()
+  const ui = copy.ui
   return (
-    <section className="grid gap-10 py-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-20">
+    <section className="grid min-h-[calc(100vh-5rem)] gap-10 py-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-16">
       <div>
-        <p className="text-xs font-bold uppercase tracking-[0.24em] text-amber-400">Plataforma europeia de Construction Intelligence</p>
+        <p className="text-xs font-bold uppercase tracking-[0.24em] text-amber-400">{ui.hero.eyebrow}</p>
         <h1 className="mt-7 max-w-5xl text-5xl font-semibold leading-[1.02] tracking-tight text-white md:text-7xl">
-          O que levava dias para analisar, a IA <span className="text-amber-400">entrega em minutos.</span>
+          {ui.hero.titlePrefix} <span className="text-amber-400">{ui.hero.titleHighlight}</span>
         </h1>
         <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-100">
-          Transforme projetos, medicoes, cadernos de encargos e documentacao tecnica em inteligencia acionavel. Identifique riscos, custos, prazos e documentos em falta antes de tomar qualquer decisao.
+          {ui.hero.subtitle}
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/construction/projects/new" className="inline-flex items-center gap-3 rounded-lg bg-gradient-to-r from-amber-500 to-amber-700 px-7 py-4 text-sm font-bold text-white shadow-xl shadow-amber-950/30 transition hover:-translate-y-0.5 hover:from-amber-400 hover:to-amber-600">
-            Iniciar Analise Gratuita
+            {ui.hero.primary}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
           <Link href="/construction/projects/demo" className="inline-flex items-center gap-3 rounded-lg border border-white/25 bg-white/[0.04] px-7 py-4 text-sm font-bold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/[0.08]">
-            Ver Projeto Demo
+            {ui.hero.secondary}
             <Play className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>
@@ -118,16 +127,16 @@ export function PremiumConstructionHero() {
         </div>
       </div>
 
-      <div className="construction-glass-card rounded-xl p-5">
+      <div className="construction-glass-card rounded-xl p-5 shadow-2xl shadow-black/40">
         <div className="border-b border-white/10 pb-4">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white">Resumo executivo</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white">{ui.hero.executive}</p>
         </div>
         <div className="mt-5 grid gap-3 sm:grid-cols-4">
           {[
-            ["Maturidade", "82%", "bg-emerald-400"],
-            ["Risco", "34%", "bg-amber-400"],
-            ["Confianca", "76%", "bg-sky-400"],
-            ["Complexidade", "58%", "bg-orange-400"],
+            [ui.hero.maturity, "82%", "bg-emerald-400"],
+            [ui.hero.risk, "34%", "bg-amber-400"],
+            [ui.hero.confidence, "76%", "bg-sky-400"],
+            [ui.hero.complexity, "58%", "bg-orange-400"],
           ].map(([label, value, color]) => (
             <div key={label} className="rounded-lg border border-white/10 bg-white/[0.06] p-4">
               <p className="text-[0.65rem] font-bold uppercase text-slate-300">{label}</p>
@@ -139,12 +148,12 @@ export function PremiumConstructionHero() {
           ))}
         </div>
         <div className="mt-6 border-t border-white/10 pt-5">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">Estimativa por cenarios</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">{ui.hero.estimates}</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             {[
-              ["Economico", "EUR 780 - 920 /m2"],
-              ["Normal", "EUR 980 - 1.250 /m2"],
-              ["Premium", "EUR 1.350 - 1.750 /m2"],
+              [ui.hero.economic, "€ 780 - 920 /m²"],
+              [ui.hero.normal, "€ 980 - 1.250 /m²"],
+              [ui.hero.premium, "€ 1.350 - 1.750 /m²"],
             ].map(([label, value]) => (
               <div key={label} className="rounded-lg border border-white/10 bg-white/[0.06] p-4">
                 <p className="text-sm font-semibold text-white">{label}</p>
@@ -154,12 +163,12 @@ export function PremiumConstructionHero() {
           </div>
         </div>
         <div className="mt-6 border-t border-white/10 pt-5">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">Mercado de referencia</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">{ui.hero.market}</p>
           <div className="mt-4 grid gap-3 rounded-lg border border-white/10 bg-white/[0.06] p-4 sm:grid-cols-4">
             <Meta flag="PT" title="Portugal" body="Pais tecnico" />
-            <Meta title="Normal" body="Segmento" icon={Gauge} />
-            <Meta title="Leroy Merlin" body="Fornecedor base" icon={Landmark} />
-            <Meta title="Estrutura" body="Categoria principal" icon={Building2} />
+            <Meta title="Normal" body={ui.hero.segment} icon={Gauge} />
+            <Meta title="Leroy Merlin" body={ui.hero.supplier} icon={Landmark} />
+            <Meta title="Estrutura" body={ui.hero.category} icon={Building2} />
           </div>
         </div>
       </div>
@@ -180,18 +189,20 @@ function Meta({ title, body, flag, icon: Icon }: { title: string; body: string; 
 }
 
 export function ConstructionHowItWorks() {
+  const { copy } = useConstructionLocale()
+  const ui = copy.ui
   const steps = [
-    { title: "Carregue a documentacao", body: "Projetos, medicoes, cadernos de encargos, especialidades e ficheiros tecnicos.", icon: CloudUpload },
-    { title: "A IA analisa o projeto", body: "Identifica documentos, riscos, maturidade, complexidade, confianca, custos e prazos.", icon: BrainCircuit },
-    { title: "Receba inteligencia acionavel", body: "Relatorio executivo com cenarios economico, normal e premium.", icon: BarChart3 },
+    { title: ui.how.uploadTitle, body: ui.how.uploadBody, icon: CloudUpload },
+    { title: ui.how.analyzeTitle, body: ui.how.analyzeBody, icon: BrainCircuit },
+    { title: ui.how.receiveTitle, body: ui.how.receiveBody, icon: BarChart3 },
   ]
 
   return (
     <section id="como-funciona" className="py-14">
-      <p className="text-xs font-bold uppercase tracking-[0.24em] text-amber-400">Como funciona</p>
+      <p className="text-xs font-bold uppercase tracking-[0.24em] text-amber-400">{ui.how.eyebrow}</p>
       <div className="mt-3 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
         <div>
-          <h2 className="max-w-3xl text-3xl font-semibold tracking-tight text-white md:text-4xl">Do documento a decisao em 3 passos simples.</h2>
+          <h2 className="max-w-3xl text-3xl font-semibold tracking-tight text-white md:text-4xl">{ui.how.title}</h2>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {steps.map((step, index) => {
               const Icon = step.icon
@@ -208,18 +219,27 @@ export function ConstructionHowItWorks() {
         </div>
         <div>
           <div className="relative aspect-video overflow-hidden rounded-xl border border-white/15 bg-slate-950 shadow-2xl shadow-black/30">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_76%_18%,rgba(245,158,11,0.42),transparent_28%),linear-gradient(120deg,rgba(2,8,23,0.4),rgba(2,8,23,0.92)),repeating-linear-gradient(90deg,rgba(148,163,184,0.24)_0_2px,transparent_2px_52px),repeating-linear-gradient(180deg,rgba(148,163,184,0.2)_0_2px,transparent_2px_46px)]" />
-            <div className="absolute inset-x-10 bottom-10 top-16 border-x-4 border-t-4 border-slate-300/25" />
+            <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(2,8,23,0.18),rgba(2,8,23,0.78)),url('/brand/construction-cinematic-reference.png')] bg-cover bg-center" />
             <button type="button" className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/50 bg-white/10 text-white backdrop-blur">
               <Play className="h-9 w-9 fill-white" aria-hidden="true" />
             </button>
-            <div className="absolute inset-x-6 bottom-5 h-1 rounded-full bg-white/20">
-              <div className="h-full w-1/2 rounded-full bg-amber-400" />
+            <div className="absolute inset-x-6 bottom-5">
+              <div className="mb-3 flex items-center justify-between gap-3 text-xs font-semibold text-white">
+                <span className="inline-flex items-center gap-2"><Play className="h-3.5 w-3.5 fill-white" aria-hidden="true" />1:18 / 2:45</span>
+                <span className="inline-flex items-center gap-3">
+                  <Volume2 className="h-4 w-4" aria-hidden="true" />
+                  <Settings className="h-4 w-4" aria-hidden="true" />
+                  <Maximize className="h-4 w-4" aria-hidden="true" />
+                </span>
+              </div>
+              <div className="h-1.5 rounded-full bg-white/25">
+                <div className="h-full w-1/2 rounded-full bg-amber-400" />
+              </div>
             </div>
           </div>
           <div className="mt-4 border-l-2 border-amber-400 pl-4">
-            <h3 className="font-semibold text-white">IA Especializada em Construcao</h3>
-            <p className="mt-1 text-sm text-slate-300">Demo visual placeholder para a experiencia premium.</p>
+            <h3 className="font-semibold text-white">{ui.how.videoTitle}</h3>
+            <p className="mt-1 text-sm text-slate-300">{ui.how.videoBody}</p>
           </div>
         </div>
       </div>

@@ -394,9 +394,9 @@ select option {
   overflow: hidden;
   pointer-events: none;
   background:
-    radial-gradient(circle at 86% 14%, rgba(245, 158, 11, 0.36), transparent 25%),
-    radial-gradient(circle at 24% 10%, rgba(14, 165, 233, 0.22), transparent 28%),
-    linear-gradient(90deg, rgba(2, 8, 23, 0.96) 0%, rgba(8, 34, 58, 0.72) 46%, rgba(92, 53, 12, 0.58) 100%);
+    linear-gradient(90deg, rgba(2, 8, 23, 0.995) 0%, rgba(2, 8, 23, 0.98) 34%, rgba(2, 24, 42, 0.78) 58%, rgba(56, 31, 8, 0.58) 100%),
+    linear-gradient(180deg, rgba(2, 8, 23, 0.2), rgba(2, 8, 23, 0.96) 78%),
+    url("/brand/construction-cinematic-reference.png") 58% top / cover no-repeat;
 }
 
 .construction-cinematic-bg::before {
@@ -405,11 +405,11 @@ select option {
   inset: 7rem 0 auto 0;
   height: 34rem;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 10%),
-    linear-gradient(90deg, rgba(2, 8, 23, 0.96), rgba(2, 8, 23, 0.48) 35%, rgba(2, 8, 23, 0.66)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 10%),
+    linear-gradient(90deg, rgba(2, 8, 23, 0.98), rgba(2, 8, 23, 0.68) 35%, rgba(2, 8, 23, 0.72)),
     radial-gradient(circle at 76% 22%, rgba(251, 191, 36, 0.42), transparent 18%),
     linear-gradient(180deg, rgba(14, 51, 82, 0.45), rgba(2, 8, 23, 0.96));
-  opacity: 0.88;
+  opacity: 0.8;
 }
 
 .construction-cinematic-bg::after {
@@ -417,8 +417,8 @@ select option {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(2, 8, 23, 0.2), rgba(2, 8, 23, 0.94) 72%),
-    linear-gradient(90deg, rgba(2, 8, 23, 0.88), transparent 44%, rgba(2, 8, 23, 0.58));
+    linear-gradient(180deg, rgba(2, 8, 23, 0.12), rgba(2, 8, 23, 0.96) 72%),
+    linear-gradient(90deg, rgba(2, 8, 23, 0.92), rgba(2, 8, 23, 0.32) 44%, rgba(2, 8, 23, 0.64));
 }
 
 .construction-sunset {
@@ -506,6 +506,32 @@ select option {
   background: linear-gradient(145deg, rgba(15, 23, 42, 0.74), rgba(15, 23, 42, 0.42));
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(22px);
+}
+
+.construction-cinematic-shell .bg-white,
+.construction-cinematic-shell .bg-slate-50 {
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.76), rgba(15, 23, 42, 0.44)) !important;
+}
+
+.construction-cinematic-shell .border-slate-200,
+.construction-cinematic-shell .border-slate-300 {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.construction-cinematic-shell .text-slate-950,
+.construction-cinematic-shell .text-slate-900,
+.construction-cinematic-shell .text-slate-800,
+.construction-cinematic-shell .text-slate-700 {
+  color: #f8fafc !important;
+}
+
+.construction-cinematic-shell .text-slate-600,
+.construction-cinematic-shell .text-slate-500 {
+  color: #cbd5e1 !important;
+}
+
+.construction-cinematic-shell .shadow-sm {
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.22) !important;
 }
 
 .iaweb-hero-title {

@@ -1,11 +1,17 @@
+"use client"
+
 import { BrainCircuit, Database, Network } from "lucide-react"
 import KnowledgeVaultConstructionElements from "./KnowledgeVaultConstructionElements"
 import KnowledgeVaultCountryPanel from "./KnowledgeVaultCountryPanel"
 import KnowledgeVaultDocumentLibrary from "./KnowledgeVaultDocumentLibrary"
 import KnowledgeVaultMetrics from "./KnowledgeVaultMetrics"
 import KnowledgeVaultRiskInsights from "./KnowledgeVaultRiskInsights"
+import { useConstructionLocale } from "./useConstructionLocale"
 
 export default function KnowledgeVaultDashboard() {
+  const { copy } = useConstructionLocale()
+  const ui = copy.ui
+
   return (
     <div className="py-12 lg:py-16">
       <section className="grid gap-8 lg:grid-cols-[1fr_0.8fr] lg:items-end">
@@ -13,8 +19,8 @@ export default function KnowledgeVaultDashboard() {
           <p className="inline-flex rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-amber-200">
             Demonstração ilustrativa
           </p>
-          <h1 className="mt-6 text-5xl font-semibold tracking-tight text-white md:text-7xl">Knowledge Vault</h1>
-          <p className="mt-5 max-w-3xl text-xl leading-8 text-slate-100">A base de conhecimento que alimenta a inteligência da plataforma.</p>
+          <h1 className="mt-6 text-5xl font-semibold tracking-tight text-white md:text-7xl">{ui.pages.knowledgeTitle}</h1>
+          <p className="mt-5 max-w-3xl text-xl leading-8 text-slate-100">{ui.pages.knowledgeSubtitle}</p>
           <p className="mt-5 max-w-4xl text-base leading-8 text-slate-300">
             Cada análise contribui para uma compreensão mais profunda dos documentos, riscos, custos, especialidades e padrões da construção em Portugal, França e Espanha.
           </p>

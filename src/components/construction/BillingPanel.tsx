@@ -1,3 +1,5 @@
+"use client"
+
 import ConstructionPlansSection from "./ConstructionPlansSection"
 import {
   ConstructionElementLibrary,
@@ -7,6 +9,7 @@ import {
   ConstructionTrustCenter,
 } from "./ConstructionMarketingSections"
 import type { ConstructionBillingUsage } from "@/lib/construction/billing/usage"
+import { useConstructionLocale } from "./useConstructionLocale"
 
 type BillingPanelProps = {
   usage: ConstructionBillingUsage | null
@@ -14,26 +17,29 @@ type BillingPanelProps = {
 }
 
 export default function BillingPanel({ usage, warning }: BillingPanelProps) {
+  const { copy } = useConstructionLocale()
+  const ui = copy.ui
+
   return (
     <div className="py-10">
-      <section className="grid gap-8 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+      <section className="construction-glass-card grid gap-8 rounded-xl p-6 md:p-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-amber-700">Billing Construction Intelligence</p>
-          <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight tracking-tight text-slate-950 md:text-6xl">
-            Ative inteligencia documental para cada decisao de obra.
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-amber-300">Billing Construction Intelligence</p>
+          <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight tracking-tight text-white md:text-6xl">
+            {ui.pages.billingTitle}
           </h1>
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
-            Planos para particulares, construtores, arquitetos, engenheiros, gabinetes tecnicos, promotores e empresas que precisam de analisar documentacao tecnica com rigor europeu.
+          <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-300">
+            {ui.pages.billingBody}
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             {["Portugal", "France", "Espana", "PT", "FR", "ES", "RGPD", "Benchmark Europeu"].map((item) => (
-              <span key={item} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-slate-700">
+              <span key={item} className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-slate-200">
                 {item}
               </span>
             ))}
           </div>
         </div>
-        <div className="rounded-[1.5rem] bg-slate-950 p-6 text-white shadow-xl shadow-slate-950/10">
+        <div className="rounded-xl border border-white/10 bg-slate-950/70 p-6 text-white shadow-xl shadow-slate-950/10">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-amber-300">Uso mensal</p>
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {[

@@ -4,6 +4,7 @@ import ConstructionShell from "@/components/construction/ConstructionShell"
 import ConstructionPlansSection from "@/components/construction/ConstructionPlansSection"
 import {
   ConstructionElementLibrary,
+  ConstructionCountrySelector,
   ConstructionEuropeanBlock,
   ConstructionHowItWorks,
   ConstructionLegalFooter,
@@ -22,8 +23,9 @@ export default function ConstructionPage() {
   return (
     <ConstructionShell>
       <PremiumConstructionHero />
-      <InteractiveDemo />
+      <ConstructionCountrySelector />
       <ConstructionHowItWorks />
+      <InteractiveDemo />
       <ConstructionElementLibrary />
       <div className="py-14">
         <ConstructionScenarioSection />

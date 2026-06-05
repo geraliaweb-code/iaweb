@@ -1,3 +1,5 @@
+"use client"
+
 import { AlertTriangle, ShieldAlert, Zap } from "lucide-react"
 import { constructionDocumentTaxonomy } from "@/lib/construction/dataset/document-taxonomy"
 import { constructionRiskMatrix } from "@/lib/construction/dataset/risk-matrix"
