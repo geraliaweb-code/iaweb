@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import ConstructionCopilot from "@/components/construction/ConstructionCopilot"
 import ConstructionShell from "@/components/construction/ConstructionShell"
 import ExecutiveProjectDashboard from "@/components/construction/ExecutiveProjectDashboard"
 import ProjectTabs from "@/components/construction/ProjectTabs"
@@ -26,6 +27,7 @@ export default async function ConstructionProjectPage({ params }: ProjectPagePro
     return (
       <ConstructionShell>
         <ExecutiveProjectDashboard project={constructionDemoProject} healthCheck={constructionDemoHealthCheck} />
+        <ConstructionCopilot project={constructionDemoProject} healthCheck={constructionDemoHealthCheck} />
         <ProjectTabs project={constructionDemoProject} demoMode />
       </ConstructionShell>
     )
@@ -67,6 +69,7 @@ export default async function ConstructionProjectPage({ params }: ProjectPagePro
   return (
     <ConstructionShell>
       <ExecutiveProjectDashboard project={data} healthCheck={healthCheckResult.data} warning={healthCheckResult.error?.message} />
+      <ConstructionCopilot project={data} healthCheck={healthCheckResult.data} />
       <ProjectTabs project={data} />
     </ConstructionShell>
   )
