@@ -8,6 +8,9 @@ import {
   type ConstructionClientType,
   type ConstructionCountry,
   type ConstructionLanguage,
+  type ConstructionLeadInput,
+  type ConstructionLeadRecord,
+  type ConstructionLeadType,
   type ConstructionProject,
   type ConstructionProjectInput,
   type ConstructionProjectType,
@@ -64,6 +67,10 @@ export function isConstructionCountry(value: string): value is ConstructionCount
 
 export function isConstructionClientType(value: string): value is ConstructionClientType {
   return constructionClientTypes.includes(value as ConstructionClientType)
+}
+
+export function isConstructionLeadType(value: string): value is ConstructionLeadType {
+  return value === "particular" || value === "empresa"
 }
 
 export function isConstructionLanguage(value: string): value is ConstructionLanguage {
@@ -139,20 +146,93 @@ export function validateConstructionProjectInput(input: Record<string, unknown>)
   }
 }
 
-export async function listConstructionProjects(limit = 20) {
+export function validateConstructionLeadInput(input: Record<string, unknown>):
+  | { ok: true; data: ConstructionLeadInput }
+  | { ok: false; error: ConstructionQueryError } {
+  const name = typeof input.name === "string" ? input.name.trim() : ""
+  const email = typeof input.email === "string" ? input.email.trim().toLowerCase() : ""
+  const phone = typeof input.phone === "string" ? input.phone.trim() : ""
+  const company = typeof input.company === "string" ? input.company.trim() : ""
+  const nif = typeof input.nif === "string" ? input.nif.trim() : ""
+  const address = typeof input.address === "string" ? input.address.trim() : ""
+  const country = typeof input.country === "string" ? input.country : ""
+  const leadType = typeof input.leadType === "string" ? input.leadType : ""
+
+  if (!name) {
+    return { ok: false, error: { code: "VALIDATION_FAILED", message: "Nome obrigatorio." } }
+  }
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { ok: false, error: { code: "VALIDATION_FAILED", message: "Email invalido." } }
+  }
+
+  if (!phone) {
+    return { ok: false, error: { code: "VALIDATION_FAILED", message: "Telefone obrigatorio." } }
+  }
+
+  if (!company) {
+    return { ok: false, error: { code: "VALIDATION_FAILED", message: "Empresa obrigatoria." } }
+  }
+
+  if (!nif) {
+    return { ok: false, error: { code: "VALIDATION_FAILED", message: "NIF obrigatorio." } }
+  }
+
+  if (!address) {
+    return { ok: false, error: { code: "VALIDATION_FAILED", message: "Morada obrigatoria." } }
+  }
+
+  if (!isConstructionCountry(country)) {
+    return { ok: false, error: { code: "VALIDATION_FAILED", message: "Pais invalido." } }
+  }
+
+  if (!isConstructionLeadType(leadType)) {
+    return { ok: false, error: { code: "VALIDATION_FAILED", message: "Tipo de lead invalido." } }
+  }
+
+  return {
+    ok: true,
+    data: {
+      name,
+      email,
+      phone,
+      company,
+      nif,
+      address,
+      country,
+      leadType,
+    },
+  }
+}
+
+type ConstructionProjectScope = {
+  userId?: string | null
+  organizationId?: string | null
+}
+
+const constructionProjectSelect =
+  "id,organization_id,user_id,name,project_type,country,language,technical_country,city,estimated_area_m2,client_type,status,maturity_score,risk_score,complexity_score,confidence_score,analyses_count,created_at,updated_at"
+
+export async function listConstructionProjects(limit = 20, scope?: ConstructionProjectScope) {
   const client = getConstructionSupabaseClient()
 
   if (!client.ok) {
     return { data: [] as ConstructionProject[], error: client.error }
   }
 
-  const { data, error } = await client.supabase
+  let query = client.supabase
     .from("construction_projects")
-    .select(
-      "id,organization_id,name,project_type,country,language,technical_country,city,estimated_area_m2,client_type,status,maturity_score,risk_score,complexity_score,confidence_score,analyses_count,created_at,updated_at",
-    )
+    .select(constructionProjectSelect)
     .order("created_at", { ascending: false })
     .limit(limit)
+
+  if (scope?.organizationId) {
+    query = query.eq("organization_id", scope.organizationId)
+  } else if (scope?.userId) {
+    query = query.eq("user_id", scope.userId)
+  }
+
+  const { data, error } = await query
 
   if (error) {
     return { data: [] as ConstructionProject[], error: { code: "SUPABASE_QUERY_FAILED", message: error.message } }
@@ -170,9 +250,7 @@ export async function getConstructionProject(id: string) {
 
   const { data, error } = await client.supabase
     .from("construction_projects")
-    .select(
-      "id,organization_id,name,project_type,country,language,technical_country,city,estimated_area_m2,client_type,status,maturity_score,risk_score,complexity_score,confidence_score,analyses_count,created_at,updated_at",
-    )
+    .select(constructionProjectSelect)
     .eq("id", id)
     .single()
 
@@ -201,10 +279,10 @@ export async function createConstructionProject(input: ConstructionProjectInput)
       city: input.city,
       estimated_area_m2: input.estimatedAreaM2,
       client_type: input.clientType,
+      user_id: input.userId ?? null,
+      organization_id: input.organizationId ?? null,
     })
-    .select(
-      "id,organization_id,name,project_type,country,language,technical_country,city,estimated_area_m2,client_type,status,maturity_score,risk_score,complexity_score,confidence_score,analyses_count,created_at,updated_at",
-    )
+    .select(constructionProjectSelect)
     .single()
 
   if (error) {
@@ -212,6 +290,36 @@ export async function createConstructionProject(input: ConstructionProjectInput)
   }
 
   return { data: data as ConstructionProject, error: null }
+}
+
+export async function createConstructionLead(input: ConstructionLeadInput, projectId: string | null) {
+  const client = getConstructionSupabaseClient()
+
+  if (!client.ok) {
+    return { data: null, error: client.error }
+  }
+
+  const { data, error } = await client.supabase
+    .from("construction_leads")
+    .insert({
+      name: input.name,
+      email: input.email,
+      phone: input.phone,
+      company: input.company,
+      nif: input.nif,
+      address: input.address,
+      country: input.country,
+      lead_type: input.leadType,
+      project_id: projectId,
+    })
+    .select("id,name,email,phone,company,nif,address,country,lead_type,project_id,created_at")
+    .single()
+
+  if (error) {
+    return { data: null, error: { code: "SUPABASE_INSERT_FAILED" as const, message: error.message } }
+  }
+
+  return { data: data as ConstructionLeadRecord, error: null }
 }
 
 export function getConstructionStats(projects: ConstructionProject[]): ConstructionStats {

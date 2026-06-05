@@ -21,6 +21,8 @@ export const constructionClientTypes = [
   "gabinete_tecnico",
 ] as const
 
+export const constructionUserTypes = ["particular", "empresa"] as const
+export const constructionOrganizationRoles = ["owner", "admin", "manager", "viewer"] as const
 export const constructionLanguages = ["pt", "fr", "es"] as const
 export const constructionTechnicalCountries = ["portugal", "france", "spain"] as const
 
@@ -36,6 +38,8 @@ export const constructionEngineIds = [
 
 export type ConstructionProjectType = (typeof constructionProjectTypes)[number]
 export type ConstructionCountry = (typeof constructionCountries)[number]
+export type ConstructionUserType = (typeof constructionUserTypes)[number]
+export type ConstructionOrganizationRole = (typeof constructionOrganizationRoles)[number]
 export type ConstructionLanguage = (typeof constructionLanguages)[number]
 export type ConstructionTechnicalCountry = (typeof constructionTechnicalCountries)[number]
 export type ConstructionClientType = (typeof constructionClientTypes)[number]
@@ -44,6 +48,7 @@ export type ConstructionEngineId = (typeof constructionEngineIds)[number]
 export type ConstructionProject = {
   id: string
   organization_id: string | null
+  user_id?: string | null
   name: string
   project_type: ConstructionProjectType
   country: ConstructionCountry
@@ -60,6 +65,42 @@ export type ConstructionProject = {
   analyses_count: number
   created_at: string
   updated_at: string
+}
+
+export type ConstructionUserProfile = {
+  id: string
+  name: string
+  email: string
+  phone: string | null
+  country: ConstructionCountry
+  user_type: ConstructionUserType
+  created_at: string
+  updated_at: string
+}
+
+export type ConstructionOrganization = {
+  id: string
+  name: string
+  nif: string | null
+  country: ConstructionCountry
+  address: string | null
+  subscription_plan: string
+  created_at: string
+}
+
+export type ConstructionOrganizationMember = {
+  id: string
+  organization_id: string
+  user_id: string
+  role: ConstructionOrganizationRole
+  created_at: string
+}
+
+export type ConstructionAccountContext = {
+  profile: ConstructionUserProfile | null
+  organization: ConstructionOrganization | null
+  membership: ConstructionOrganizationMember | null
+  planName: string
 }
 
 export type ConstructionFileStatus = "uploaded" | "processing" | "analyzed" | "failed"
@@ -243,6 +284,35 @@ export type ConstructionProjectInput = {
   city: string
   estimatedAreaM2?: number | null
   clientType: ConstructionClientType
+  userId?: string | null
+  organizationId?: string | null
+}
+
+export type ConstructionLeadType = "particular" | "empresa"
+
+export type ConstructionLeadInput = {
+  name: string
+  email: string
+  phone: string
+  company: string
+  nif: string
+  address: string
+  country: ConstructionCountry
+  leadType: ConstructionLeadType
+}
+
+export type ConstructionLeadRecord = {
+  id: string
+  name: string
+  email: string
+  phone: string
+  company: string
+  nif: string
+  address: string
+  country: ConstructionCountry
+  lead_type: ConstructionLeadType
+  project_id: string | null
+  created_at: string
 }
 
 export type ConstructionStats = {

@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { BadgeCheck, BrainCircuit, Building2, FileText, LockKeyhole, ShieldCheck } from "lucide-react"
 import ConstructionCookieBanner from "./ConstructionCookieBanner"
+import ConstructionHeaderAccount from "./ConstructionHeaderAccount"
 import ConstructionLocaleSelector from "./ConstructionLocaleSelector"
 import { useConstructionLocale } from "./useConstructionLocale"
 
@@ -28,11 +29,6 @@ export default function ConstructionShell({ children, eyebrow = "Construction In
   return (
     <main className="construction-cinematic-shell min-h-screen overflow-x-hidden text-slate-50">
       <div className="construction-cinematic-bg" aria-hidden="true">
-        <div className="construction-sunset" />
-        <div className="construction-crane construction-crane-a" />
-        <div className="construction-crane construction-crane-b" />
-        <div className="construction-structure" />
-        <div className="construction-blueprint-grid" />
       </div>
 
       <div className="relative z-10 flex min-h-screen w-full flex-col">
@@ -53,6 +49,7 @@ export default function ConstructionShell({ children, eyebrow = "Construction In
               <ConstructionLocaleSelector />
             </div>
             <nav className="flex items-center gap-2 text-sm font-semibold text-slate-200">
+              <ConstructionHeaderAccount />
               <Link href="/construction/dashboard" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white md:inline-flex">
                 {ui.nav.dashboard}
               </Link>
