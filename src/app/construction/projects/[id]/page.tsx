@@ -24,7 +24,7 @@ export default async function ConstructionProjectPage({ params }: ProjectPagePro
 
   if (id === "demo") {
     return (
-      <ConstructionShell surface="light">
+      <ConstructionShell>
         <ExecutiveProjectDashboard project={constructionDemoProject} healthCheck={constructionDemoHealthCheck} />
         <ProjectTabs project={constructionDemoProject} demoMode />
       </ConstructionShell>
@@ -43,13 +43,13 @@ export default async function ConstructionProjectPage({ params }: ProjectPagePro
 
   if (error) {
     return (
-      <ConstructionShell surface="light">
+      <ConstructionShell>
         <div className="flex flex-1 items-center justify-center py-12">
-          <div className="max-w-2xl rounded-lg border border-slate-200 bg-white p-7 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-700">Projeto indisponivel</p>
-            <h1 className="mt-3 text-2xl font-semibold text-slate-950">Nao foi possivel carregar este projeto.</h1>
-            <p className="mt-3 text-sm leading-6 text-slate-600">{error.message}</p>
-            <Link href="/construction/dashboard" className="mt-6 inline-flex rounded-lg bg-slate-950 px-5 py-3 text-sm font-bold text-white">
+          <div className="construction-glass-card max-w-2xl rounded-xl p-7">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-400">Projeto indisponivel</p>
+            <h1 className="mt-3 text-2xl font-semibold text-white">Nao foi possivel carregar este projeto.</h1>
+            <p className="mt-3 text-sm leading-6 text-slate-300">{error.message}</p>
+            <Link href="/construction/dashboard" className="mt-6 inline-flex rounded-lg bg-amber-500 px-5 py-3 text-sm font-bold text-slate-950">
               Voltar ao dashboard
             </Link>
           </div>
@@ -65,7 +65,7 @@ export default async function ConstructionProjectPage({ params }: ProjectPagePro
   const healthCheckResult = await listConstructionHealthCheck(data.id)
 
   return (
-    <ConstructionShell surface="light">
+    <ConstructionShell>
       <ExecutiveProjectDashboard project={data} healthCheck={healthCheckResult.data} warning={healthCheckResult.error?.message} />
       <ProjectTabs project={data} />
     </ConstructionShell>

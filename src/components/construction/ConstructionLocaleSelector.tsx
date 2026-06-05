@@ -5,17 +5,23 @@ import type { ConstructionLanguage, ConstructionTechnicalCountry } from "@/lib/c
 
 export const constructionLocaleEvent = "iaweb-construction-locale"
 
-const languageOptions: Array<{ value: ConstructionLanguage; label: string }> = [
-  { value: "pt", label: "PT" },
-  { value: "fr", label: "FR" },
-  { value: "es", label: "ES" },
+const languageOptions: Array<{ value: ConstructionLanguage; label: string; flag: string }> = [
+  { value: "pt", label: "PT", flag: "PT" },
+  { value: "fr", label: "FR", flag: "FR" },
+  { value: "es", label: "ES", flag: "ES" },
 ]
 
-const countryOptions: Array<{ value: ConstructionTechnicalCountry; label: string; legacyCountry: string }> = [
-  { value: "portugal", label: "Portugal", legacyCountry: "Portugal" },
-  { value: "france", label: "France", legacyCountry: "FranÃ§a" },
-  { value: "spain", label: "Espana", legacyCountry: "Espanha" },
+const countryOptions: Array<{ value: ConstructionTechnicalCountry; label: string; legacyCountry: string; flag: string }> = [
+  { value: "portugal", label: "Portugal", legacyCountry: "Portugal", flag: "PT" },
+  { value: "france", label: "France", legacyCountry: "França", flag: "FR" },
+  { value: "spain", label: "España", legacyCountry: "Espanha", flag: "ES" },
 ]
+
+const flagClasses: Record<string, string> = {
+  PT: "bg-[linear-gradient(90deg,#047857_0_42%,#dc2626_42%)]",
+  FR: "bg-[linear-gradient(90deg,#1d4ed8_0_33%,#ffffff_33%_66%,#dc2626_66%)]",
+  ES: "bg-[linear-gradient(180deg,#dc2626_0_25%,#facc15_25%_75%,#dc2626_75%)]",
+}
 
 export function getLegacyConstructionCountry(country: ConstructionTechnicalCountry) {
   return countryOptions.find((option) => option.value === country)?.legacyCountry ?? "Portugal"
@@ -49,6 +55,10 @@ function persistLocale(language: ConstructionLanguage, technicalCountry: Constru
   window.dispatchEvent(new CustomEvent(constructionLocaleEvent, { detail: { language, technicalCountry } }))
 }
 
+function Flag({ code }: { code: string }) {
+  return <span aria-hidden="true" className={`h-3.5 w-5 rounded-[2px] border border-white/20 shadow-sm ${flagClasses[code]}`} />
+}
+
 export default function ConstructionLocaleSelector() {
   const [language, setLanguage] = useState<ConstructionLanguage>("pt")
   const [technicalCountry, setTechnicalCountry] = useState<ConstructionTechnicalCountry>("portugal")
@@ -72,29 +82,35 @@ export default function ConstructionLocaleSelector() {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2" aria-label="Construction language and country selectors">
-      <div className="inline-flex rounded-full border border-slate-200 bg-white p-1 shadow-sm">
+    <div className="flex flex-wrap items-center justify-center gap-2" aria-label="Construction language and country selectors">
+      <div className="inline-flex rounded-full border border-white/10 bg-white/[0.04] p-1 shadow-sm backdrop-blur">
         {languageOptions.map((option) => (
           <button
             key={option.value}
             type="button"
             onClick={() => chooseLanguage(option.value)}
-            className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${language === option.value ? "bg-slate-950 text-white" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"}`}
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition ${
+              language === option.value ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/10 hover:text-white"
+            }`}
             aria-pressed={language === option.value}
           >
+            <Flag code={option.flag} />
             {option.label}
           </button>
         ))}
       </div>
-      <div className="inline-flex rounded-full border border-slate-200 bg-white p-1 shadow-sm">
+      <div className="inline-flex rounded-full border border-white/10 bg-white/[0.04] p-1 shadow-sm backdrop-blur">
         {countryOptions.map((option) => (
           <button
             key={option.value}
             type="button"
             onClick={() => chooseCountry(option.value)}
-            className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${technicalCountry === option.value ? "bg-amber-700 text-white" : "text-slate-500 hover:bg-amber-50 hover:text-amber-900"}`}
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition ${
+              technicalCountry === option.value ? "bg-white text-slate-950" : "text-slate-300 hover:bg-white/10 hover:text-white"
+            }`}
             aria-pressed={technicalCountry === option.value}
           >
+            <Flag code={option.flag} />
             {option.label}
           </button>
         ))}

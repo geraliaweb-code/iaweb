@@ -1,5 +1,5 @@
 import Link from "next/link"
-import OfficialLogo from "@/components/iaweb/OfficialLogo"
+import { BadgeCheck, BrainCircuit, Building2, FileText, LockKeyhole, ShieldCheck } from "lucide-react"
 import ConstructionCookieBanner from "./ConstructionCookieBanner"
 import ConstructionLocaleSelector from "./ConstructionLocaleSelector"
 
@@ -10,60 +10,86 @@ type ConstructionShellProps = {
 }
 
 export default function ConstructionShell({ children, eyebrow = "Construction Intelligence", surface = "dark" }: ConstructionShellProps) {
-  const isLight = surface === "light"
+  void surface
+  const seals = [
+    { label: "IA Especializada", body: "Treinada em construcao", icon: BrainCircuit },
+    { label: "Benchmark Europeu", body: "Referencias reais", icon: BadgeCheck },
+    { label: "PT - FR - ES", body: "Inteligencia localizada", icon: Building2 },
+    { label: "Dados Protegidos RGPD", body: "Seguranca e privacidade", icon: ShieldCheck },
+    { label: "Infraestrutura Segura", body: "Cloud europeu", icon: LockKeyhole },
+    { label: "Relatorios Executivos", body: "IA aplicada a obra", icon: FileText },
+  ]
 
   return (
-    <main className={isLight ? "min-h-screen overflow-x-hidden bg-slate-50 text-slate-800" : "iaweb-cinematic-shell min-h-screen overflow-x-hidden text-slate-50"}>
-      {isLight ? (
-        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_46%,#eef2f7_100%)]">
-          <div className="absolute inset-0 opacity-[0.42] [background-image:linear-gradient(#0f172a0d_1px,transparent_1px),linear-gradient(90deg,#0f172a0d_1px,transparent_1px)] [background-size:48px_48px]" />
-          <div className="absolute left-1/2 top-0 h-[34rem] w-[70rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(180,83,9,0.12),transparent_62%)] blur-3xl" />
-        </div>
-      ) : (
-        <div className="iaweb-cinematic-bg">
-          <div className="iaweb-cinematic-grid" />
-          <div className="iaweb-lightning top-[12%] left-[-12%]" />
-          <div className="iaweb-lightning" />
-          <div className="iaweb-lightning" />
-          <div className="iaweb-lightning-field" />
-        </div>
-      )}
+    <main className="construction-cinematic-shell min-h-screen overflow-x-hidden text-slate-50">
+      <div className="construction-cinematic-bg" aria-hidden="true">
+        <div className="construction-sunset" />
+        <div className="construction-crane construction-crane-a" />
+        <div className="construction-crane construction-crane-b" />
+        <div className="construction-structure" />
+        <div className="construction-blueprint-grid" />
+      </div>
 
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-5 sm:px-6 lg:px-8">
-        <header className={`flex flex-wrap items-center justify-between gap-4 border-b pb-5 ${isLight ? "border-slate-200/80" : "border-white/10"}`}>
-          <Link href="/construction" className="inline-flex items-center gap-4">
-            <span className={isLight ? "rounded-full bg-slate-950 px-3 py-2 shadow-sm" : ""}>
-              <OfficialLogo compact />
-            </span>
-            <span className={`hidden h-8 w-px sm:block ${isLight ? "bg-slate-200" : "bg-white/10"}`} />
-            <span className={`text-xs font-semibold uppercase tracking-[0.28em] ${isLight ? "text-slate-600" : "text-sky-200"}`}>{eyebrow}</span>
-          </Link>
-          <nav className={`flex items-center gap-2 text-sm ${isLight ? "text-slate-600" : "text-slate-300"}`}>
-            <ConstructionLocaleSelector />
-            <Link href="/construction/dashboard" className={`rounded-full border px-4 py-2 transition ${isLight ? "border-slate-200 bg-white hover:border-slate-400 hover:text-slate-950" : "border-white/10 hover:border-sky-300/50 hover:text-white"}`}>
-              Dashboard
+      <div className="relative z-10 flex min-h-screen w-full flex-col">
+        <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/82 backdrop-blur-xl">
+          <div className="mx-auto flex w-full max-w-[96rem] flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+            <Link href="/construction" className="inline-flex min-w-0 items-center gap-4">
+              <img src="/brand/logo-iaweb-trans.png" alt="IAWEB" className="h-10 w-auto max-w-[9.5rem] object-contain" />
+              <span className="hidden h-8 w-px bg-white/15 sm:block" />
+              <span className="hidden text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-white md:inline">{eyebrow}</span>
             </Link>
-            <Link href="/construction/billing" className={`rounded-full border px-4 py-2 transition ${isLight ? "border-slate-200 bg-white hover:border-slate-400 hover:text-slate-950" : "border-white/10 hover:border-sky-300/50 hover:text-white"}`}>
-              Billing
-            </Link>
-            <Link href="/construction/projects/new" className={`rounded-full px-4 py-2 font-semibold transition ${isLight ? "bg-slate-950 text-white hover:bg-slate-800" : "bg-sky-400 text-slate-950 hover:bg-sky-300"}`}>
-              Novo Projeto
-            </Link>
-          </nav>
-        </header>
-        {children}
-        <footer className={`mt-auto border-t py-6 text-sm ${isLight ? "border-slate-200 text-slate-500" : "border-white/10 text-slate-400"}`}>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <p>Estimativa baseada na documentacao analisada e em dados de mercado disponiveis a data da analise. Nao constitui orcamento vinculativo nem garantia de custo final.</p>
-            <div className="flex flex-wrap gap-3">
-              <Link href="/construction/privacy" className={isLight ? "hover:text-slate-950" : "hover:text-white"}>Privacidade</Link>
-              <Link href="/construction/cookies" className={isLight ? "hover:text-slate-950" : "hover:text-white"}>Cookies</Link>
-              <Link href="/construction/security" className={isLight ? "hover:text-slate-950" : "hover:text-white"}>Seguranca</Link>
-              <Link href="/construction/terms" className={isLight ? "hover:text-slate-950" : "hover:text-white"}>Termos</Link>
+            <div className="min-w-0 flex-1 justify-center lg:flex">
+              <ConstructionLocaleSelector />
             </div>
+            <nav className="flex items-center gap-2 text-sm font-semibold text-slate-200">
+              <Link href="/construction/dashboard" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white md:inline-flex">
+                Dashboard
+              </Link>
+              <Link href="/construction/billing" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white md:inline-flex">
+                Planos
+              </Link>
+              <Link href="/construction#como-funciona" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white lg:inline-flex">
+                Recursos
+              </Link>
+              <Link href="/construction/security" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white lg:inline-flex">
+                Empresa
+              </Link>
+              <Link href="/construction/projects/new" className="rounded-lg bg-gradient-to-r from-amber-500 to-amber-700 px-4 py-2.5 text-white shadow-lg shadow-amber-950/30 transition hover:-translate-y-0.5 hover:from-amber-400 hover:to-amber-600">
+                Novo Projeto
+              </Link>
+            </nav>
           </div>
-        </footer>
-        <ConstructionCookieBanner />
+        </header>
+
+        <div className="mx-auto flex w-full max-w-[96rem] flex-1 flex-col px-4 sm:px-6 lg:px-8">
+          {children}
+          <footer className="mt-auto border-t border-white/10 py-6 text-sm text-slate-300">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+              {seals.map((seal) => {
+                const Icon = seal.icon
+                return (
+                  <div key={seal.label} className="flex items-start gap-3">
+                    <Icon className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" aria-hidden="true" />
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-white">{seal.label}</p>
+                      <p className="mt-1 text-xs text-slate-400">{seal.body}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-5">
+              <p>Estimativa baseada na documentacao analisada e em dados de mercado. Nao constitui orcamento vinculativo.</p>
+              <div className="flex flex-wrap gap-3">
+                <Link href="/construction/privacy" className="hover:text-white">Privacidade</Link>
+                <Link href="/construction/cookies" className="hover:text-white">Cookies</Link>
+                <Link href="/construction/security" className="hover:text-white">Seguranca</Link>
+                <Link href="/construction/terms" className="hover:text-white">Termos</Link>
+              </div>
+            </div>
+          </footer>
+          <ConstructionCookieBanner />
+        </div>
       </div>
     </main>
   )

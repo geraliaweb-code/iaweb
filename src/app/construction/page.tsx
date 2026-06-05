@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function ConstructionPage() {
   return (
-    <ConstructionShell surface="light">
+    <ConstructionShell>
       <PremiumConstructionHero />
       <ConstructionHowItWorks />
       <ConstructionElementLibrary />

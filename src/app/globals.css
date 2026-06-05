@@ -379,6 +379,135 @@ select option {
     0 0 34px rgba(255, 184, 0, 0.08);
 }
 
+.construction-cinematic-shell {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(1, 8, 18, 0.94), rgba(2, 12, 24, 0.96) 48%, rgba(2, 9, 18, 0.98)),
+    #020817;
+  isolation: isolate;
+}
+
+.construction-cinematic-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 86% 14%, rgba(245, 158, 11, 0.36), transparent 25%),
+    radial-gradient(circle at 24% 10%, rgba(14, 165, 233, 0.22), transparent 28%),
+    linear-gradient(90deg, rgba(2, 8, 23, 0.96) 0%, rgba(8, 34, 58, 0.72) 46%, rgba(92, 53, 12, 0.58) 100%);
+}
+
+.construction-cinematic-bg::before {
+  content: "";
+  position: absolute;
+  inset: 7rem 0 auto 0;
+  height: 34rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 10%),
+    linear-gradient(90deg, rgba(2, 8, 23, 0.96), rgba(2, 8, 23, 0.48) 35%, rgba(2, 8, 23, 0.66)),
+    radial-gradient(circle at 76% 22%, rgba(251, 191, 36, 0.42), transparent 18%),
+    linear-gradient(180deg, rgba(14, 51, 82, 0.45), rgba(2, 8, 23, 0.96));
+  opacity: 0.88;
+}
+
+.construction-cinematic-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(2, 8, 23, 0.2), rgba(2, 8, 23, 0.94) 72%),
+    linear-gradient(90deg, rgba(2, 8, 23, 0.88), transparent 44%, rgba(2, 8, 23, 0.58));
+}
+
+.construction-sunset {
+  position: absolute;
+  right: 5%;
+  top: 7rem;
+  width: min(34rem, 46vw);
+  height: min(34rem, 46vw);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 198, 99, 0.46), rgba(245, 158, 11, 0.16) 36%, transparent 68%);
+  filter: blur(10px);
+}
+
+.construction-crane {
+  position: absolute;
+  top: 6rem;
+  width: 18rem;
+  height: 26rem;
+  opacity: 0.72;
+}
+
+.construction-crane::before {
+  content: "";
+  position: absolute;
+  left: 7rem;
+  top: 0;
+  width: 0.28rem;
+  height: 25rem;
+  background:
+    repeating-linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0 10px, rgba(148, 163, 184, 0.72) 10px 14px);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.construction-crane::after {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  top: 1.7rem;
+  width: 16rem;
+  height: 0.26rem;
+  background: rgba(15, 23, 42, 0.96);
+  transform: rotate(-10deg);
+  box-shadow:
+    2rem 0.9rem 0 rgba(15, 23, 42, 0.78),
+    11rem 2rem 0 rgba(15, 23, 42, 0.58);
+}
+
+.construction-crane-a {
+  left: 48%;
+}
+
+.construction-crane-b {
+  right: 7%;
+  top: 5rem;
+  transform: scale(0.82) rotate(4deg);
+}
+
+.construction-structure {
+  position: absolute;
+  left: 26%;
+  right: 3%;
+  top: 22rem;
+  height: 20rem;
+  opacity: 0.6;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 34px, rgba(148, 163, 184, 0.5) 34px 37px),
+    repeating-linear-gradient(180deg, transparent 0 42px, rgba(148, 163, 184, 0.38) 42px 45px),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(15, 23, 42, 0.86));
+  mask-image: linear-gradient(90deg, transparent, black 18%, black 82%, transparent);
+}
+
+.construction-blueprint-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.26;
+  background-image:
+    linear-gradient(rgba(14, 165, 233, 0.11) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 165, 233, 0.11) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(circle at 52% 28%, black, transparent 72%);
+}
+
+.construction-glass-card {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.74), rgba(15, 23, 42, 0.42));
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(22px);
+}
+
 .iaweb-hero-title {
   letter-spacing: -0.055em;
   text-shadow: 0 0 40px rgba(0, 163, 255, 0.2);
