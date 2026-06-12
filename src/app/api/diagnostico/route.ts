@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
 import { calculateDiagnostico, type DiagnosticoFormData } from "@/lib/diagnostico"
+import { getSupabaseServerClient } from "@/lib/supabase-server"
 
 const requiredFields: Array<keyof DiagnosticoFormData> = [
   "nome",
@@ -39,24 +39,16 @@ export async function POST(request: Request) {
     const createdAt = new Date().toISOString()
     const result = calculateDiagnostico(lead)
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const client = getSupabaseServerClient()
 
-    if (!supabaseUrl || !supabaseKey) {
+    if (!client.ok) {
       return NextResponse.json(
-        { error: "Supabase nao esta configurado. Define NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY." },
+        { error: client.error.message },
         { status: 500 },
       )
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    })
-
-    const { data, error } = await supabase
+    const { data, error } = await client.supabase
       .from("diagnostico_digital_leads")
       .insert({
         nome: lead.nome,

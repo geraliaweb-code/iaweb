@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { CheckCircle2, FileSearch, FileText, Gauge, Scale, UploadCloud } from "lucide-react"
+import Link from "next/link"
+import { CheckCircle2, FileSearch, FileText, Gauge, Lock, Scale, UploadCloud } from "lucide-react"
 import { constructionClientTypeLabels, constructionProjectTypeLabels } from "@/lib/construction/constants"
 import type { ConstructionProject } from "@/lib/construction/types"
 import BenchmarkPanel from "./BenchmarkPanel"
@@ -22,6 +23,7 @@ type ProjectTab = (typeof tabs)[number]
 
 export default function ProjectTabs({ project, demoMode = false }: ProjectTabsProps) {
   const [activeTab, setActiveTab] = useState<ProjectTab>("Overview")
+  const partialMode = !demoMode
   const steps = [
     { label: "Upload", done: demoMode || project.analyses_count > 0, icon: UploadCloud },
     { label: "Analisar Documentos", done: demoMode || project.analyses_count > 0, icon: FileSearch },
@@ -112,7 +114,7 @@ export default function ProjectTabs({ project, demoMode = false }: ProjectTabsPr
             title="Transforma documentos em decisao"
             body="O Health Check resume maturidade, risco, complexidade, confianca, custo e prazo numa linguagem executiva."
           />
-          {demoMode ? <DemoHealthCheckPanel /> : <HealthCheckPanel projectId={project.id} language={project.language} />}
+          {demoMode ? <DemoHealthCheckPanel /> : <HealthCheckPanel projectId={project.id} language={project.language} partialMode={partialMode} />}
         </div>
       ) : null}
       {activeTab === "Benchmark" ? (
@@ -121,7 +123,7 @@ export default function ProjectTabs({ project, demoMode = false }: ProjectTabsPr
             title="Compara com obras semelhantes"
             body="O Benchmark V1 usa dataset simulado para mostrar se o projeto esta acima, abaixo ou dentro da media de mercado."
           />
-          <BenchmarkPanel projectId={project.id} demoMode={demoMode} />
+          {partialMode ? <LockedPremiumPanel title="Benchmark Europeu bloqueado" /> : <BenchmarkPanel projectId={project.id} demoMode={demoMode} />}
         </div>
       ) : null}
       {activeTab === "Relatorio" ? (
@@ -130,7 +132,7 @@ export default function ProjectTabs({ project, demoMode = false }: ProjectTabsPr
             title="Fecha a narrativa executiva"
             body="O PDF junta capa, Health Check, documentos, faltas, estimativas e riscos num artefacto pronto para reuniao."
           />
-          {demoMode ? <DemoReportPanel /> : <section className="iaweb-premium-card rounded-2xl p-6">
+          {demoMode ? <DemoReportPanel /> : partialMode ? <LockedPremiumPanel title="PDF Executivo bloqueado" /> : <section className="iaweb-premium-card rounded-2xl p-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-200">PDF Executivo Premium</p>
@@ -145,6 +147,27 @@ export default function ProjectTabs({ project, demoMode = false }: ProjectTabsPr
         </div>
       ) : null}
     </div>
+  )
+}
+
+function LockedPremiumPanel({ title }: { title: string }) {
+  return (
+    <section className="iaweb-premium-card rounded-2xl p-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="max-w-2xl">
+          <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-amber-300 text-slate-950">
+            <Lock className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <h2 className="mt-4 text-xl font-semibold text-white">{title}</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            Aceda ao orcamento completo por material, mao de obra, fornecedor, benchmark europeu, PDF executivo e recomendacoes da IA.
+          </p>
+        </div>
+        <Link href="/construction/billing" className="inline-flex rounded-full bg-amber-300 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-amber-200">
+          Desbloquear Analise Completa
+        </Link>
+      </div>
+    </section>
   )
 }
 
@@ -166,7 +189,7 @@ function OverviewPanel({ project }: { project: ConstructionProject }) {
           <Info label="Tipo de cliente" value={constructionClientTypeLabels[project.client_type]} />
           <Info label="Idioma" value={project.language.toUpperCase()} />
           <Info label="Pais tecnico" value={project.technical_country} />
-          <Info label="Area estimada" value={project.estimated_area_m2 ? `${project.estimated_area_m2} m2` : "Por definir"} />
+          <Info label="Area estimada" value={project.estimated_area_m2 ? `c. ${project.estimated_area_m2} m2` : "Por definir"} />
           <Info label="Maturidade" value={`${project.maturity_score ?? 0}/100`} />
           <Info label="Risco" value={`${project.risk_score ?? 0}/100`} />
           <Info label="Confianca" value={`${project.confidence_score ?? 0}/100`} />

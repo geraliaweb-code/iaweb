@@ -6,6 +6,11 @@ export function isValidConstructionProjectId(projectId: string) {
   return uuidPattern.test(projectId)
 }
 
+export function isConstructionAlphaEnvironment() {
+  const appEnv = process.env.NEXT_PUBLIC_APP_ENV ?? process.env.APP_ENV ?? ""
+  return ["alpha", "alfa", "staging", "development"].includes(appEnv.toLowerCase()) || process.env.NODE_ENV !== "production"
+}
+
 export function invalidConstructionProjectResponse() {
   return NextResponse.json({ error: "Identificador de projeto invalido." }, { status: 400 })
 }

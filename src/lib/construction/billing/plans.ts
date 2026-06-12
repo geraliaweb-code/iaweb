@@ -19,7 +19,7 @@ export const constructionBillingPlans: ConstructionBillingPlan[] = [
     monthlyPriceEur: 49.9,
     monthlyAnalysisLimit: 3,
     usersIncluded: 1,
-    features: ["3 analises por mes", "Health Check", "PDF executivo"],
+    features: ["Analises para particulares", "Health Check", "PDF executivo"],
     stripePriceIdEnv: "STRIPE_HOME_PRICE_ID",
   },
   {
@@ -59,8 +59,6 @@ export const constructionBillingPlans: ConstructionBillingPlan[] = [
     stripePriceIdEnv: "STRIPE_ENTERPRISE_PRICE_ID",
   },
 ]
-
-export const constructionTrialDays = 7
 
 export function getConstructionBillingPlan(planId: string | null | undefined) {
   return constructionBillingPlans.find((plan) => plan.id === planId) ?? constructionBillingPlans[0]

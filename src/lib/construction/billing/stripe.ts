@@ -1,7 +1,7 @@
 import Stripe from "stripe"
 import { getConstructionSupabaseClient } from "../db"
 import { getConstructionLanguage } from "../i18n"
-import { constructionTrialDays, getConstructionBillingPlan, type ConstructionBillingPlanId, type ConstructionBillingStatus } from "./plans"
+import { getConstructionBillingPlan, type ConstructionBillingPlanId, type ConstructionBillingStatus } from "./plans"
 
 export const stripeApiVersion = "2026-05-27.dahlia"
 
@@ -129,7 +129,6 @@ export async function createConstructionCheckoutSession(input: {
     cancel_url: `${baseUrl}/construction/billing?stripe=cancelled`,
     customer_email: input.customerEmail ?? undefined,
     subscription_data: {
-      trial_period_days: constructionTrialDays,
       metadata: {
         plan_id: plan.id,
         organization_id: input.organizationId ?? "",

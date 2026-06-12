@@ -1,0 +1,76 @@
+name: iaweb-construction-agent-network
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: iaweb_agents_staging
+      POSTGRES_USER: iaweb_agents
+      POSTGRES_PASSWORD: iaweb_agents_local
+    ports:
+      - "5545:5432"
+    volumes:
+      - agent_postgres_data:/var/lib/postgresql/data
+      - ./supabase/construction_agent_network_staging.sql:/docker-entrypoint-initdb.d/001_agent_network.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iaweb_agents -d iaweb_agents_staging"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6385:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - agent_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./agent-network
+    environment:
+      AGENT_NETWORK_ENV: staging
+      AGENT_DATABASE_URL: postgresql://iaweb_agents:iaweb_agents_local@postgres:5432/iaweb_agents_staging
+      AGENT_REDIS_URL: redis://redis:6379/0
+      AGENT_ACTIVATION_WEEK: "1"
+      AGENT_AUTOMATIC_CYCLES_ENABLED: "false"
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_DIEGO_CHAT_ID: ${TELEGRAM_DIEGO_CHAT_ID:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    ports:
+      - "8045:8045"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8045"]
+
+  worker:
+    build:
+      context: ./agent-network
+    environment:
+      AGENT_NETWORK_ENV: staging
+      AGENT_DATABASE_URL: postgresql://iaweb_agents:iaweb_agents_local@postgres:5432/iaweb_agents_staging
+      AGENT_REDIS_URL: redis://redis:6379/0
+      AGENT_ACTIVATION_WEEK: "1"
+      AGENT_AUTOMATIC_CYCLES_ENABLED: "false"
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_DIEGO_CHAT_ID: ${TELEGRAM_DIEGO_CHAT_ID:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["celery", "-A", "app.worker.celery_app", "worker", "--loglevel=INFO", "--concurrency=1"]
+
+volumes:
+  agent_postgres_data:
+  agent_redis_data:

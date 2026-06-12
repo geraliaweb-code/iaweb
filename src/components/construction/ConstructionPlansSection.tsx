@@ -36,7 +36,7 @@ const planCopy: Record<string, { label: string; body: string }> = {
 }
 
 const statusLabels: Record<string, string> = {
-  trial: "Trial",
+  trial: "Parcial gratuita",
   active: "Ativo",
   past_due: "Pagamento em atraso",
   cancelled: "Cancelado",
@@ -112,7 +112,7 @@ export default function ConstructionPlansSection({ usage, warning, compact = fal
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-amber-300">Planos Construction Intelligence</p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white md:text-4xl">Escolha o nivel de inteligencia que pretende para a sua obra.</h2>
           <p className="mt-4 text-base leading-7 text-slate-300">
-            Trial de 7 dias preparado para Stripe Checkout. Os limites sao aplicados antes de Document Intelligence, Health Check, Benchmark e PDF executivo.
+            Sem trial de 7 dias: particulares e empresas recebem 1 analise parcial gratuita. Para continuar a analisar projetos e documentacao tecnica, ative um plano Construction Intelligence.
           </p>
         </div>
         {usage?.stripeCustomerId ? (
@@ -155,7 +155,7 @@ export default function ConstructionPlansSection({ usage, warning, compact = fal
           <article className="rounded-xl border border-amber-300/20 bg-amber-300/10 p-6 text-sm leading-6 text-amber-50">
             <div className="flex items-start gap-3">
               <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
-              <p>{actionError ?? warning ?? "Trial ativo. O Customer Portal permite gerir ou cancelar a subscricao quando existir cliente Stripe associado."}</p>
+              <p>{actionError ?? warning ?? "Analise parcial gratuita ativa. O Customer Portal permite gerir ou cancelar a subscricao quando existir cliente Stripe associado."}</p>
             </div>
           </article>
         </div>

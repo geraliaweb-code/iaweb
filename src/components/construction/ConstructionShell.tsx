@@ -53,6 +53,9 @@ export default function ConstructionShell({ children, eyebrow = "Construction In
               <Link href="/construction/dashboard" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white md:inline-flex">
                 {ui.nav.dashboard}
               </Link>
+              <Link href="/construction/analytics" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white lg:inline-flex">
+                Analytics
+              </Link>
               <Link href="/construction/billing" className="hidden rounded-full px-4 py-2 transition hover:bg-white/5 hover:text-white md:inline-flex">
                 {ui.nav.plans}
               </Link>

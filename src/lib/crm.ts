@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js"
+import { getSupabaseServerClient } from "@/lib/supabase-server"
 
 export const crmStatuses = ["novo", "contactado", "reuniao", "simulacao", "proposta", "negociacao", "fechado", "perdido"] as const
 export const crmSortFields = ["created_at", "score_geral"] as const
@@ -91,25 +91,19 @@ export function getCrmStatusLabel(status: string) {
 }
 
 function getSupabaseClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const client = getSupabaseServerClient()
 
-  if (!supabaseUrl || !supabaseKey) {
+  if (!client.ok) {
     return {
       error: {
         code: "SUPABASE_NOT_CONFIGURED",
-        message: "Supabase nao esta configurado. Define NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY.",
+        message: client.error.message,
       } satisfies CrmSupabaseConfigError,
     }
   }
 
   return {
-    supabase: createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    }),
+    supabase: client.supabase,
   }
 }
 

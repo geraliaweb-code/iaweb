@@ -1,4 +1,3 @@
-import { createClient } from "@supabase/supabase-js"
 import { Activity, CheckCircle2, Cpu, Database, FileText, HeartPulse, MessageCircle, ShieldCheck, TriangleAlert, XCircle } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { createDiagnosticoPdf } from "@/app/diagnostico/pdf"
@@ -9,6 +8,7 @@ import { generateSalesAgentMessages } from "@/lib/sales-agent"
 import { generateWebsiteTransformation } from "@/lib/website-generator"
 import OfficialLogo from "@/components/iaweb/OfficialLogo"
 import { getEmailHealth } from "@/lib/admin-email"
+import { getSupabaseServerClient } from "@/lib/supabase-server"
 import EmailControlPanel from "./EmailControlPanel"
 import { redirect } from "next/navigation"
 
@@ -58,25 +58,17 @@ const sampleLead: DiagnosticoFormData = {
 }
 
 async function getSupabaseSnapshot(): Promise<SupabaseSnapshot> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const client = getSupabaseServerClient()
 
-  if (!supabaseUrl || !supabaseKey) {
+  if (!client.ok) {
     return {
       configured: false,
-      error: "Supabase nao configurado neste ambiente.",
+      error: client.error.message,
       leads: [],
     }
   }
 
-  const supabase = createClient(supabaseUrl, supabaseKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  })
-
-  const { data, error } = await supabase
+  const { data, error } = await client.supabase
     .from("diagnosticos")
     .select(
       "id,empresa,email,setor,score_geral,status,impacto_financeiro,homepage_gerada,plano_recomendado,score_projetado,melhoria_prevista,template_utilizado,whatsapp_message,email_subject,email_body,followup_3d,followup_7d,followup_15d,objection_responses,post_proposal_message,post_meeting_message,sales_agent_status",

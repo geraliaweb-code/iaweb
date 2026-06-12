@@ -1,20 +1,21 @@
-import type { ConstructionClientType, ConstructionCountry, ConstructionEngineId, ConstructionProjectType } from "./types"
+import type { ConstructionClientType, ConstructionEngineId, ConstructionProjectType } from "./types"
 
 export const constructionProjectTypeLabels: Record<ConstructionProjectType, string> = {
   moradia: "Moradia",
-  remodelacao: "Remodelação",
-  creche: "Creche",
+  remodelacao: "Remodelacao + Ampliacao",
+  creche: "Equipamento Social",
   hotel: "Hotel",
   pavilhao_industrial: "Pavilhao industrial",
   restaurante: "Restaurante",
   lar: "Lar",
-  industria: "Indústria",
-  comercio: "Comércio",
+  industria: "Industria",
+  comercio: "Comercio",
 }
 
-export const constructionCountryLabels: Record<ConstructionCountry, string> = {
+export const constructionCountryLabels: Record<string, string> = {
   Portugal: "Portugal",
-  França: "França",
+  Franca: "Franca",
+  "FranÃ§a": "Franca",
   Espanha: "Espanha",
 }
 
@@ -23,8 +24,8 @@ export const constructionClientTypeLabels: Record<ConstructionClientType, string
   construtora: "Construtora",
   arquiteto: "Arquiteto",
   engenheiro: "Engenheiro",
-  promotor_imobiliario: "Promotor imobiliário",
-  gabinete_tecnico: "Gabinete técnico",
+  promotor_imobiliario: "Promotor imobiliario",
+  gabinete_tecnico: "Gabinete tecnico",
 }
 
 export const constructionEngineCards: Array<{

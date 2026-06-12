@@ -1,0 +1,8 @@
+material,canonical_name,unidade,preço_unitário,país,fonte,data_recolha,confidence
+Betao C25/30,STRUCTURAL_CONCRETE_C25_30,m3,,Portugal,,,
+Aco A500,REINFORCEMENT_STEEL,kg,,Portugal,,,
+Tubo PVC SN4,PVC_DRAINAGE_PIPE_SN4,m,,Portugal,,,
+Tubo PEAD,HDPE_PIPE,m,,Portugal,,,
+Lancil de betao,CONCRETE_KERB,m,,Portugal,,,
+Camara de visita,MANHOLE_CHAMBER,un,,Portugal,,,
+Pavimento betuminoso,BITUMINOUS_PAVEMENT,m2,,Portugal,,,

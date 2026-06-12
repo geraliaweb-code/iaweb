@@ -16,19 +16,21 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url)
-  let query = client.supabase.from("prospects").select("*").order("opportunity_score", { ascending: false })
+  let query = client.supabase.from("prospects").select("*").order("prospect_score", { ascending: true })
 
   const nicho = searchParams.get("nicho")
   const cidade = searchParams.get("cidade")
   const priority = searchParams.get("priority")
+  const classificacao = searchParams.get("classificacao")
   const status = searchParams.get("status")
   const scoreMin = Number(searchParams.get("scoreMin") ?? "")
 
   if (nicho) query = query.eq("nicho", nicho)
   if (cidade) query = query.ilike("cidade", `%${cidade}%`)
   if (priority) query = query.eq("priority_label", priority)
+  if (classificacao) query = query.eq("classificacao", classificacao)
   if (status) query = query.eq("status", status)
-  if (Number.isFinite(scoreMin) && scoreMin > 0) query = query.gte("opportunity_score", scoreMin)
+  if (Number.isFinite(scoreMin) && scoreMin > 0) query = query.gte("prospect_score", scoreMin)
 
   const { data, error } = await query.limit(100)
 

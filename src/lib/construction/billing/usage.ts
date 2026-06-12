@@ -1,6 +1,6 @@
 import { getConstructionProject, getConstructionSupabaseClient } from "../db"
 import { getConstructionBillingScope, evaluateConstructionUsageLimit, type ConstructionBillableAction } from "./limits"
-import { getConstructionBillingPlan, constructionTrialDays, type ConstructionBillingStatus } from "./plans"
+import { getConstructionBillingPlan, type ConstructionBillingStatus } from "./plans"
 
 type ConstructionBillingError = {
   code: string
@@ -27,12 +27,6 @@ function getCurrentMonthWindow(now = new Date()) {
   const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0))
   const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0))
   return { start: start.toISOString(), end: end.toISOString() }
-}
-
-function getDefaultTrialEnd() {
-  const value = new Date()
-  value.setUTCDate(value.getUTCDate() + constructionTrialDays)
-  return value.toISOString()
 }
 
 type SubscriptionRow = {
@@ -129,7 +123,7 @@ export async function getConstructionBillingUsage(projectId?: string | null): Pr
   }
 
   const status = subscription?.status ?? "trial"
-  const trialEndsAt = subscription?.trial_ends_at ?? getDefaultTrialEnd()
+  const trialEndsAt = subscription?.trial_ends_at ?? null
   const decision = evaluateConstructionUsageLimit({
     plan,
     status,
@@ -189,7 +183,7 @@ export async function canRunAnalysis(projectId: string) {
     plan,
     status: subscription?.status ?? "trial",
     usedThisMonth: usageResult.data,
-    trialEndsAt: subscription?.trial_ends_at ?? getDefaultTrialEnd(),
+    trialEndsAt: subscription?.trial_ends_at ?? null,
   })
 
   return { allowed: decision.allowed, error: null, decision, project: projectResult.data }

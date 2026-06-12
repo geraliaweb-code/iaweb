@@ -2,8 +2,9 @@ import { calculateFinanceImpact } from "@/lib/finance-impact"
 import { generateSalesAgentMessages } from "@/lib/sales-agent"
 import { generateWebsiteTransformation } from "@/lib/website-generator"
 import { analyzeDigitalPresence } from "./digital-analysis-engine"
-import { generateSimulatedCompanies } from "./lead-enrichment"
+import { loadProspectorCompanies, type ProspectorDataSourceMode } from "./data-sources"
 import { calculateOpportunityScore } from "./opportunity-score"
+import { calculateProspectScore, generateAutomaticDiagnosis } from "./prospect-score-engine"
 import type { ProspectCompany, ProspectorFilters, ProspectorResult } from "./types"
 
 function getPlan(score: number, niche: string) {
@@ -15,6 +16,7 @@ function getPlan(score: number, niche: string) {
 
 export function analyzeProspect(company: ProspectCompany): ProspectorResult {
   const digitalAnalysis = analyzeDigitalPresence(company)
+  const prospectScore = calculateProspectScore(company, digitalAnalysis)
   const plan = getPlan(digitalAnalysis.scoreDigital, company.nicho)
   const financialImpact = calculateFinanceImpact({
     niche: company.nicho,
@@ -22,6 +24,7 @@ export function analyzeProspect(company: ProspectCompany): ProspectorResult {
     score: digitalAnalysis.scoreDigital,
   })
   const opportunity = calculateOpportunityScore(company, digitalAnalysis, financialImpact.lostRevenueMonthly.max)
+  const diagnosis = generateAutomaticDiagnosis(company, digitalAnalysis, prospectScore, financialImpact.lostRevenueMonthly.max)
   const website = generateWebsiteTransformation({
     company: company.empresa,
     niche: company.nicho,
@@ -30,7 +33,7 @@ export function analyzeProspect(company: ProspectCompany): ProspectorResult {
     currentScore: digitalAnalysis.scoreDigital,
   })
 
-  generateSalesAgentMessages({
+  const commercial = generateSalesAgentMessages({
     company: company.empresa,
     contactName: company.contacto,
     niche: company.nicho,
@@ -42,24 +45,37 @@ export function analyzeProspect(company: ProspectCompany): ProspectorResult {
     recommendedPlan: plan,
     generatedHomepage: website.homepage,
     templateUsed: website.homepage.templateId,
-    problems: digitalAnalysis.detectedProblems,
-    opportunities: digitalAnalysis.opportunities,
+    problems: diagnosis.problemas,
+    opportunities: diagnosis.oportunidades,
   })
 
   return {
     company,
     digitalAnalysis,
+    prospectScore,
+    diagnosis,
     opportunity,
     financialImpact,
     homepage: website.homepage,
     projectedScore: website.projection.projectedScore,
     improvement: website.projection.improvementPoints,
     templateUsed: website.homepage.templateId,
+    commercial,
   }
 }
 
 export function generateProspects(filters: ProspectorFilters = {}) {
-  return generateSimulatedCompanies(filters)
+  return generateProspectsForMode(filters, "simulation")
+}
+
+export function generateProspectsForMode(filters: ProspectorFilters = {}, mode: ProspectorDataSourceMode = "simulation") {
+  const source = loadProspectorCompanies(filters, mode)
+
+  if (!source.ok) {
+    throw new Error(source.error)
+  }
+
+  return source.companies
     .map(analyzeProspect)
     .filter((result) => result.opportunity.score >= (filters.scoreMin ?? 0))
     .filter((result) => result.opportunity.score <= (filters.scoreMax ?? 100))

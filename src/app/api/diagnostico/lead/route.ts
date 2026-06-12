@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
 import type { DiagnosticoFormData, DiagnosticoResult } from "@/lib/diagnostico"
 import { sendDiagnosticoLeadEmail } from "@/lib/diagnostico-email"
 import { generateDiagnosticoWhatsAppMessage } from "@/lib/diagnostico-whatsapp"
 import { generateSalesAgentMessages } from "@/lib/sales-agent"
+import { getSupabaseServerClient } from "@/lib/supabase-server"
 
 type LeadPayload = {
   formData?: Partial<DiagnosticoFormData>
@@ -98,19 +98,13 @@ export async function POST(request: Request) {
 
     const formData = payload.formData as DiagnosticoFormData
     const result = payload.result as DiagnosticoResult & CommercialCrmFields
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const client = getSupabaseServerClient()
 
-    if (!supabaseUrl || !supabaseKey) {
-      return NextResponse.json({ error: "Supabase nao esta configurado." }, { status: 500 })
+    if (!client.ok) {
+      return NextResponse.json({ error: client.error.message }, { status: 500 })
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    })
+    const supabase = client.supabase
 
     let whatsappMessage: string | null = null
     let whatsappStatus = "pendente"

@@ -1,12 +1,14 @@
 import Link from "next/link"
 import { ArrowRight, BarChart3, Building2, FileText, Gauge, Plus, ShieldAlert, Sparkles } from "lucide-react"
 import { constructionClientTypeLabels, constructionProjectTypeLabels } from "@/lib/construction/constants"
-import type { ConstructionProject, ConstructionStats } from "@/lib/construction/types"
+import type { ConstructionLearningStatus, ConstructionProject, ConstructionStats } from "@/lib/construction/types"
 
 type ConstructionDashboardProps = {
   projects: ConstructionProject[]
   stats: ConstructionStats
   warning?: string
+  showProjectSelector?: boolean
+  learningStatus?: ConstructionLearningStatus | null
 }
 
 const metricCards = [
@@ -16,7 +18,7 @@ const metricCards = [
   { key: "averageMaturity", label: "Maturidade media", icon: Gauge, suffix: "/100" },
 ] as const
 
-export default function ConstructionDashboard({ projects, stats, warning }: ConstructionDashboardProps) {
+export default function ConstructionDashboard({ projects, stats, warning, showProjectSelector = true, learningStatus = null }: ConstructionDashboardProps) {
   return (
     <div className="flex flex-1 flex-col py-10">
       <div className="flex flex-wrap items-end justify-between gap-5">
@@ -34,13 +36,15 @@ export default function ConstructionDashboard({ projects, stats, warning }: Cons
           <Plus className="h-4 w-4" aria-hidden="true" />
           Novo Projeto
         </Link>
-        <Link
-          href="/construction/projects/demo"
-          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-300 to-sky-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-[0_0_34px_rgba(245,158,11,0.18)] transition hover:scale-[1.02]"
-        >
-          <Sparkles className="h-4 w-4" aria-hidden="true" />
-          Ver Projeto Demo
-        </Link>
+        {showProjectSelector ? (
+          <Link
+            href="/construction/projects/demo"
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-300 to-sky-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-[0_0_34px_rgba(245,158,11,0.18)] transition hover:scale-[1.02]"
+          >
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
+            Ver PT-001
+          </Link>
+        ) : null}
       </div>
 
       {warning ? (
@@ -67,18 +71,36 @@ export default function ConstructionDashboard({ projects, stats, warning }: Cons
         })}
       </section>
 
-      <section className="mt-8 grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+      <section className="mt-8 rounded-2xl border border-sky-300/20 bg-sky-300/10 p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-200">Learning Status</p>
+            <h2 className="mt-2 text-2xl font-semibold text-white">Real Project Learning Loop</h2>
+          </div>
+          <span className="rounded-full border border-white/15 bg-white/[0.05] px-3 py-1 text-sm font-semibold text-sky-100">
+            {learningStatus?.eventsReceived ?? 0} eventos recebidos
+          </span>
+        </div>
+        <div className="mt-5 grid gap-3 md:grid-cols-4">
+          <LearningMetric label="Eventos recebidos" value={String(learningStatus?.eventsReceived ?? 0)} />
+          <LearningMetric label="Ultimo evento" value={learningStatus?.lastEvent ? learningEventTitle(learningStatus.lastEvent.type) : "Sem eventos"} detail={learningStatus?.lastEvent ? relativeLearningTime(learningStatus.lastEvent.timestamp) : "Aguardando LE-04/06/09"} />
+          <LearningMetric label="Confianca atual" value={`${learningStatus?.currentConfidence ?? 0}/100`} />
+          <LearningMetric label="Evolucao" value={`+${learningStatus?.confidenceEvolution ?? 0}`} detail="desde ultimo evento validado" />
+        </div>
+      </section>
+
+      {showProjectSelector ? <section className="mt-8 grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
         <Link href="/construction/projects/demo" className="iaweb-premium-card rounded-2xl p-6 transition hover:scale-[1.01]">
           <div className="flex items-center gap-3">
             <Sparkles className="h-6 w-6 text-amber-200" aria-hidden="true" />
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-200">Demo premium</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-200">Alfa PT-001</p>
           </div>
-          <h2 className="mt-4 text-2xl font-semibold text-white">Hotel Atlantico</h2>
+          <h2 className="mt-4 text-2xl font-semibold text-white">Equipamento Social</h2>
           <p className="mt-3 text-sm leading-6 text-slate-300">
-            Fluxo completo para apresentacao: uploads, Document Intelligence, Health Check, Benchmark e PDF executivo.
+            Remodelacao + Ampliacao em Portugal com Health Check V2, custo, prazo, riscos e proxima acao.
           </p>
           <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-sky-200">
-            Abrir demo comercial
+            Abrir PT-001
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </span>
         </Link>
@@ -94,9 +116,9 @@ export default function ConstructionDashboard({ projects, stats, warning }: Cons
             </div>
           ))}
         </div>
-      </section>
+      </section> : null}
 
-      <section className="mt-8">
+      {showProjectSelector ? <section className="mt-8">
         <div className="mb-4 flex items-center justify-between gap-4">
           <h2 className="text-xl font-semibold text-white">Projetos recentes</h2>
           <Link href="/construction" className="text-sm font-medium text-sky-200 hover:text-sky-100">
@@ -144,13 +166,13 @@ export default function ConstructionDashboard({ projects, stats, warning }: Cons
                     Novo Projeto
                   </Link>
                   <Link href="/construction/projects/demo" className="rounded-full border border-white/15 px-5 py-3 text-sm font-bold text-white">
-                    Ver Projeto Demo
+                    Ver PT-001
                   </Link>
                 </div>
               </div>
               <div className="rounded-2xl border border-sky-300/20 bg-sky-300/10 p-5">
                 <FileText className="h-6 w-6 text-sky-200" aria-hidden="true" />
-                <p className="mt-4 font-semibold text-white">Demo: Hotel Atlantico</p>
+                <p className="mt-4 font-semibold text-white">Alfa: PT-001</p>
                 <p className="mt-2 text-sm leading-6 text-slate-300">
                   Fluxo completo com documentos classificados, scores, custo, prazo, riscos e PDF executivo.
                 </p>
@@ -158,7 +180,35 @@ export default function ConstructionDashboard({ projects, stats, warning }: Cons
             </div>
           )}
         </div>
-      </section>
+      </section> : null}
     </div>
   )
+}
+
+function LearningMetric({ label, value, detail }: { label: string; value: string; detail?: string }) {
+  return (
+    <article className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">{label}</p>
+      <p className="mt-2 text-xl font-semibold text-white">{value}</p>
+      {detail ? <p className="mt-2 text-xs leading-5 text-slate-300">{detail}</p> : null}
+    </article>
+  )
+}
+
+function learningEventTitle(type: string) {
+  if (type === "LE-04") return "Documento recebido"
+  if (type === "LE-06") return "Novo orcamento"
+  if (type === "LE-09") return "Area confirmada"
+  return "Evento recebido"
+}
+
+function relativeLearningTime(timestamp: string) {
+  const deltaMs = Date.now() - new Date(timestamp).getTime()
+  const minutes = Math.max(0, Math.round(deltaMs / 60000))
+  if (minutes < 60) return minutes <= 1 ? "agora" : `ha ${minutes} minutos`
+  const hours = Math.round(minutes / 60)
+  if (hours < 24) return hours === 1 ? "ha 1 hora" : `ha ${hours} horas`
+  const days = Math.round(hours / 24)
+  if (days <= 1) return "ontem"
+  return `ha ${days} dias`
 }

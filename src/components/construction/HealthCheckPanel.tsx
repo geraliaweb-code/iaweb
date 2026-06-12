@@ -9,6 +9,7 @@ import GenerateReportButton from "./GenerateReportButton"
 type HealthCheckPanelProps = {
   projectId: string
   language?: ConstructionLanguage | null
+  partialMode?: boolean
 }
 
 type PanelState = {
@@ -36,7 +37,7 @@ function localeFromLanguage(language?: ConstructionLanguage | null) {
   return "pt-PT"
 }
 
-export default function HealthCheckPanel({ projectId, language = "pt" }: HealthCheckPanelProps) {
+export default function HealthCheckPanel({ projectId, language = "pt", partialMode = true }: HealthCheckPanelProps) {
   const copy = healthCopy[language ?? "pt"]
   const [healthCheck, setHealthCheck] = useState<ConstructionHealthCheckResult | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -130,9 +131,9 @@ export default function HealthCheckPanel({ projectId, language = "pt" }: HealthC
         </button>
       </div>
 
-      <div className="mt-5">
+      {!partialMode ? <div className="mt-5">
         <GenerateReportButton projectId={projectId} compact />
-      </div>
+      </div> : null}
 
       {state.message ? (
         <div className="mt-5 flex items-start gap-3 rounded-2xl border border-sky-300/20 bg-sky-300/10 p-4 text-sm text-sky-100">
@@ -186,10 +187,14 @@ export default function HealthCheckPanel({ projectId, language = "pt" }: HealthC
             <InfoCard title={copy.missing} value={healthCheck.missingCriticalDocuments.length ? healthCheck.missingCriticalDocuments.join(", ") : "Sem faltas criticas"} />
           </div>
 
-          <EstimateSection healthCheck={healthCheck} language={language} />
-          <KnowledgeGraphSection healthCheck={healthCheck} />
+          {partialMode ? <PartialHealthPaywall /> : (
+            <>
+              <EstimateSection healthCheck={healthCheck} language={language} />
+              <KnowledgeGraphSection healthCheck={healthCheck} />
+            </>
+          )}
 
-          <div>
+          {!partialMode ? <div>
             <h3 className="font-semibold text-white">{copy.alerts}</h3>
             {healthCheck.alerts.length ? (
               <div className="mt-4 grid gap-3">
@@ -212,7 +217,7 @@ export default function HealthCheckPanel({ projectId, language = "pt" }: HealthC
                 Sem alertas principais registados pelo Scores Engine V1.
               </div>
             )}
-          </div>
+          </div> : null}
         </div>
       ) : (
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
@@ -222,6 +227,24 @@ export default function HealthCheckPanel({ projectId, language = "pt" }: HealthC
         </div>
       )}
     </section>
+  )
+}
+
+function PartialHealthPaywall() {
+  return (
+    <article className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-5">
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-100">Analise parcial ativa</p>
+      <h3 className="mt-2 text-lg font-semibold text-white">Orcamento completo, recomendacoes e PDF ficam bloqueados.</h3>
+      <p className="mt-3 text-sm leading-6 text-amber-50/80">
+        A amostra gratuita mostra scores, documentos, prazo/orcamento preliminar no resumo executivo e 1 a 2 linhas detalhadas. Para continuar a analisar projetos e documentacao tecnica, ative um plano Construction Intelligence.
+      </p>
+      <a
+        href="/construction/billing"
+        className="mt-4 inline-flex rounded-full bg-amber-300 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-amber-200"
+      >
+        Desbloquear Analise Completa
+      </a>
+    </article>
   )
 }
 

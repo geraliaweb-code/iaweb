@@ -9,6 +9,9 @@ import type {
   ConstructionDetectedDocument,
   ConstructionEstimateRecord,
   ConstructionHealthCheckResult,
+  ConstructionLearningConfidenceSnapshot,
+  ConstructionLearningDecision,
+  ConstructionLearningEvent,
   ConstructionProject,
   ConstructionRiskRecord,
   ConstructionScoreRecord,
@@ -176,6 +179,176 @@ function grade(score: number, inverse = false) {
   return "D"
 }
 
+function healthScoreFrom(input: { documentConfidence: number; estimationConfidence: number; benchmarkConfidence: number }) {
+  return clampScore(input.documentConfidence * 0.45 + input.estimationConfidence * 0.4 + input.benchmarkConfidence * 0.15)
+}
+
+function tierWeight(score: number) {
+  if (score >= 76) return 0.8
+  if (score >= 51) return 0.6
+  if (score >= 26) return 0.4
+  return 0.2
+}
+
+function learningDecision(deltaPercent: number): ConstructionLearningDecision {
+  if (deltaPercent <= 10) return "automatico"
+  if (deltaPercent <= 20) return "revisao_recomendada"
+  return "aprovacao_obrigatoria"
+}
+
+function latestTimestamp(values: Array<string | null | undefined>, fallback: string) {
+  const latest = values
+    .filter((value): value is string => Boolean(value))
+    .sort((left, right) => new Date(right).getTime() - new Date(left).getTime())[0]
+  return latest ?? fallback
+}
+
+function learningEvent(input: {
+  projectId: string
+  type: ConstructionLearningEvent["type"]
+  timestamp: string
+  source: string
+  status: ConstructionLearningEvent["status"]
+}): ConstructionLearningEvent {
+  return {
+    id: `${input.projectId}-${input.type}-${new Date(input.timestamp).getTime()}`,
+    projectId: input.projectId,
+    type: input.type,
+    timestamp: input.timestamp,
+    source: input.source,
+    status: input.status,
+  }
+}
+
+export function buildConstructionLearningEvents(input: {
+  project: ConstructionProject | null
+  documents?: ConstructionDetectedDocument[]
+  estimates?: ConstructionEstimateRecord[]
+  now?: string
+}) {
+  const projectId = input.project?.id ?? "unknown"
+  const now = input.now ?? new Date().toISOString()
+  const documents = input.documents ?? []
+  const estimates = input.estimates ?? []
+  const events: ConstructionLearningEvent[] = []
+
+  if (documents.length) {
+    events.push(learningEvent({
+      projectId,
+      type: "LE-04",
+      timestamp: latestTimestamp(documents.map((document) => document.created_at), now),
+      source: "document-intelligence",
+      status: "validated",
+    }))
+  }
+
+  const budget = estimates.find((estimate) => estimate.estimate_type.includes("cost") || estimate.currency === "EUR")
+  if (budget) {
+    const hasIdentifiedBudget = Boolean(budget.estimate_type)
+    const hasTotal = typeof budget.expected_amount === "number" && Number.isFinite(budget.expected_amount)
+    const hasCurrency = Boolean(budget.currency)
+    events.push(learningEvent({
+      projectId,
+      type: "LE-06",
+      timestamp: budget.created_at,
+      source: "cost-intelligence",
+      status: hasIdentifiedBudget && hasTotal && hasCurrency ? "validated" : "pending",
+    }))
+  }
+
+  if (input.project?.estimated_area_m2) {
+    events.push(learningEvent({
+      projectId,
+      type: "LE-09",
+      timestamp: input.project.updated_at ?? input.project.created_at ?? now,
+      source: "project-record",
+      status: "validated",
+    }))
+  }
+
+  if (input.project?.status.toLowerCase().includes("cancel")) {
+    events.push(learningEvent({
+      projectId,
+      type: "PROJECT_CANCELLED",
+      timestamp: input.project.updated_at ?? input.project.created_at ?? now,
+      source: "project-record",
+      status: "validated",
+    }))
+  }
+
+  return events.sort((left, right) => new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime())
+}
+
+export function recalculateConstructionLearningConfidence(input: {
+  project: ConstructionProject | null
+  healthCheck: {
+    confidenceScore: number
+    costEstimate?: { costConfidence: number } | null
+    scheduleEstimate?: { scheduleConfidence: number } | null
+  } | null
+  events: ConstructionLearningEvent[]
+  benchmarkConfidence?: number | null
+}): ConstructionLearningConfidenceSnapshot {
+  const baseDocument = clampScore(input.healthCheck?.confidenceScore ?? input.project?.confidence_score ?? 0)
+  const baseEstimation = clampScore(averageDefined([
+    input.healthCheck?.costEstimate?.costConfidence,
+    input.healthCheck?.scheduleEstimate?.scheduleConfidence,
+    baseDocument,
+  ]))
+  const baseBenchmark = clampScore(input.benchmarkConfidence ?? Math.round((baseDocument + baseEstimation) / 2))
+  const baseHealthScore = healthScoreFrom({
+    documentConfidence: baseDocument,
+    estimationConfidence: baseEstimation,
+    benchmarkConfidence: baseBenchmark,
+  })
+  const weight = tierWeight(baseHealthScore)
+  const validatedEvents = input.events.filter((event) => event.status === "validated")
+  const gains = validatedEvents.reduce((total, event) => {
+    if (event.type === "LE-04") return { document: total.document + 8, estimation: total.estimation + 3, benchmark: total.benchmark + 5 }
+    if (event.type === "LE-06") return { document: total.document + 1, estimation: total.estimation + 12, benchmark: total.benchmark + 6 }
+    if (event.type === "LE-09") return { document: total.document + 2, estimation: total.estimation + 9, benchmark: total.benchmark + 7 }
+    return total
+  }, { document: 0, estimation: 0, benchmark: 0 })
+  const documentConfidence = clampScore(baseDocument + gains.document * weight)
+  const estimationConfidence = clampScore(baseEstimation + gains.estimation * weight)
+  const benchmarkConfidence = clampScore(baseBenchmark + gains.benchmark * weight)
+  const healthScore = healthScoreFrom({ documentConfidence, estimationConfidence, benchmarkConfidence })
+  const deltaPercent = Math.max(0, Math.round(((healthScore - baseHealthScore) / Math.max(1, baseHealthScore)) * 100))
+
+  return {
+    documentConfidence,
+    estimationConfidence,
+    benchmarkConfidence,
+    healthScore,
+    previousHealthScore: baseHealthScore,
+    deltaPercent,
+    decision: learningDecision(deltaPercent),
+  }
+}
+
+export function buildConstructionLearningStatus(projects: ConstructionProject[]) {
+  const events = projects.flatMap((project) => buildConstructionLearningEvents({ project }))
+  const lastEvent = events[0] ?? null
+  const confidenceValues = projects
+    .map((project) => project.confidence_score)
+    .filter((value): value is number => typeof value === "number")
+  const currentConfidence = confidenceValues.length
+    ? clampScore(confidenceValues.reduce((total, value) => total + value, 0) / confidenceValues.length)
+    : 0
+
+  return {
+    eventsReceived: events.length,
+    lastEvent,
+    currentConfidence,
+    confidenceEvolution: events.length ? Math.min(20, Math.max(1, Math.round(events.length * 2))) : 0,
+  }
+}
+
+function averageDefined(values: Array<number | null | undefined>) {
+  const defined = values.filter((value): value is number => typeof value === "number" && Number.isFinite(value))
+  return defined.length ? defined.reduce((total, value) => total + value, 0) / defined.length : 0
+}
+
 export async function listConstructionHealthCheck(projectId: string) {
   const client = getConstructionSupabaseClient()
 
@@ -229,6 +402,20 @@ export async function listConstructionHealthCheck(projectId: string) {
   )
   const projectResult = await getConstructionProject(projectId)
   const knowledgeGraphResult = projectResult.data ? await buildProjectKnowledgeGraph(projectResult.data) : { data: null }
+  const learningEvents = buildConstructionLearningEvents({
+    project: projectResult.data,
+    documents: documentsResult.data,
+    estimates,
+  })
+  const learningConfidence = recalculateConstructionLearningConfidence({
+    project: projectResult.data,
+    healthCheck: {
+      confidenceScore: latest.get("confidence") ?? 0,
+      costEstimate: cost ? { costConfidence: cost.confidence_score ?? 0 } : null,
+      scheduleEstimate: schedule ? { scheduleConfidence: schedule.confidence_score ?? 0 } : null,
+    },
+    events: learningEvents,
+  })
 
   return {
     data: {
@@ -284,6 +471,9 @@ export async function listConstructionHealthCheck(projectId: string) {
             recommendations: knowledgeGraphResult.data.recommendations,
           }
         : null,
+      learningEvents,
+      learningConfidence,
+      lastLearningEvent: learningEvents[0] ?? null,
     } satisfies ConstructionHealthCheckResult,
     error: null,
   }
@@ -437,6 +627,21 @@ export async function runConstructionScores(projectId: string) {
     })
     .eq("id", projectId)
   const knowledgeGraphResult = await buildProjectKnowledgeGraph(project)
+  const insertedEstimates = (estimatesInsert.data ?? []) as ConstructionEstimateRecord[]
+  const learningEvents = buildConstructionLearningEvents({
+    project,
+    documents,
+    estimates: insertedEstimates,
+  })
+  const learningConfidence = recalculateConstructionLearningConfidence({
+    project,
+    healthCheck: {
+      confidenceScore: computed.confidenceScore,
+      costEstimate: { costConfidence: costEstimate.costConfidence },
+      scheduleEstimate: { scheduleConfidence: scheduleEstimate.scheduleConfidence },
+    },
+    events: learningEvents,
+  })
 
   return {
     data: {
@@ -450,7 +655,7 @@ export async function runConstructionScores(projectId: string) {
       alerts: computed.alerts,
       costEstimate,
       scheduleEstimate,
-      estimates: (estimatesInsert.data ?? []) as ConstructionEstimateRecord[],
+      estimates: insertedEstimates,
       scores: (scoresInsert.data ?? []) as ConstructionScoreRecord[],
       risks: (risksInsert.data ?? []) as ConstructionRiskRecord[],
       knowledgeGraph: knowledgeGraphResult.data
@@ -463,6 +668,9 @@ export async function runConstructionScores(projectId: string) {
             recommendations: knowledgeGraphResult.data.recommendations,
           }
         : null,
+      learningEvents,
+      learningConfidence,
+      lastLearningEvent: learningEvents[0] ?? null,
     } satisfies ConstructionHealthCheckResult,
     error: null,
   }

@@ -1,5 +1,5 @@
-import { createClient } from "@supabase/supabase-js"
 import type { SupabaseClient } from "@supabase/supabase-js"
+import { getSupabaseServerClient } from "@/lib/supabase-server"
 
 export type ProspectorSupabaseError = {
   code: "SUPABASE_NOT_CONFIGURED" | "SUPABASE_QUERY_FAILED"
@@ -11,26 +11,20 @@ type ProspectorSupabaseClientResult =
   | { ok: false; error: ProspectorSupabaseError }
 
 export function getProspectorSupabaseClient(): ProspectorSupabaseClientResult {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const client = getSupabaseServerClient()
 
-  if (!supabaseUrl || !supabaseKey) {
+  if (!client.ok) {
     return {
       ok: false,
       error: {
-        code: "SUPABASE_NOT_CONFIGURED",
-        message: "Supabase nao esta configurado.",
+        code: client.error.code,
+        message: client.error.message,
       } satisfies ProspectorSupabaseError,
     }
   }
 
   return {
     ok: true,
-    supabase: createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    }),
+    supabase: client.supabase,
   }
 }

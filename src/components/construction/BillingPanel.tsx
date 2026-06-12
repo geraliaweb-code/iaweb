@@ -19,6 +19,7 @@ type BillingPanelProps = {
 export default function BillingPanel({ usage, warning }: BillingPanelProps) {
   const { copy } = useConstructionLocale()
   const ui = copy.ui
+  const statusLabel = usage?.status === "trial" || !usage?.status ? "parcial gratuita" : usage.status
 
   return (
     <div className="py-10">
@@ -44,7 +45,7 @@ export default function BillingPanel({ usage, warning }: BillingPanelProps) {
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {[
               ["Plano", usage?.planName ?? "Home"],
-              ["Estado", usage?.status ?? "trial"],
+              ["Estado", statusLabel],
               ["Restantes", String(usage?.remainingThisMonth ?? usage?.monthlyLimit ?? 3)],
             ].map(([label, value]) => (
               <div key={label} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">

@@ -273,6 +273,48 @@ export type ConstructionHealthCheckResult = {
     scheduleFactors: string[]
     recommendations: string[]
   } | null
+  learningEvents?: ConstructionLearningEvent[]
+  learningConfidence?: ConstructionLearningConfidenceSnapshot | null
+  lastLearningEvent?: ConstructionLearningEvent | null
+}
+
+export type ConstructionLearningEventType =
+  | "LE-01"
+  | "LE-02"
+  | "LE-04"
+  | "LE-06"
+  | "LE-09"
+  | "LE-11"
+  | "PROJECT_CANCELLED"
+
+export type ConstructionLearningEventStatus = "pending" | "validated" | "rejected"
+
+export type ConstructionLearningEvent = {
+  id: string
+  projectId: string
+  type: ConstructionLearningEventType
+  timestamp: string
+  source: string
+  status: ConstructionLearningEventStatus
+}
+
+export type ConstructionLearningDecision = "automatico" | "revisao_recomendada" | "aprovacao_obrigatoria"
+
+export type ConstructionLearningConfidenceSnapshot = {
+  documentConfidence: number
+  estimationConfidence: number
+  benchmarkConfidence: number
+  healthScore: number
+  previousHealthScore: number
+  deltaPercent: number
+  decision: ConstructionLearningDecision
+}
+
+export type ConstructionLearningStatus = {
+  eventsReceived: number
+  lastEvent: ConstructionLearningEvent | null
+  currentConfidence: number
+  confidenceEvolution: number
 }
 
 export type ConstructionProjectInput = {

@@ -29,20 +29,16 @@ export function evaluateConstructionUsageLimit(input: {
   trialEndsAt: string | null
   now?: Date
 }): ConstructionUsageDecision {
-  const now = input.now ?? new Date()
-  const trialExpired = input.status === "trial" && input.trialEndsAt ? new Date(input.trialEndsAt).getTime() < now.getTime() : false
-  const blockedStatus = input.status === "past_due" || input.status === "cancelled" || trialExpired
+  const blockedStatus = input.status === "past_due" || input.status === "cancelled"
   const remainingThisMonth = Math.max(0, input.plan.monthlyAnalysisLimit - input.usedThisMonth)
   const limitReached = remainingThisMonth <= 0
 
   return {
     allowed: !blockedStatus && !limitReached,
     reason: blockedStatus
-      ? trialExpired
-        ? "Trial expirado. Atualiza o plano para continuar a gerar analises."
-        : "Subscricao indisponivel. Regulariza o plano para continuar."
+      ? "Subscricao indisponivel. Regulariza o plano para continuar."
       : limitReached
-        ? "Limite mensal de analises atingido. Atualiza o plano para continuar."
+        ? "Analise parcial gratuita usada. Ative um plano Construction Intelligence para continuar."
         : null,
     status: input.status,
     plan: input.plan,

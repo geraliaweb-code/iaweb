@@ -15,6 +15,7 @@ export type ProspectCompany = {
 
 export type DigitalAnalysis = {
   websiteExists: boolean
+  httpsEnabled: boolean
   modernWebsite: boolean
   mobileFriendly: boolean
   googlePresence: boolean
@@ -30,6 +31,34 @@ export type DigitalAnalysis = {
   detectedProblems: string[]
   opportunities: string[]
   commercialRisk: "baixo" | "medio" | "alto"
+}
+
+export type ProspectClassification = "Critico" | "Oportunidade" | "Forte"
+
+export type ProspectScore = {
+  score: number
+  classification: ProspectClassification
+  signals: Record<
+    | "website"
+    | "https"
+    | "mobile"
+    | "googleBusiness"
+    | "social"
+    | "speed"
+    | "visibleContacts"
+    | "form"
+    | "cta"
+    | "seo",
+    boolean | number
+  >
+}
+
+export type AutomaticDiagnosis = {
+  problemas: string[]
+  oportunidades: string[]
+  potencialEstimadoMensal: number
+  resumoExecutivo: string
+  proximaAcao: string
 }
 
 export type OpportunityScore = {
@@ -55,15 +84,19 @@ export type ProspectorFilters = {
   scoreMin?: number
   scoreMax?: number
   status?: string
+  sourceMode?: "simulation" | "production"
 }
 
 export type ProspectorResult = {
   company: ProspectCompany
   digitalAnalysis: DigitalAnalysis
+  prospectScore: ProspectScore
+  diagnosis: AutomaticDiagnosis
   opportunity: OpportunityScore
   financialImpact: Record<string, unknown>
   homepage: Record<string, unknown>
   projectedScore: number
   improvement: number
   templateUsed: string
+  commercial: import("@/lib/sales-agent").SalesAgentMessages
 }

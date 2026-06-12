@@ -2,15 +2,42 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { Lock } from "lucide-react"
 import { notFound } from "next/navigation"
+import BenchmarkPreviewPanel from "@/components/construction/BenchmarkPreviewPanel"
+import ConstructionAdvisorPanel from "@/components/construction/ConstructionAdvisorPanel"
+import ConstructionCostIntelligencePanel from "@/components/construction/ConstructionCostIntelligencePanel"
 import ConstructionCopilot from "@/components/construction/ConstructionCopilot"
+import ConstructionForecastPanel from "@/components/construction/ConstructionForecastPanel"
+import ConstructionOSPanel from "@/components/construction/ConstructionOSPanel"
+import ConstructionRiskPanel from "@/components/construction/ConstructionRiskPanel"
 import ConstructionShell from "@/components/construction/ConstructionShell"
+import ConstructionTimelinePanel from "@/components/construction/ConstructionTimelinePanel"
 import ExecutiveProjectDashboard from "@/components/construction/ExecutiveProjectDashboard"
+import PdfPreviewPanel from "@/components/construction/PdfPreviewPanel"
 import ProjectTabs from "@/components/construction/ProjectTabs"
+import UpgradeBanner from "@/components/construction/UpgradeBanner"
 import { getConstructionAccountContext, getConstructionAuthUser } from "@/lib/construction/auth"
-import { constructionDemoHealthCheck, constructionDemoProject } from "@/lib/construction/demo-data"
+import {
+  constructionDemoHealthCheck,
+  constructionDemoProject,
+  constructionPt002HealthCheck,
+  constructionPt002Project,
+  constructionTartasHealthCheck,
+  constructionTartasProject,
+} from "@/lib/construction/demo-data"
+import { buildConstructionAdvisor } from "@/lib/construction/advisor"
+import { generateBenchmarkV2 } from "@/lib/construction/benchmark-v2"
+import { buildConstructionCommercialAnalysis } from "@/lib/construction/commercial/experience"
+import { generateConstructionCostForecast } from "@/lib/construction/cost-forecasting"
 import { getConstructionProject } from "@/lib/construction/db"
-import { isValidConstructionProjectId } from "@/lib/construction/production"
+import { buildConstructionIntelligence } from "@/lib/construction/os"
+import { buildProcurementPlan } from "@/lib/construction/procurement"
+import { isConstructionAlphaEnvironment, isValidConstructionProjectId } from "@/lib/construction/production"
+import { generateConstructionRiskReport } from "@/lib/construction/risk-v2"
 import { listConstructionHealthCheck } from "@/lib/construction/score-engine"
+import { buildSupplierRecommendations, type SupplierRecommendation, type SupplierRecommendationResult } from "@/lib/construction/supplier-intelligence"
+import { generateConstructionTimeline } from "@/lib/construction/timeline"
+import type { ConstructionAdvisorResult } from "@/lib/construction/advisor"
+import type { ConstructionHealthCheckResult, ConstructionProject } from "@/lib/construction/types"
 
 export const dynamic = "force-dynamic"
 
@@ -24,13 +51,35 @@ export const metadata: Metadata = {
 
 export default async function ConstructionProjectPage({ params }: ProjectPageProps) {
   const { id } = await params
+  const isAlpha = isConstructionAlphaEnvironment()
 
   if (id === "demo") {
+    const demoIntelligence = buildAlphaHealthCheckV2Intelligence(constructionDemoProject, constructionDemoHealthCheck, "Portugal")
     return (
       <ConstructionShell>
-        <ExecutiveProjectDashboard project={constructionDemoProject} healthCheck={constructionDemoHealthCheck} />
+        <ExecutiveProjectDashboard project={constructionDemoProject} healthCheck={constructionDemoHealthCheck} intelligence={demoIntelligence} />
         <ConstructionCopilot project={constructionDemoProject} healthCheck={constructionDemoHealthCheck} />
         <ProjectTabs project={constructionDemoProject} demoMode />
+      </ConstructionShell>
+    )
+  }
+
+  if (isAlpha && id === "pt-002") {
+    const pt002Intelligence = buildAlphaHealthCheckV2Intelligence(constructionPt002Project, constructionPt002HealthCheck, "Portugal")
+    return (
+      <ConstructionShell>
+        <ExecutiveProjectDashboard project={constructionPt002Project} healthCheck={constructionPt002HealthCheck} intelligence={pt002Intelligence} />
+        <ProjectTabs project={constructionPt002Project} demoMode />
+      </ConstructionShell>
+    )
+  }
+
+  if (isAlpha && id === "tartas") {
+    const tartasIntelligence = buildAlphaHealthCheckV2Intelligence(constructionTartasProject, constructionTartasHealthCheck, "Franca")
+    return (
+      <ConstructionShell>
+        <ExecutiveProjectDashboard project={constructionTartasProject} healthCheck={constructionTartasHealthCheck} intelligence={tartasIntelligence} />
+        <ProjectTabs project={constructionTartasProject} demoMode />
       </ConstructionShell>
     )
   }
@@ -76,14 +125,191 @@ export default async function ConstructionProjectPage({ params }: ProjectPagePro
   }
 
   const healthCheckResult = await listConstructionHealthCheck(data.id)
+  const advisorResult = await buildConstructionAdvisor(data.id)
+  const healthCheckV2 = await buildHealthCheckV2Intelligence(data.id, data, healthCheckResult.data, advisorResult.data)
 
   return (
     <ConstructionShell>
-      <ExecutiveProjectDashboard project={data} healthCheck={healthCheckResult.data} warning={healthCheckResult.error?.message} />
-      <LockedCopilotPanel />
+      <ExecutiveProjectDashboard
+        project={data}
+        healthCheck={healthCheckResult.data}
+        intelligence={healthCheckV2}
+        warning={[healthCheckResult.error?.message, healthCheckV2.warning].filter(Boolean).join(" ")}
+      />
+      {isAlpha ? (
+        <>
+          <ConstructionOSPanel projectId={data.id} />
+          <ConstructionTimelinePanel projectId={data.id} />
+          <ConstructionRiskPanel projectId={data.id} />
+          <ConstructionForecastPanel projectId={data.id} />
+          <ConstructionAdvisorPanel projectId={data.id} advisor={advisorResult.data} warnings={advisorResult.warnings} />
+          <ConstructionCostIntelligencePanel projectId={data.id} />
+          <BenchmarkPreviewPanel projectId={data.id} />
+          <PdfPreviewPanel projectId={data.id} />
+          <UpgradeBanner projectId={data.id} />
+          <LockedCopilotPanel />
+        </>
+      ) : null}
       <ProjectTabs project={data} />
     </ConstructionShell>
   )
+}
+
+function buildSupplierMap(commercial: Awaited<ReturnType<typeof buildConstructionCommercialAnalysis>>["data"]) {
+  const supplierRecommendations: Record<string, SupplierRecommendationResult | SupplierRecommendation | null> = {}
+
+  for (const item of commercial?.costBreakdownV2.items.slice(0, 8) ?? []) {
+    supplierRecommendations[item.materialName || item.specialty] = buildSupplierRecommendations({
+      country: commercial?.project.technical_country ?? commercial?.project.country,
+      specialty: item.specialty,
+      materialCategory: item.materialName,
+    })
+  }
+
+  return supplierRecommendations
+}
+
+async function buildHealthCheckV2Intelligence(
+  projectId: string,
+  project: ConstructionProject,
+  healthCheck: ConstructionHealthCheckResult | null,
+  advisor: ConstructionAdvisorResult | null,
+) {
+  const [commercialResult, benchmarkResult] = await Promise.all([
+    buildConstructionCommercialAnalysis(projectId),
+    generateBenchmarkV2({ projectId }),
+  ])
+  const commercial = commercialResult.data
+  const supplierRecommendations = buildSupplierMap(commercial)
+  const procurementPlan = commercial?.costBreakdownV2
+    ? buildProcurementPlan({
+        project: commercial.project,
+        costBreakdown: commercial.costBreakdownV2,
+        supplierRecommendations,
+      })
+    : null
+  const timeline = generateConstructionTimeline({
+    projectId,
+    project: commercial?.project ?? project,
+    healthCheck,
+    specialties: healthCheck?.identifiedSpecialties ?? commercial?.costBreakdownV2.items.map((item) => item.specialty) ?? [],
+    complexityScore: healthCheck?.complexityScore ?? project.complexity_score ?? null,
+    riskScore: healthCheck?.riskScore ?? project.risk_score ?? null,
+    confidenceScore: healthCheck?.confidenceScore ?? project.confidence_score ?? null,
+    maturityScore: healthCheck?.maturityScore ?? project.maturity_score ?? null,
+    procurementPlan,
+    supplierRecommendations,
+    knowledgeGraph: healthCheck?.knowledgeGraph,
+  })
+  const constructionOS = buildConstructionIntelligence({
+    projectId,
+    project: commercial?.project ?? project,
+    healthCheck,
+    costBreakdownV2: commercial?.costBreakdownV2 ?? null,
+    advisorInsights: advisor,
+    supplierRecommendations,
+    procurementPlan,
+    timeline,
+    benchmarkV2: benchmarkResult.data,
+    unlockStatus: commercial?.unlockedAnalysis ?? null,
+  })
+  const riskReport = generateConstructionRiskReport({
+    projectId,
+    project: commercial?.project ?? project,
+    healthCheck,
+    timeline,
+    procurementPlan,
+    procurementActions: constructionOS.procurementActions,
+    supplierRecommendations,
+    benchmarkV2: benchmarkResult.data,
+    costBreakdownV2: commercial?.costBreakdownV2 ?? null,
+    constructionOS,
+    knowledgeGraph: healthCheck?.knowledgeGraph,
+  })
+  const forecast = generateConstructionCostForecast({
+    projectId,
+    project: commercial?.project ?? project,
+    healthCheck,
+    costBreakdownV2: commercial?.costBreakdownV2 ?? null,
+    timeline,
+    riskReport,
+    benchmarkV2: benchmarkResult.data,
+    constructionOS,
+    procurementPlan,
+    supplierRecommendations,
+  })
+
+  return {
+    timeline,
+    riskReport,
+    forecast,
+    benchmark: benchmarkResult.data,
+    advisor,
+    warning: [
+      commercialResult.error?.message,
+      benchmarkResult.error?.message,
+      ...benchmarkResult.warnings,
+    ].filter(Boolean).join(" "),
+  }
+}
+
+function buildAlphaHealthCheckV2Intelligence(project: ConstructionProject, healthCheck: ConstructionHealthCheckResult, benchmarkCountry: "Portugal" | "Franca") {
+  const timeline = generateConstructionTimeline({
+    projectId: project.id,
+    project,
+    healthCheck,
+    specialties: healthCheck.identifiedSpecialties,
+    complexityScore: healthCheck.complexityScore,
+    riskScore: healthCheck.riskScore,
+    confidenceScore: healthCheck.confidenceScore,
+    maturityScore: healthCheck.maturityScore,
+    knowledgeGraph: healthCheck.knowledgeGraph,
+  })
+  const riskReport = generateConstructionRiskReport({
+    projectId: project.id,
+    project,
+    healthCheck,
+    timeline,
+    knowledgeGraph: healthCheck.knowledgeGraph,
+  })
+  const forecast = generateConstructionCostForecast({
+    projectId: project.id,
+    project,
+    healthCheck,
+    timeline,
+    riskReport,
+  })
+  const mediumCost = project.estimated_area_m2 ? Math.round((healthCheck.costEstimate?.estimatedCostMid ?? forecast.expectedCase) / project.estimated_area_m2) : 1900
+
+  return {
+    timeline,
+    riskReport,
+    forecast,
+    benchmark: {
+      accessLevel: "full_unlocked" as const,
+      isBlocked: false,
+      projectCountry: benchmarkCountry,
+      comparedCountries: [],
+      projectCostPerM2: mediumCost,
+      marketCostPerM2Range: benchmarkCountry === "Franca" ? { low: 1420, medium: 1910, high: 2580 } : { low: 1400, medium: 1900, high: 2600 },
+      costPosition: "dentro_da_media" as const,
+      specialtyComparisons: [],
+      productivityComparisons: [],
+      laborComparisons: [],
+      scheduleComparison: null,
+      riskComparison: null,
+      maturityComparison: null,
+      confidenceScore: healthCheck.learningConfidence?.benchmarkConfidence ?? healthCheck.confidenceScore,
+      executiveInsights: [
+        benchmarkCountry === "Franca"
+          ? "TARTAS consolidado produz Benchmark FR consistente para custo, prazo e produtividade."
+          : `${project.name} esta dentro da media de custo para projetos semelhantes.`,
+      ],
+      lockedSections: [],
+      upgradeCTA: null,
+    },
+    advisor: null,
+  }
 }
 
 function LockedCopilotPanel() {

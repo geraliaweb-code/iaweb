@@ -21,7 +21,7 @@ export default async function ProspectorPage() {
   const { data, error } = await client.supabase
     .from("prospects")
     .select("*")
-    .order("opportunity_score", { ascending: false })
+    .order("prospect_score", { ascending: true })
     .limit(100)
 
   return <ProspectorClient initialProspects={(data ?? []) as never[]} initialWarning={error?.message} />

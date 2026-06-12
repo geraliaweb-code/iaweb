@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js"
+import { getSupabaseServerClient } from "@/lib/supabase-server"
 
 const RESEND_API_URL = "https://api.resend.com/emails"
 
@@ -27,20 +27,14 @@ type EmailEventInsert = {
 }
 
 function getSupabaseClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const client = getSupabaseServerClient()
 
-  if (!supabaseUrl || !supabaseKey) {
-    return { supabase: null, error: "Supabase nao configurado." }
+  if (!client.ok) {
+    return { supabase: null, error: client.error.message }
   }
 
   return {
-    supabase: createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    }),
+    supabase: client.supabase,
     error: null,
   }
 }

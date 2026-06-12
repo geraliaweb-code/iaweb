@@ -14,11 +14,22 @@ type Prospect = {
   website?: string
   cidade?: string
   nicho: string
+  prospect_score?: number
+  classificacao?: "Critico" | "Oportunidade" | "Forte"
   score_digital: number
   opportunity_score: number
   priority_label: string
   problemas_detectados: string[]
   oportunidades: string[]
+  potencial_estimado?: number
+  resumo_executivo?: string
+  proxima_acao?: string
+  whatsapp_message?: string
+  email_subject?: string
+  email_body?: string
+  followup_3d?: string
+  followup_7d?: string
+  followup_15d?: string
   impacto_financeiro: {
     lostRevenueMonthly?: { min?: number; max?: number }
     lostRevenueAnnual?: { min?: number; max?: number }
@@ -37,6 +48,7 @@ type ProspectorClientProps = {
 
 const nicheOptions = ["", "construcao", "clinicas", "imobiliario", "restaurantes", "advocacia", "contabilidade"]
 const priorityOptions = ["", "Critica", "Alta", "Media", "Baixa"]
+const classificationOptions = ["", "Critico", "Oportunidade", "Forte"]
 const statusOptions = ["", "novo", "promovido_crm", "descartado"]
 
 function formatEuro(value: number | undefined) {
@@ -47,11 +59,22 @@ function formatEuro(value: number | undefined) {
   }).format(value ?? 0)
 }
 
-function priorityClass(priority: string) {
-  if (priority === "Critica") return "border-rose-300/30 bg-rose-300/10 text-rose-100"
-  if (priority === "Alta") return "border-[#FFB800]/35 bg-[#FFB800]/10 text-[#FFE3A3]"
-  if (priority === "Media") return "border-[#00A3FF]/30 bg-[#00A3FF]/10 text-[#BFEAFF]"
-  return "border-white/10 bg-white/[0.04] text-slate-300"
+function getProspectScore(prospect: Prospect) {
+  return prospect.prospect_score ?? prospect.score_digital ?? 0
+}
+
+function getClassification(prospect: Prospect) {
+  if (prospect.classificacao) return prospect.classificacao
+  const score = getProspectScore(prospect)
+  if (score <= 40) return "Critico"
+  if (score <= 70) return "Oportunidade"
+  return "Forte"
+}
+
+function classificationClass(classification: string) {
+  if (classification === "Critico") return "border-rose-300/30 bg-rose-300/10 text-rose-100"
+  if (classification === "Oportunidade") return "border-[#FFB800]/35 bg-[#FFB800]/10 text-[#FFE3A3]"
+  return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100"
 }
 
 export default function ProspectorClient({ initialProspects, initialWarning }: ProspectorClientProps) {
@@ -60,6 +83,7 @@ export default function ProspectorClient({ initialProspects, initialWarning }: P
   const [nicho, setNicho] = useState("")
   const [cidade, setCidade] = useState("")
   const [priority, setPriority] = useState("")
+  const [classification, setClassification] = useState("")
   const [status, setStatus] = useState("")
   const [scoreMin, setScoreMin] = useState("0")
   const [loading, setLoading] = useState(false)
@@ -70,15 +94,18 @@ export default function ProspectorClient({ initialProspects, initialWarning }: P
       .filter((prospect) => (!nicho ? true : prospect.nicho === nicho))
       .filter((prospect) => (!cidade ? true : (prospect.cidade ?? "").toLowerCase().includes(cidade.toLowerCase())))
       .filter((prospect) => (!priority ? true : prospect.priority_label === priority))
+      .filter((prospect) => (!classification ? true : getClassification(prospect) === classification))
       .filter((prospect) => (!status ? true : prospect.status === status))
-      .filter((prospect) => prospect.opportunity_score >= Number(scoreMin || 0))
-      .sort((a, b) => b.opportunity_score - a.opportunity_score)
-  }, [cidade, nicho, priority, prospects, scoreMin, status])
+      .filter((prospect) => getProspectScore(prospect) >= Number(scoreMin || 0))
+      .sort((a, b) => getProspectScore(a) - getProspectScore(b))
+  }, [cidade, classification, nicho, priority, prospects, scoreMin, status])
+  const totalPotential = prospects.reduce((sum, item) => sum + (item.potencial_estimado ?? item.impacto_financeiro?.lostRevenueMonthly?.max ?? 0), 0)
   const metrics: Array<[string, number, LucideIcon]> = [
     ["Prospects", prospects.length, Database],
-    ["Criticas", prospects.filter((item) => item.priority_label === "Critica").length, Zap],
-    ["Promovidos", prospects.filter((item) => item.status === "promovido_crm").length, Send],
-    ["Score medio", Math.round(prospects.reduce((sum, item) => sum + item.opportunity_score, 0) / Math.max(1, prospects.length)), Target],
+    ["Criticos", prospects.filter((item) => getClassification(item) === "Critico").length, Zap],
+    ["Oportunidades", prospects.filter((item) => getClassification(item) === "Oportunidade").length, Target],
+    ["Fortes", prospects.filter((item) => getClassification(item) === "Forte").length, Sparkles],
+    ["Valor potencial", totalPotential, Send],
   ]
   const topCities = Object.entries(
     filteredProspects.reduce<Record<string, number>>((acc, prospect) => {
@@ -90,7 +117,7 @@ export default function ProspectorClient({ initialProspects, initialWarning }: P
     .sort((a, b) => b[1] - a[1])
     .slice(0, 6)
   const topProspects = filteredProspects.slice(0, 6)
-  const radarScore = Math.round(filteredProspects.reduce((sum, item) => sum + item.opportunity_score, 0) / Math.max(1, filteredProspects.length))
+  const radarScore = Math.round(filteredProspects.reduce((sum, item) => sum + getProspectScore(item), 0) / Math.max(1, filteredProspects.length))
 
   async function generateProspects() {
     setLoading(true)
@@ -98,12 +125,12 @@ export default function ProspectorClient({ initialProspects, initialWarning }: P
     const response = await fetch("/api/prospector/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nicho: nicho || undefined, cidade: cidade || undefined, limit: 30, scoreMin: Number(scoreMin || 0) }),
+      body: JSON.stringify({ nicho: nicho || undefined, cidade: cidade || undefined, limit: 30, scoreMin: Number(scoreMin || 0), sourceMode: "simulation" }),
     })
     const data = await response.json()
     setProspects(data.prospects ?? [])
     setSelected(data.prospects?.[0] ?? null)
-    setMessage(data.warning ?? (response.ok ? "Prospects gerados com sucesso." : data.error ?? "Erro ao gerar prospects."))
+    setMessage(data.warning ?? (response.ok ? `Prospects gerados com sucesso (${data.mode ?? "simulation"} mode).` : data.error ?? "Erro ao gerar prospects."))
     setLoading(false)
   }
 
@@ -156,20 +183,20 @@ export default function ProspectorClient({ initialProspects, initialWarning }: P
           </p>
         </header>
 
-        <section className="grid gap-3 md:grid-cols-4">
+        <section className="grid gap-3 md:grid-cols-5">
           {metrics.map(([label, value, Icon]) => (
             <div key={label} className="iaweb-premium-card rounded-2xl p-5">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">{String(label)}</p>
                 <Icon size={19} className="text-[#3AB8FF]" />
               </div>
-              <p className="mt-3 text-4xl font-black tracking-[-0.05em] text-white">{value}</p>
+              <p className="mt-3 text-4xl font-black tracking-[-0.05em] text-white">{label === "Valor potencial" ? formatEuro(value) : value}</p>
             </div>
           ))}
         </section>
 
         <section className="iaweb-premium-card rounded-2xl p-4">
-          <div className="grid gap-3 lg:grid-cols-[180px_1fr_160px_160px_140px_auto]">
+          <div className="grid gap-3 lg:grid-cols-[160px_1fr_145px_160px_140px_120px_auto]">
             <select value={nicho} onChange={(event) => setNicho(event.target.value)} className="h-11 rounded-xl border border-white/10 bg-[#081120] px-3 text-sm text-white outline-none">
               {nicheOptions.map((option) => (
                 <option key={option || "todos"} value={option}>
@@ -182,6 +209,13 @@ export default function ProspectorClient({ initialProspects, initialWarning }: P
               {priorityOptions.map((option) => (
                 <option key={option || "todas"} value={option}>
                   {option || "Prioridade"}
+                </option>
+              ))}
+            </select>
+            <select value={classification} onChange={(event) => setClassification(event.target.value)} className="h-11 rounded-xl border border-white/10 bg-[#081120] px-3 text-sm text-white outline-none">
+              {classificationOptions.map((option) => (
+                <option key={option || "classificacao"} value={option}>
+                  {option || "Classificacao"}
                 </option>
               ))}
             </select>
@@ -212,7 +246,7 @@ export default function ProspectorClient({ initialProspects, initialWarning }: P
                 <span className="text-4xl font-black text-white">{radarScore}</span>
               </div>
               <div>
-                <p className="text-sm leading-6 text-slate-400">Media das oportunidades filtradas. Quanto maior, maior urgencia comercial.</p>
+              <p className="text-sm leading-6 text-slate-400">Media do prospect score filtrado. Scores baixos revelam maior fragilidade digital imediata.</p>
                 <p className="mt-3 text-xs font-black uppercase tracking-[0.16em] text-[#FFB800]">{filteredProspects.length} sinais ativos</p>
               </div>
             </div>
@@ -241,10 +275,10 @@ export default function ProspectorClient({ initialProspects, initialWarning }: P
                 <div key={prospect.id ?? prospect.email ?? prospect.empresa}>
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-bold text-white">{prospect.empresa}</span>
-                    <span className="text-[#FFB800]">{prospect.opportunity_score}/100</span>
+                    <span className="text-[#FFB800]">{getProspectScore(prospect)}/100</span>
                   </div>
                   <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
-                    <div className="h-full rounded-full bg-gradient-to-r from-[#00A3FF] to-[#FFB800]" style={{ width: `${prospect.opportunity_score}%` }} />
+                    <div className="h-full rounded-full bg-gradient-to-r from-[#00A3FF] to-[#FFB800]" style={{ width: `${getProspectScore(prospect)}%` }} />
                   </div>
                 </div>
               ))}
@@ -266,15 +300,15 @@ export default function ProspectorClient({ initialProspects, initialWarning }: P
                       <h2 className="text-lg font-black text-white">{prospect.empresa}</h2>
                       <p className="mt-1 text-sm text-slate-500">{prospect.nicho} - {prospect.cidade} - {prospect.website || "sem website"}</p>
                     </div>
-                    <span className={`rounded-full border px-3 py-1 text-xs font-black uppercase tracking-[0.12em] ${priorityClass(prospect.priority_label)}`}>
-                      {prospect.priority_label}
+                    <span className={`rounded-full border px-3 py-1 text-xs font-black uppercase tracking-[0.12em] ${classificationClass(getClassification(prospect))}`}>
+                      {getClassification(prospect)}
                     </span>
                   </div>
                   <div className="mt-4 grid gap-3 md:grid-cols-5">
+                    <Metric label="Prospect" value={`${getProspectScore(prospect)}/100`} />
                     <Metric label="Digital" value={`${prospect.score_digital}/100`} />
                     <Metric label="Opportunity" value={`${prospect.opportunity_score}/100`} />
-                    <Metric label="Mensal" value={formatEuro(prospect.impacto_financeiro?.lostRevenueMonthly?.max)} />
-                    <Metric label="Anual" value={formatEuro(prospect.impacto_financeiro?.lostRevenueAnnual?.max)} />
+                    <Metric label="Mensal" value={formatEuro(prospect.potencial_estimado ?? prospect.impacto_financeiro?.lostRevenueMonthly?.max)} />
                     <Metric label="Projetado" value={`${prospect.score_projetado}/100`} />
                   </div>
                 </article>
@@ -287,10 +321,13 @@ export default function ProspectorClient({ initialProspects, initialWarning }: P
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#3AB8FF]">Detalhes</p>
                 <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-white">{selected.empresa}</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-400">{selected.problemas_detectados?.[0] ?? "Problema principal a validar."}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-400">{selected.resumo_executivo ?? selected.problemas_detectados?.[0] ?? "Problema principal a validar."}</p>
                 <div className="mt-5 grid gap-3">
+                  <Metric label="Prospect score" value={`${getProspectScore(selected)}/100`} />
+                  <Metric label="Classificacao" value={getClassification(selected)} />
                   <Metric label="Score digital" value={`${selected.score_digital}/100`} />
                   <Metric label="Opportunity score" value={`${selected.opportunity_score}/100`} />
+                  <Metric label="Potencial mensal" value={formatEuro(selected.potencial_estimado ?? selected.impacto_financeiro?.lostRevenueMonthly?.max)} />
                   <Metric label="Melhoria prevista" value={`+${selected.melhoria_prevista} pontos`} />
                   <Metric label="Template" value={selected.template_utilizado || "--"} />
                 </div>
@@ -302,6 +339,9 @@ export default function ProspectorClient({ initialProspects, initialWarning }: P
                   ))}
                 </div>
                 <div className="mt-5 grid gap-3">
+                  <div className="rounded-xl border border-[#00A3FF]/20 bg-[#00A3FF]/10 p-3 text-sm leading-6 text-[#BFEAFF]">
+                    {selected.proxima_acao ?? "Validar prospect e preparar proxima acao comercial."}
+                  </div>
                   <button type="button" onClick={() => promoteToCrm(selected)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#007BFF] to-[#FFB800] px-4 text-sm font-black text-white shadow-[0_0_28px_rgba(255,184,0,0.18)]">
                     Promover para CRM
                     <ArrowRight size={16} />

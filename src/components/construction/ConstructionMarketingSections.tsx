@@ -219,7 +219,7 @@ export function ConstructionHowItWorks() {
         </div>
         <div>
           <div className="relative aspect-video overflow-hidden rounded-xl border border-white/15 bg-slate-950 shadow-2xl shadow-black/30">
-            <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(2,8,23,0.18),rgba(2,8,23,0.78)),url('/brand/construction-cinematic-reference.png')] bg-cover bg-center" />
+            <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(2,8,23,0.18),rgba(2,8,23,0.78)),url('/brand/construction-hero-8k.jpg')] bg-cover bg-center" />
             <button type="button" className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/50 bg-white/10 text-white backdrop-blur">
               <Play className="h-9 w-9 fill-white" aria-hidden="true" />
             </button>

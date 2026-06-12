@@ -13,6 +13,7 @@ export function analyzeDigitalPresence(company: ProspectCompany): DigitalAnalysi
   const hasWebsite = Boolean(company.website?.includes("."))
   const entropy = signal(base, 100)
   const websiteExists = hasWebsite && entropy % 9 !== 0
+  const httpsEnabled = websiteExists && company.website?.startsWith("https://") === true
   const modernWebsite = websiteExists && entropy % 4 !== 0
   const mobileFriendly = websiteExists && entropy % 5 !== 0
   const googlePresence = entropy % 6 !== 0
@@ -53,6 +54,7 @@ export function analyzeDigitalPresence(company: ProspectCompany): DigitalAnalysi
 
   return {
     websiteExists,
+    httpsEnabled,
     modernWebsite,
     mobileFriendly,
     googlePresence,
