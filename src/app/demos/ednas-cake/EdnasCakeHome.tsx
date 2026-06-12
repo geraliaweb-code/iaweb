@@ -1,74 +1,53 @@
 "use client"
 
 /**
- * Edna's Cake — Bolos, Doces e Salgados Artesanais | Demo Premium
+ * Edna's Cake — Confeitaria Artesanal | Demo Premium (v2 · cinematográfica)
  * --------------------------------------------------------------------------
- * Demo comercial realista para apresentar à dona da Edna's Cake.
  * Rota isolada: /demos/ednas-cake  (não afeta nenhuma rota existente).
  *
- * FOTOS E VÍDEOS REAIS fornecidos pelo cliente (pasta /public/ednas-cake/):
- *   Imagens (.webp / .png):
- *     bolo-chocolate.webp      → bolo de chocolate com brigadeiro
- *     bolo-red-velvet.webp     → red velvet com frutos vermelhos
- *     bolo-morango.webp        → bolo de chocolate com morangos
- *     bolo-princesa.webp       → bolo personalizado (princesas "Helena")
- *     bolo-farmacia.webp       → bolo personalizado (farmacêutica "Sofia")
- *     bolo-ironman.webp        → bolo personalizado (Iron Man "Thierry")
- *     bolo-melancia.png        → bolo personalizado (melancia / Turma da Mônica)
- *     bolo-borboletas.png      → bolo personalizado (borboletas "Shaela")
- *     combo-doce-salgado.webp  → bolo de pote + caixa de coxinhas
- *     salgados-brigadeiro.webp → coxinhas (branca + brigadeiro) com a marca
- *     salgados-caixa.png       → caixa de salgados da marca
- *     coxinhas-prato.png       → prato de coxinhas douradas
- *     morango-do-amor.png      → morango do amor na caixa da marca
- *     sobremesas-presente.webp → sobremesas em embalagem presente
- *     sobremesa-copo.png       → sobremesa no copo
- *     loja-fachada.png         → fachada / montra da loja em Arcozelo
- *   Vídeos (.mp4):
- *     video-bolos.mp4          → bolos de festa / casamento (hero + reel)
- *     video-salgados.mp4       → coxinhas / salgados / açaí
- *     video-festa.mp4          → salgados e bolos de aniversário
+ * Reconstrução completa orientada à EMOÇÃO e à MARCA, calibrada pela
+ * referência da Demo Factory (Marlene Miranda). Ordem obrigatória:
+ *   1 Hero · 2 Emoção · 3 Marca · 4 Storytelling · 5 Confiança
+ *   6 Reviews · 7 Produtos/Experiências · 8 Funcionalidades (galeria/contactos)
  *
- * Avaliações = REAIS do Google (5 mostradas). Rating 4,9 · 9 críticas.
- * Horário = placeholder editável (Google: abre às 14:00).
+ * Assets REAIS do cliente em /public/ednas-cake/ (fotos .webp/.png + vídeos .mp4).
+ * Avaliações = reais do Google (4,9 · 9 críticas). Horário = placeholder editável.
  * --------------------------------------------------------------------------
  */
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import { motion } from "framer-motion"
+import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import Lenis from "lenis"
 import { Fraunces } from "next/font/google"
 import {
-  Cake,
-  Croissant,
-  Candy,
-  UtensilsCrossed,
+  ArrowUpRight,
+  ChevronRight,
+  Heart,
+  MapPin,
+  Phone,
+  Play,
+  Quote,
   Sparkles,
   Star,
-  Heart,
-  Gift,
-  Users,
-  Coffee,
-  Baby,
-  PartyPopper,
-  CalendarHeart,
-  ChefHat,
-  Phone,
-  MapPin,
-  Clock,
-  Menu,
   X,
-  ArrowRight,
-  ArrowUpRight,
-  CheckCircle2,
-  Quote,
 } from "lucide-react"
 
 const display = Fraunces({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
+})
+
+const EASE = [0.21, 0.47, 0.32, 0.98] as const
+const reveal = (delay = 0) => ({
+  initial: { opacity: 0, y: 32 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-70px" },
+  transition: { duration: 0.9, delay, ease: EASE },
 })
 
 /* ──────────────────────  ÍCONES DE MARCA (SVG)  ────────────────────── */
@@ -96,13 +75,12 @@ const WHATSAPP = "351920497230"
 function waLink(produto?: string) {
   const base = `https://wa.me/${WHATSAPP}`
   if (!produto) return base
-  const msg = `Olá Edna's Cake! 🎂 Gostaria de fazer uma encomenda: ${produto}.`
+  const msg = `Olá Edna's Cake! 🎂 Gostaria de falar sobre: ${produto}.`
   return `${base}?text=${encodeURIComponent(msg)}`
 }
 
 const EMPRESA = {
   nome: "Edna's Cake",
-  tagline: "Doces & Salgados",
   slogan: "O sabor que abraça.",
   telefone: "920 497 230",
   telefoneHref: "tel:+351920497230",
@@ -112,890 +90,687 @@ const EMPRESA = {
   instagramHandle: "@ednascake.pt",
 }
 
-const NAV_LINKS = [
-  { label: "Início", href: "#inicio" },
-  { label: "Favoritos", href: "#favoritos" },
-  { label: "Bolos", href: "#catalogo" },
-  { label: "Salgados", href: "#catalogo" },
-  { label: "Eventos", href: "#eventos" },
+const NAV = [
+  { label: "História", href: "#historia" },
+  { label: "Experiências", href: "#experiencias" },
   { label: "Avaliações", href: "#avaliacoes" },
+  { label: "Galeria", href: "#galeria" },
   { label: "Contactos", href: "#contactos" },
 ]
 
-const FAVORITOS = [
-  {
-    icon: Croissant,
-    titulo: "Coxinha",
-    texto: "Crocante por fora, cremosa por dentro e cheia de sabor brasileiro.",
-  },
-  {
-    icon: Cake,
-    titulo: "Bolos personalizados",
-    texto: "Bolos criados para aniversários, casamentos, batizados e datas especiais.",
-  },
-  {
-    icon: Candy,
-    titulo: "Docinhos de festa",
-    texto: "Brigadeiros, beijinhos e doces que deixam qualquer mesa mais bonita.",
-  },
-  {
-    icon: UtensilsCrossed,
-    titulo: "Salgados",
-    texto: "Opções perfeitas para festas, empresas, reuniões e encomendas familiares.",
-  },
+const PILARES = [
+  { icon: Heart, titulo: "Carinho brasileiro", texto: "Receitas trazidas do Brasil, feitas com o afeto de quem cozinha para a própria família." },
+  { icon: Sparkles, titulo: "Detalhe artesanal", texto: "Cada bolo é desenhado à mão, peça única, pensado ao pormenor para o seu momento." },
+  { icon: Star, titulo: "Reconhecida em Barcelos", texto: "4,9 no Google e a fama de «melhor coxinha de Barcelos» — confiança de quem já provou." },
 ]
 
-const CATALOGO = [
-  {
-    img: "/ednas-cake/bolo-red-velvet.webp",
-    categoria: "Bolos",
-    titulo: "Red Velvet com frutos vermelhos",
-    texto: "Camadas fofas com creme aveludado e frutos vermelhos frescos.",
-  },
-  {
-    img: "/ednas-cake/coxinhas-prato.png",
-    categoria: "Salgados",
-    titulo: "Coxinhas douradas",
-    texto: "Crocantes, douradas e recheadas — a estrela das festas.",
-  },
-  {
-    img: "/ednas-cake/bolo-princesa.webp",
-    categoria: "Personalizados",
-    titulo: "Bolos temáticos",
-    texto: "Cada detalhe pensado para tornar a festa inesquecível.",
-  },
-  {
-    img: "/ednas-cake/bolo-chocolate.webp",
-    categoria: "Bolos",
-    titulo: "Chocolate com brigadeiro",
-    texto: "Massa húmida de chocolate com brigadeiro cremoso e crocante.",
-  },
-  {
-    img: "/ednas-cake/morango-do-amor.png",
-    categoria: "Doces",
-    titulo: "Morango do amor",
-    texto: "O doce do momento — e os docinhos que enchem a mesa de carinho.",
-  },
-  {
-    img: "/ednas-cake/salgados-caixa.png",
-    categoria: "Salgados",
-    titulo: "Caixas para partilhar",
-    texto: "Sortido de salgados perfeito para reuniões e coffee breaks.",
-  },
-  {
-    img: "/ednas-cake/bolo-morango.webp",
-    categoria: "Bolos",
-    titulo: "Bolo de morango",
-    texto: "Chocolate com morangos e frutos vermelhos, fresquinho na caixa.",
-  },
-  {
-    img: "/ednas-cake/sobremesas-presente.webp",
-    categoria: "Sobremesas",
-    titulo: "Sobremesas presente",
-    texto: "Sobremesas individuais em embalagem que já é um presente.",
-  },
+const METODO = [
+  { n: "01", titulo: "Conversa", texto: "Conte-nos a ocasião, a data e a sua ideia. Ouvimos cada detalhe com atenção." },
+  { n: "02", titulo: "Criação", texto: "Desenhamos o bolo, escolhemos sabores e definimos os salgados e doces da festa." },
+  { n: "03", titulo: "Confeção", texto: "Tudo feito à mão, fresco, com ingredientes de qualidade e tempo de dedicação." },
+  { n: "04", titulo: "Entrega", texto: "Levante na loja em Arcozelo ou combine connosco a recolha para o grande dia." },
 ]
 
-const VIDEOS = [
-  {
-    src: "/ednas-cake/video-bolos.mp4",
-    poster: "/ednas-cake/bolo-princesa.webp",
-    etiqueta: "Bolos personalizados",
-  },
-  {
-    src: "/ednas-cake/video-salgados.mp4",
-    poster: "/ednas-cake/coxinhas-prato.png",
-    etiqueta: "Salgados & Coxinhas",
-  },
-  {
-    src: "/ednas-cake/video-festa.mp4",
-    poster: "/ednas-cake/bolo-melancia.png",
-    etiqueta: "Festas & Eventos",
-  },
-]
-
-const ETAPAS = [
-  { n: "1", titulo: "Escolha o produto", texto: "Bolo, salgados, doces ou um menu completo para a sua festa." },
-  { n: "2", titulo: "Envie data e quantidade", texto: "Diga-nos a data, o número de pessoas e a sua ideia." },
-  { n: "3", titulo: "Receba a confirmação", texto: "Confirmamos tudo pelo WhatsApp, com calma e atenção ao detalhe." },
-  { n: "4", titulo: "Levante na loja", texto: "Levante na loja em Arcozelo ou combine connosco a recolha." },
-]
-
-const EVENTOS = [
-  { icon: PartyPopper, titulo: "Aniversários" },
-  { icon: Heart, titulo: "Casamentos" },
-  { icon: Baby, titulo: "Batizados" },
-  { icon: Users, titulo: "Empresas" },
-  { icon: Coffee, titulo: "Coffee breaks" },
-  { icon: CalendarHeart, titulo: "Festas infantis" },
-]
-
-const AVALIACOES = [
+const REVIEWS = [
+  { nome: "Paula Tayt-Sohn", texto: "Melhor coxinha de Barcelos.", destaque: true },
   { nome: "Joel Castro", texto: "Agradabilíssimo, e além disso é absolutamente delicioso! Parabéns, Edna." },
   { nome: "Aline Cavalcante", texto: "Melhores salgados da região sem dúvida." },
   { nome: "Ana Paula Marques", texto: "Tudo sempre maravilhoso ❤️" },
-  { nome: "Paula Tayt-Sohn", texto: "Melhor coxinha de Barcelos." },
   { nome: "Luciano Camargo", texto: "Coxinha deliciosa!" },
 ]
 
-/* ──────────────────────────  ANIMAÇÕES  ────────────────────────── */
+const EXPERIENCIAS = [
+  {
+    id: "bolos",
+    eyebrow: "Bolos personalizados",
+    titulo: "Bolos que viram o centro da festa.",
+    texto:
+      "De princesas a super-heróis, de aniversários a casamentos — cada bolo é criado à medida da pessoa e do momento. Cor, tema, recheio e cada detalhe pensado para arrancar o «uau».",
+    video: "/ednas-cake/video-bolos.mp4",
+    poster: "/ednas-cake/bolo-princesa.webp",
+    foto: "/ednas-cake/bolo-farmacia.webp",
+    cta: "Encomendar um bolo",
+  },
+  {
+    id: "salgados",
+    eyebrow: "Salgados brasileiros",
+    titulo: "A coxinha que conquistou Barcelos.",
+    texto:
+      "Crocante por fora, cremosa por dentro. Coxinhas, salgados variados e o autêntico sabor brasileiro para festas, empresas, reuniões e encomendas de família.",
+    video: "/ednas-cake/video-salgados.mp4",
+    poster: "/ednas-cake/coxinhas-prato.png",
+    foto: "/ednas-cake/salgados-caixa.png",
+    cta: "Pedir salgados",
+  },
+  {
+    id: "eventos",
+    eyebrow: "Eventos & catering",
+    titulo: "Mesas que ficam na memória.",
+    texto:
+      "Aniversários, batizados, casamentos, coffee breaks de empresa e festas infantis. Doces, salgados e bolos a condizer, para transformar o seu evento numa experiência completa.",
+    video: "/ednas-cake/video-festa.mp4",
+    poster: "/ednas-cake/bolo-melancia.png",
+    foto: "/ednas-cake/morango-do-amor.png",
+    cta: "Planear um evento",
+  },
+]
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } },
-}
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08 } },
-}
+type Media = { type: "image" | "video"; src: string; poster?: string; tag: string; tall?: boolean }
+const GALERIA: Media[] = [
+  { type: "image", src: "/ednas-cake/bolo-red-velvet.webp", tag: "Red velvet", tall: true },
+  { type: "video", src: "/ednas-cake/video-bolos.mp4", poster: "/ednas-cake/bolo-princesa.webp", tag: "Bolos de festa" },
+  { type: "image", src: "/ednas-cake/coxinhas-prato.png", tag: "Coxinhas" },
+  { type: "image", src: "/ednas-cake/bolo-chocolate.webp", tag: "Chocolate & brigadeiro", tall: true },
+  { type: "image", src: "/ednas-cake/morango-do-amor.png", tag: "Morango do amor" },
+  { type: "video", src: "/ednas-cake/video-salgados.mp4", poster: "/ednas-cake/coxinhas-prato.png", tag: "Salgados" },
+  { type: "image", src: "/ednas-cake/bolo-borboletas.png", tag: "Borboletas" },
+  { type: "image", src: "/ednas-cake/combo-doce-salgado.webp", tag: "Doce + salgado", tall: true },
+  { type: "image", src: "/ednas-cake/bolo-morango.webp", tag: "Frutos vermelhos" },
+  { type: "video", src: "/ednas-cake/video-festa.mp4", poster: "/ednas-cake/bolo-melancia.png", tag: "Festas" },
+  { type: "image", src: "/ednas-cake/sobremesas-presente.webp", tag: "Sobremesas presente" },
+  { type: "image", src: "/ednas-cake/salgados-brigadeiro.webp", tag: "Brigadeiro & coxinha", tall: true },
+]
 
 /* ──────────────────────────  COMPONENTES  ──────────────────────── */
 
-function Logo({ light = false }: { light?: boolean }) {
+function SectionLabel({ children, tone = "gold" }: { children: React.ReactNode; tone?: "gold" | "green" }) {
+  const color = tone === "gold" ? "var(--ec-gold-dark)" : "var(--ec-gold)"
   return (
-    <a href="#inicio" className="flex items-center gap-3 group">
-      <span
-        className="flex h-11 w-11 items-center justify-center rounded-full ring-1 transition-transform group-hover:scale-105"
-        style={{
-          background: light ? "rgba(255,255,255,0.08)" : "var(--ec-green)",
-          boxShadow: "0 6px 18px -8px rgba(11,61,53,0.55)",
-        }}
-      >
-        <ChefHat className="h-5 w-5" style={{ color: "var(--ec-gold)" }} />
-      </span>
-      <span className="leading-none">
-        <span
-          className={`block text-[19px] font-semibold tracking-tight ${display.className}`}
-          style={{ color: light ? "var(--ec-cream)" : "var(--ec-green-deep)" }}
-        >
-          Edna&apos;s Cake
-        </span>
-        <span
-          className="block text-[10px] font-medium uppercase tracking-[0.32em]"
-          style={{ color: "var(--ec-gold-dark)" }}
-        >
-          Doces &amp; Salgados
-        </span>
-      </span>
-    </a>
+    <p className="mb-5 flex items-center gap-4 text-[10px] font-semibold uppercase tracking-[0.42em]" style={{ color }}>
+      <span className="h-px w-10" style={{ background: "currentColor", opacity: 0.5 }} />
+      {children}
+    </p>
   )
 }
 
-function SectionTag({ children }: { children: React.ReactNode }) {
+function Pill({ href, children, variant = "solid" }: { href: string; children: React.ReactNode; variant?: "solid" | "ghost" | "cream" }) {
+  const base =
+    "group inline-flex min-h-12 items-center justify-center gap-2.5 rounded-full px-7 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] transition-all duration-300 hover:scale-[1.03]"
+  const styles: Record<string, React.CSSProperties> = {
+    solid: { background: "var(--ec-gold)", color: "var(--ec-ink)", boxShadow: "0 18px 50px -18px rgba(216,181,109,0.7)" },
+    cream: { background: "var(--ec-cream)", color: "var(--ec-ink)" },
+    ghost: { border: "1px solid rgba(255,244,230,0.28)", color: "var(--ec-cream)" },
+  }
   return (
-    <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em]" style={{ color: "var(--ec-gold-dark)" }}>
-      <span className="h-px w-7 rounded-full" style={{ background: "var(--ec-gold)" }} />
+    <a
+      href={href}
+      target={href.startsWith("http") ? "_blank" : undefined}
+      rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+      className={base}
+      style={styles[variant]}
+    >
       {children}
-    </span>
+      <ArrowUpRight className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+    </a>
   )
 }
 
 /* ─────────────────────────────  PÁGINA  ───────────────────────────── */
 
 export default function EdnasCakeHome() {
-  const [menuOpen, setMenuOpen] = useState(false)
+  const heroRef = useRef<HTMLElement>(null)
+  const [active, setActive] = useState<Media | null>(null)
+  const [scrolled, setScrolled] = useState(false)
+
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] })
+  const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "14%"])
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
+
+  // Smooth scroll (Lenis)
+  useEffect(() => {
+    const lenis = new Lenis({ duration: 1.15, smoothWheel: true, wheelMultiplier: 0.9 })
+    let raf = 0
+    const loop = (t: number) => {
+      lenis.raf(t)
+      raf = requestAnimationFrame(loop)
+    }
+    raf = requestAnimationFrame(loop)
+    const onScroll = () => setScrolled(window.scrollY > 40)
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => {
+      cancelAnimationFrame(raf)
+      lenis.destroy()
+      window.removeEventListener("scroll", onScroll)
+    }
+  }, [])
+
+  // GSAP reveals + signature parallax
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger)
+    const ctx = gsap.context(() => {
+      gsap.utils.toArray<HTMLElement>(".ec-reveal").forEach((el) => {
+        gsap.fromTo(
+          el,
+          { y: 40, opacity: 0 },
+          { y: 0, opacity: 1, duration: 1, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 84%" } },
+        )
+      })
+      gsap.utils.toArray<HTMLElement>(".ec-signature").forEach((el) => {
+        gsap.to(el, { xPercent: -10, ease: "none", scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: 1.2 } })
+      })
+    })
+    return () => ctx.revert()
+  }, [])
 
   return (
-    <div
-      id="inicio"
-      className="min-h-screen w-full overflow-x-hidden antialiased"
+    <main
+      className={`ec-root relative overflow-x-clip ${display.className}`}
       style={
         {
+          "--ec-ink": "#08251E",
+          "--ec-ink-2": "#0B3D35",
+          "--ec-moss": "#134E40",
           "--ec-green": "#1F7A68",
-          "--ec-green-deep": "#0B3D35",
-          "--ec-green-deeper": "#072A23",
+          "--ec-cream": "#FFF4E6",
+          "--ec-cream-2": "#FBEBD9",
           "--ec-gold": "#D8B56D",
           "--ec-gold-soft": "#E7CE9A",
           "--ec-gold-dark": "#A9823C",
-          "--ec-cream": "#FFF4E6",
-          "--ec-cream-2": "#FBEBD9",
-          "--ec-white": "#FFFFFF",
           "--ec-brown": "#6B4E3D",
-          "--ec-ink": "#2B2018",
-          background: "var(--ec-cream)",
-          color: "var(--ec-ink)",
+          background: "var(--ec-ink)",
+          color: "var(--ec-cream)",
         } as React.CSSProperties
       }
     >
-      {/* ───────────────── HEADER ───────────────── */}
-      <header
-        className="fixed inset-x-0 top-0 z-50 border-b"
-        style={{
-          background: "rgba(255,244,230,0.82)",
-          backdropFilter: "blur(20px) saturate(160%)",
-          borderColor: "rgba(169,130,60,0.18)",
-        }}
-      >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 lg:px-8">
-          <Logo />
+      {/* ─── estilos locais ─── */}
+      <style>{`
+        .ec-root { font-feature-settings: "ss01"; }
+        .ec-serif { font-family: ${display.style.fontFamily}, Georgia, serif; }
+        .ec-grain::after {
+          content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1; opacity: .05;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+        .ec-glass { background: rgba(8,37,30,0.55); backdrop-filter: blur(22px) saturate(150%); border: 1px solid rgba(216,181,109,0.22); }
+        @keyframes ec-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .ec-marquee-track { animation: ec-marquee 32s linear infinite; }
+        @media (prefers-reduced-motion: reduce) { .ec-marquee-track { animation: none; } }
+        .ec-masonry { column-gap: 14px; }
+        .ec-masonry > * { break-inside: avoid; margin-bottom: 14px; }
+      `}</style>
 
-          <nav className="hidden items-center gap-7 lg:flex">
-            {NAV_LINKS.map((l) => (
-              <a
-                key={l.label}
-                href={l.href}
-                className="text-[13px] font-medium tracking-wide transition-colors"
-                style={{ color: "var(--ec-green-deep)" }}
-              >
-                <span className="border-b-2 border-transparent pb-0.5 transition-colors hover:border-[var(--ec-gold)]">{l.label}</span>
-              </a>
+      {/* ───────────────── NAV ───────────────── */}
+      <nav className="fixed inset-x-0 top-0 z-50 px-4 py-4 sm:px-6">
+        <div
+          className="mx-auto flex max-w-7xl items-center justify-between rounded-full px-4 py-2.5 transition-all duration-500 sm:px-6"
+          style={
+            scrolled
+              ? { background: "rgba(8,37,30,0.72)", backdropFilter: "blur(20px)", border: "1px solid rgba(216,181,109,0.18)" }
+              : { background: "transparent", border: "1px solid transparent" }
+          }
+        >
+          <a href="#top" className="flex items-center gap-2.5">
+            <span className="ec-serif text-xl tracking-tight text-[color:var(--ec-cream)] sm:text-2xl">Edna&apos;s Cake</span>
+          </a>
+          <div className="hidden items-center gap-7 text-[10px] uppercase tracking-[0.26em] lg:flex" style={{ color: "rgba(255,244,230,0.72)" }}>
+            {NAV.map((n) => (
+              <a key={n.label} href={n.href} className="transition-colors hover:text-[color:var(--ec-gold)]">{n.label}</a>
             ))}
-          </nav>
-
-          <div className="hidden items-center gap-5 lg:flex">
-            <a href={EMPRESA.telefoneHref} className="flex items-center gap-2 text-[13px] font-semibold" style={{ color: "var(--ec-green-deep)" }}>
-              <Phone className="h-3.5 w-3.5" style={{ color: "var(--ec-gold-dark)" }} />
-              {EMPRESA.telefone}
+          </div>
+          <div className="flex items-center gap-2">
+            <a href={EMPRESA.telefoneHref} aria-label="Ligar" className="grid h-10 w-10 place-items-center rounded-full transition-colors hover:text-[color:var(--ec-gold)]" style={{ border: "1px solid rgba(255,244,230,0.18)", color: "var(--ec-cream)" }}>
+              <Phone className="h-4 w-4" />
             </a>
-            <a
-              href={waLink()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-semibold text-white shadow-sm transition-transform hover:scale-[1.03]"
-              style={{ background: "var(--ec-green)" }}
-            >
-              <WhatsAppIcon className="h-4 w-4" />
-              Encomendar
+            <a href={waLink()} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center gap-2 rounded-full px-4 text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ background: "var(--ec-gold)", color: "var(--ec-ink)" }}>
+              <WhatsAppIcon className="h-4 w-4" /> <span className="hidden sm:inline">Encomendar</span>
             </a>
           </div>
-
-          {/* Mobile toggle */}
-          <button
-            onClick={() => setMenuOpen((o) => !o)}
-            className="flex h-10 w-10 items-center justify-center rounded-full lg:hidden"
-            style={{ background: "rgba(31,122,104,0.1)", color: "var(--ec-green-deep)" }}
-            aria-label="Menu"
-          >
-            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
         </div>
+      </nav>
 
-        {/* Mobile menu */}
-        {menuOpen && (
-          <div className="border-t lg:hidden" style={{ borderColor: "rgba(169,130,60,0.18)", background: "var(--ec-cream)" }}>
-            <nav className="mx-auto flex max-w-7xl flex-col px-5 py-3">
-              {NAV_LINKS.map((l) => (
-                <a
-                  key={l.label}
-                  href={l.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="border-b py-3 text-[15px] font-medium"
-                  style={{ color: "var(--ec-green-deep)", borderColor: "rgba(169,130,60,0.12)" }}
-                >
-                  {l.label}
-                </a>
-              ))}
-              <a
-                href={waLink()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white"
-                style={{ background: "var(--ec-green)" }}
-              >
-                <WhatsAppIcon className="h-4 w-4" /> Encomendar pelo WhatsApp
-              </a>
-            </nav>
-          </div>
-        )}
-      </header>
-
-      {/* ───────────────── HERO ───────────────── */}
-      <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden">
-        {/* Vídeo de fundo + fallback poster */}
-        <video
-          className="absolute inset-0 h-full w-full object-cover"
+      {/* ───────────────── 1 · HERO ───────────────── */}
+      <section id="top" ref={heroRef} className="ec-grain relative flex min-h-[100svh] items-end overflow-hidden">
+        <motion.video
+          style={{ y: videoY }}
+          className="absolute inset-0 h-[116%] w-full object-cover"
+          src="/ednas-cake/video-bolos.mp4"
+          poster="/ednas-cake/bolo-red-velvet.webp"
           autoPlay
           muted
           loop
           playsInline
-          preload="metadata"
-          poster="/ednas-cake/bolo-red-velvet.webp"
-        >
-          <source src="/ednas-cake/video-bolos.mp4" type="video/mp4" />
-        </video>
-
-        {/* Overlay para legibilidade */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(7,42,35,0.78) 0%, rgba(11,61,53,0.62) 38%, rgba(7,42,35,0.86) 100%)",
-          }}
+          preload="auto"
         />
-        <div className="pointer-events-none absolute -left-24 top-1/3 h-72 w-72 rounded-full blur-3xl" style={{ background: "radial-gradient(circle, rgba(216,181,109,0.28), transparent 70%)" }} />
+        {/* máscaras cinematográficas */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(8,37,30,0.72) 0%, rgba(8,37,30,0.30) 38%, rgba(8,37,30,0.92) 100%)" }} />
+        <div className="absolute inset-y-0 left-0 w-2/3" style={{ background: "linear-gradient(90deg, rgba(8,37,30,0.92), rgba(8,37,30,0.30) 60%, transparent)" }} />
 
-        <div className="relative z-10 mx-auto max-w-4xl px-6 py-32 text-center">
-          <motion.div initial="hidden" animate="show" variants={stagger}>
-            <motion.div variants={fadeUp} className="mb-6 flex flex-wrap items-center justify-center gap-3">
-              <span
-                className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[12px] font-semibold backdrop-blur-md"
-                style={{ background: "rgba(255,255,255,0.12)", color: "var(--ec-cream)", border: "1px solid rgba(216,181,109,0.4)" }}
-              >
-                <span className="flex items-center gap-0.5" style={{ color: "var(--ec-gold)" }}>
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-3.5 w-3.5 fill-current" />
-                  ))}
-                </span>
-                4,9 no Google
-              </span>
-              <span
-                className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[12px] font-semibold backdrop-blur-md"
-                style={{ background: "rgba(216,181,109,0.16)", color: "var(--ec-gold-soft)", border: "1px solid rgba(216,181,109,0.4)" }}
-              >
-                <Sparkles className="h-3.5 w-3.5" /> «Melhor coxinha de Barcelos»
-              </span>
-            </motion.div>
-
-            <motion.p
-              variants={fadeUp}
-              className="mb-5 text-[12px] font-semibold uppercase tracking-[0.34em]"
-              style={{ color: "var(--ec-gold-soft)" }}
-            >
-              Doces • Salgados • Bolos Personalizados • Catering
+        <motion.div style={{ opacity: heroOpacity }} className="relative z-10 mx-auto grid w-full max-w-7xl gap-10 px-6 pb-14 pt-36 sm:px-8 lg:grid-cols-[minmax(0,1fr)_330px] lg:items-end lg:pb-20 lg:px-10">
+          <div className="min-w-0">
+            <motion.p initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.2, ease: EASE }} className="mb-6 text-[10px] uppercase tracking-[0.44em]" style={{ color: "var(--ec-gold-soft)" }}>
+              Confeitaria artesanal brasileira · Arcozelo, Barcelos
             </motion.p>
-
             <motion.h1
-              variants={fadeUp}
-              className={`text-balance text-4xl font-semibold leading-[1.08] text-white sm:text-5xl lg:text-6xl ${display.className}`}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.1, delay: 0.4, ease: EASE }}
+              className="ec-serif max-w-4xl text-balance font-light leading-[0.92] text-[color:var(--ec-cream)]"
+              style={{ fontSize: "clamp(2.6rem, 9.5vw, 7.5rem)" }}
             >
-              Bolos que marcam momentos.
+              Cada bolo conta
               <br />
-              <span style={{ color: "var(--ec-gold)" }}>Sabores que criam memórias.</span>
+              uma história.
             </motion.h1>
-
-            <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-2xl text-pretty text-[15px] leading-relaxed text-white/85 sm:text-base">
-              Bolos personalizados, doces artesanais, salgados e catering para festas, empresas e
-              momentos especiais em Barcelos.
+            <motion.p initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.6, ease: EASE }} className="ec-serif mt-5 text-2xl italic sm:text-3xl" style={{ color: "var(--ec-gold)" }}>
+              — o sabor que abraça.
             </motion.p>
-
-            <motion.div variants={fadeUp} className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <a
-                href={waLink()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-[1.03] sm:w-auto"
-                style={{ background: "var(--ec-green)", boxShadow: "0 14px 34px -12px rgba(31,122,104,0.8)" }}
-              >
+            <motion.p initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.72, ease: EASE }} className="mt-6 max-w-xl text-[15px] leading-7 sm:text-base" style={{ color: "rgba(255,244,230,0.78)" }}>
+              Bolos personalizados, salgados brasileiros, doces de festa e catering — feitos à mão para
+              os momentos que ficam na memória.
+            </motion.p>
+            <motion.div initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.85, ease: EASE }} className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <Pill href={waLink("uma encomenda")} variant="solid">
                 <WhatsAppIcon className="h-4 w-4" /> Fazer Encomenda
-              </a>
-              <a
-                href="#catalogo"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold transition-colors hover:bg-white/10 sm:w-auto"
-                style={{ color: "var(--ec-cream)", border: "1px solid rgba(255,244,230,0.45)" }}
-              >
-                Ver Catálogo <ArrowRight className="h-4 w-4" />
-              </a>
+              </Pill>
+              <Pill href="#experiencias" variant="ghost">Ver Trabalhos</Pill>
             </motion.div>
-          </motion.div>
-        </div>
+          </div>
 
-        <a href="#favoritos" className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 text-white/60" aria-label="Descer">
-          <span className="flex h-9 w-9 animate-bounce items-center justify-center rounded-full" style={{ border: "1px solid rgba(255,255,255,0.3)" }}>
-            <ArrowRight className="h-4 w-4 rotate-90" />
-          </span>
-        </a>
-      </section>
-
-      {/* ───────────────── FAVORITOS ───────────────── */}
-      <section id="favoritos" className="relative py-20 lg:py-28" style={{ background: "var(--ec-cream)" }}>
-        <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={fadeUp} className="mb-12 text-center">
-            <SectionTag>Os preferidos da casa</SectionTag>
-            <h2 className={`mt-4 text-3xl font-semibold sm:text-4xl ${display.className}`} style={{ color: "var(--ec-green-deep)" }}>
-              Os favoritos de quem já provou.
-            </h2>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-60px" }}
-            variants={stagger}
-            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
-          >
-            {FAVORITOS.map((f) => (
-              <motion.div
-                key={f.titulo}
-                variants={fadeUp}
-                className="group rounded-3xl border bg-white p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
-                style={{ borderColor: "rgba(169,130,60,0.18)" }}
-              >
-                <span
-                  className="flex h-14 w-14 items-center justify-center rounded-2xl transition-colors"
-                  style={{ background: "var(--ec-cream-2)" }}
-                >
-                  <f.icon className="h-7 w-7" style={{ color: "var(--ec-green)" }} />
-                </span>
-                <h3 className={`mt-5 text-xl font-semibold ${display.className}`} style={{ color: "var(--ec-green-deep)" }}>
-                  {f.titulo}
-                </h3>
-                <p className="mt-2 text-[14px] leading-relaxed" style={{ color: "var(--ec-brown)" }}>
-                  {f.texto}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ───────────────── CATÁLOGO / GALERIA ───────────────── */}
-      <section id="catalogo" className="py-20 lg:py-28" style={{ background: "var(--ec-cream-2)" }}>
-        <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={fadeUp} className="mb-12 max-w-2xl">
-            <SectionTag>Catálogo</SectionTag>
-            <h2 className={`mt-4 text-3xl font-semibold sm:text-4xl ${display.className}`} style={{ color: "var(--ec-green-deep)" }}>
-              Feito à mão, com o carinho de sempre.
-            </h2>
-            <p className="mt-3 text-[15px] leading-relaxed" style={{ color: "var(--ec-brown)" }}>
-              Bolos, salgados, doces e sobremesas preparados por encomenda. Escolha o seu preferido e
-              peça diretamente pelo WhatsApp.
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 1, ease: EASE }} className="ec-glass min-w-0 rounded-[1.6rem] p-6">
+            <div className="flex items-center gap-1" style={{ color: "var(--ec-gold)" }}>
+              {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}
+            </div>
+            <p className="ec-serif mt-4 text-5xl text-[color:var(--ec-cream)]">4,9</p>
+            <p className="mt-1 text-sm" style={{ color: "rgba(255,244,230,0.7)" }}>9 avaliações no Google</p>
+            <div className="my-5 h-px" style={{ background: "rgba(216,181,109,0.25)" }} />
+            <p className="flex items-center gap-2 text-sm" style={{ color: "var(--ec-gold-soft)" }}>
+              <Sparkles className="h-4 w-4" /> «Melhor coxinha de Barcelos»
             </p>
           </motion.div>
+        </motion.div>
+      </section>
 
-          <motion.div
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-60px" }}
-            variants={stagger}
-            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
-          >
-            {CATALOGO.map((c) => (
+      {/* ───────────────── 2 · EMOÇÃO (marquee + manifesto) ───────────────── */}
+      <section className="overflow-hidden border-y py-4" style={{ background: "var(--ec-cream)", borderColor: "rgba(169,130,60,0.2)" }}>
+        <div className="ec-marquee-track flex w-max gap-10 whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.34em]" style={{ color: "var(--ec-ink)" }}>
+          {Array.from({ length: 2 }).map((_, g) => (
+            <div key={g} className="flex shrink-0 gap-10">
+              {["O sabor que abraça", "Bolos personalizados", "Salgados brasileiros", "4,9 no Google", "Feito à mão em Barcelos", "Catering & eventos"].map((t) => (
+                <span key={t} className="flex items-center gap-10">
+                  {t} <span style={{ color: "var(--ec-gold-dark)" }}>✦</span>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="ec-grain relative px-6 py-24 text-center sm:px-8 lg:py-32" style={{ background: "var(--ec-ink)" }}>
+        <motion.p {...reveal()} className="ec-serif mx-auto max-w-4xl text-balance font-light leading-[1.05]" style={{ fontSize: "clamp(1.9rem, 5vw, 3.6rem)", color: "var(--ec-cream)" }}>
+          Não vendemos apenas doces.
+          <br />
+          <span style={{ color: "var(--ec-gold)" }}>Servimos memórias.</span>
+        </motion.p>
+        <motion.p {...reveal(0.1)} className="mx-auto mt-7 max-w-xl text-[15px] leading-7" style={{ color: "rgba(255,244,230,0.65)" }}>
+          Por trás de cada encomenda há uma celebração, uma família reunida e uma mesa que ninguém
+          esquece. É isso que a Edna confeciona, todos os dias.
+        </motion.p>
+      </section>
+
+      {/* ───────────────── 3 · MARCA (signature + pilares) ───────────────── */}
+      <section className="relative overflow-hidden py-24 lg:py-32" style={{ background: "var(--ec-ink-2)" }}>
+        <div className="ec-signature ec-serif pointer-events-none absolute -top-2 left-0 whitespace-nowrap leading-none" style={{ fontSize: "18vw", color: "rgba(255,244,230,0.035)" }}>
+          Edna&apos;s Cake · Doces &amp; Salgados
+        </div>
+        <div className="relative mx-auto max-w-7xl px-6 sm:px-8 lg:px-10">
+          <motion.div {...reveal()} className="max-w-3xl">
+            <SectionLabel>A assinatura Edna&apos;s</SectionLabel>
+            <h2 className="ec-serif text-5xl font-light leading-[0.98] sm:text-7xl" style={{ color: "var(--ec-cream)" }}>
+              Não é só um bolo. É afeto em forma de doce.
+            </h2>
+          </motion.div>
+          <div className="mt-14 grid gap-4 md:grid-cols-3">
+            {PILARES.map((p, i) => (
               <motion.article
-                key={c.titulo}
-                variants={fadeUp}
-                className="group flex flex-col overflow-hidden rounded-3xl border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
-                style={{ borderColor: "rgba(169,130,60,0.18)" }}
+                key={p.titulo}
+                {...reveal(i * 0.08)}
+                className="rounded-[1.5rem] p-7"
+                style={{ background: "rgba(255,244,230,0.04)", border: "1px solid rgba(216,181,109,0.16)" }}
               >
-                <div className="relative aspect-square overflow-hidden">
-                  <Image
-                    src={c.img}
-                    alt={c.titulo}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <span
-                    className="absolute left-3 top-3 rounded-full px-3 py-1 text-[11px] font-semibold backdrop-blur-md"
-                    style={{ background: "rgba(11,61,53,0.82)", color: "var(--ec-gold-soft)" }}
-                  >
-                    {c.categoria}
-                  </span>
-                </div>
-                <div className="flex flex-1 flex-col p-5">
-                  <h3 className={`text-[17px] font-semibold ${display.className}`} style={{ color: "var(--ec-green-deep)" }}>
-                    {c.titulo}
-                  </h3>
-                  <p className="mt-1.5 flex-1 text-[13px] leading-relaxed" style={{ color: "var(--ec-brown)" }}>
-                    {c.texto}
-                  </p>
-                  <a
-                    href={waLink(c.titulo)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-4 inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-semibold transition-colors"
-                    style={{ background: "var(--ec-cream-2)", color: "var(--ec-green-deep)" }}
-                  >
-                    <WhatsAppIcon className="h-4 w-4" style={{ color: "var(--ec-green)" }} /> Pedir por WhatsApp
-                  </a>
-                </div>
+                <span className="grid h-12 w-12 place-items-center rounded-2xl" style={{ background: "rgba(216,181,109,0.14)" }}>
+                  <p.icon className="h-6 w-6" style={{ color: "var(--ec-gold)" }} />
+                </span>
+                <h3 className="ec-serif mt-6 text-3xl" style={{ color: "var(--ec-cream)" }}>{p.titulo}</h3>
+                <p className="mt-3 text-sm leading-7" style={{ color: "rgba(255,244,230,0.62)" }}>{p.texto}</p>
               </motion.article>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* ───────────────── VÍDEOS / REELS ───────────────── */}
-      <section className="py-20 lg:py-28" style={{ background: "var(--ec-green-deep)" }}>
-        <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={fadeUp} className="mb-12 text-center">
-            <SectionTag>Bastidores</SectionTag>
-            <h2 className={`mt-4 text-3xl font-semibold text-white sm:text-4xl ${display.className}`}>
-              Momentos da Edna&apos;s Cake
-            </h2>
-            <p className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-white/70">
-              Um cantinho dos nossos bolos, salgados e festas — feitos com sabor e carinho.
+      {/* ───────────────── 4 · STORYTELLING (história) ───────────────── */}
+      <section id="historia" className="relative mx-auto grid max-w-7xl gap-12 px-6 py-24 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:px-10 lg:py-32">
+        <motion.div {...reveal()} className="relative order-2 lg:order-1">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-[1.75rem] shadow-2xl">
+            <Image src="/ednas-cake/loja-fachada.png" alt="Loja Edna's Cake em Arcozelo, Barcelos" fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 50%, rgba(8,37,30,0.55))" }} />
+            <p className="absolute bottom-6 left-6 text-[10px] uppercase tracking-[0.4em]" style={{ color: "var(--ec-gold-soft)" }}>A nossa casa · Arcozelo</p>
+          </div>
+          <div className="ec-glass absolute -bottom-6 -right-3 hidden rounded-2xl px-6 py-4 sm:block">
+            <span className="ec-serif block text-4xl" style={{ color: "var(--ec-gold)" }}>4,9</span>
+            <span className="text-[11px] tracking-wide" style={{ color: "rgba(255,244,230,0.7)" }}>9 críticas no Google</span>
+          </div>
+        </motion.div>
+
+        <div className="order-1 lg:order-2">
+          <div className="ec-reveal"><SectionLabel>A história da Edna</SectionLabel></div>
+          <h2 className="ec-reveal ec-serif text-5xl font-light leading-[0.98] sm:text-6xl" style={{ color: "var(--ec-cream)" }}>
+            Uma brasileira que trouxe sabor e carinho para Barcelos.
+          </h2>
+          <p className="ec-reveal mt-7 max-w-xl text-[15px] leading-8" style={{ color: "rgba(255,244,230,0.72)" }}>
+            A Edna&apos;s Cake nasceu da vontade de transformar receitas, memórias e celebrações em
+            momentos especiais. Do Brasil para Portugal, a Edna trouxe na bagagem a paixão pela
+            confeitaria e o jeito de quem cozinha com o coração.
+          </p>
+          <p className="ec-reveal mt-4 max-w-xl text-[15px] leading-8" style={{ color: "rgba(255,244,230,0.72)" }}>
+            Entre bolos personalizados, doces artesanais e salgados brasileiros, cada encomenda é
+            preparada à mão, com atenção ao detalhe, sabor e carinho — o que rendeu à casa a fama de
+            melhor coxinha da região.
+          </p>
+          <div className="ec-reveal mt-9 flex flex-wrap gap-3">
+            <Pill href={waLink("falar com a Edna")} variant="cream"><WhatsAppIcon className="h-4 w-4" /> Falar com a Edna</Pill>
+            <a href={EMPRESA.instagram} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center gap-2.5 rounded-full px-7 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors" style={{ border: "1px solid rgba(255,244,230,0.24)", color: "var(--ec-cream)" }}>
+              <InstagramIcon className="h-4 w-4" /> {EMPRESA.instagramHandle}
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ───────────────── 5 · CONFIANÇA (método) ───────────────── */}
+      <section className="py-24 lg:py-32" style={{ background: "var(--ec-cream)" }}>
+        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-10">
+          <motion.div {...reveal()} className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
+            <div>
+              <SectionLabel tone="green">Como funciona</SectionLabel>
+              <h2 className="ec-serif text-5xl font-light leading-[0.95] sm:text-6xl" style={{ color: "var(--ec-ink-2)" }}>
+                Da sua ideia à mesa da festa.
+              </h2>
+            </div>
+            <p className="max-w-md text-[15px] leading-8" style={{ color: "var(--ec-brown)" }}>
+              Encomendar é simples e pessoal. Falamos consigo, desenhamos tudo à medida e tratamos do
+              resto — para só ter de aproveitar o momento.
             </p>
           </motion.div>
 
-          <motion.div
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-60px" }}
-            variants={stagger}
-            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {VIDEOS.map((v) => (
-              <motion.div
-                key={v.src}
-                variants={fadeUp}
-                className="group relative aspect-[9/13] overflow-hidden rounded-3xl border shadow-lg"
-                style={{ borderColor: "rgba(216,181,109,0.25)" }}
-              >
-                <video
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  poster={v.poster}
-                >
-                  <source src={v.src} type="video/mp4" />
-                </video>
-                <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 45%, rgba(7,42,35,0.85) 100%)" }} />
-                <div className="absolute inset-x-0 bottom-0 flex items-center justify-between p-4">
-                  <span
-                    className="rounded-full px-3 py-1 text-[12px] font-semibold backdrop-blur-md"
-                    style={{ background: "rgba(255,244,230,0.16)", color: "var(--ec-cream)", border: "1px solid rgba(216,181,109,0.35)" }}
-                  >
-                    {v.etiqueta}
-                  </span>
-                  <a
-                    href={waLink(v.etiqueta)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-semibold text-white transition-transform hover:scale-105"
-                    style={{ background: "var(--ec-green)" }}
-                  >
-                    Pedir igual <ArrowUpRight className="h-3.5 w-3.5" />
-                  </a>
-                </div>
-              </motion.div>
+          <div className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {METODO.map((m, i) => (
+              <motion.article key={m.n} {...reveal(i * 0.07)} className="rounded-[1.5rem] bg-white p-7" style={{ border: "1px solid rgba(169,130,60,0.2)" }}>
+                <p className="text-[10px] uppercase tracking-[0.34em]" style={{ color: "var(--ec-gold-dark)" }}>{m.n}</p>
+                <h3 className="ec-serif mt-6 text-3xl" style={{ color: "var(--ec-ink-2)" }}>{m.titulo}</h3>
+                <p className="mt-3 text-sm leading-7" style={{ color: "var(--ec-brown)" }}>{m.texto}</p>
+              </motion.article>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* ───────────────── ENCOMENDAS ───────────────── */}
-      <section id="encomendas" className="py-20 lg:py-28" style={{ background: "var(--ec-cream)" }}>
-        <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={fadeUp} className="mb-12 text-center">
-            <SectionTag>Encomendas</SectionTag>
-            <h2 className={`mt-4 text-3xl font-semibold sm:text-4xl ${display.className}`} style={{ color: "var(--ec-green-deep)" }}>
-              Faça a sua encomenda em poucos minutos.
-            </h2>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-60px" }}
-            variants={stagger}
-            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
-          >
-            {ETAPAS.map((e) => (
-              <motion.div key={e.n} variants={fadeUp} className="relative rounded-3xl border bg-white p-7" style={{ borderColor: "rgba(169,130,60,0.18)" }}>
-                <span
-                  className={`flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-bold ${display.className}`}
-                  style={{ background: "var(--ec-green)", color: "var(--ec-gold-soft)" }}
-                >
-                  {e.n}
-                </span>
-                <h3 className={`mt-5 text-lg font-semibold ${display.className}`} style={{ color: "var(--ec-green-deep)" }}>
-                  {e.titulo}
-                </h3>
-                <p className="mt-2 text-[14px] leading-relaxed" style={{ color: "var(--ec-brown)" }}>
-                  {e.texto}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp} className="mt-10 text-center">
-            <a
-              href={waLink()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-[1.03]"
-              style={{ background: "var(--ec-green)", boxShadow: "0 14px 34px -12px rgba(31,122,104,0.8)" }}
-            >
-              <WhatsAppIcon className="h-5 w-5" /> Encomendar pelo WhatsApp
-            </a>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ───────────────── EVENTOS ───────────────── */}
-      <section id="eventos" className="relative overflow-hidden py-20 lg:py-28" style={{ background: "var(--ec-cream-2)" }}>
-        <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={fadeUp} className="mb-12 text-center">
-            <SectionTag>Catering & Eventos</SectionTag>
-            <h2 className={`mt-4 text-3xl font-semibold sm:text-4xl ${display.className}`} style={{ color: "var(--ec-green-deep)" }}>
-              Para festas, empresas e momentos especiais.
-            </h2>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-60px" }}
-            variants={stagger}
-            className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6"
-          >
-            {EVENTOS.map((ev) => (
-              <motion.div
-                key={ev.titulo}
-                variants={fadeUp}
-                className="group flex flex-col items-center gap-3 rounded-2xl border bg-white px-4 py-7 text-center transition-all hover:-translate-y-1 hover:shadow-lg"
-                style={{ borderColor: "rgba(169,130,60,0.18)" }}
-              >
-                <span className="flex h-12 w-12 items-center justify-center rounded-full" style={{ background: "var(--ec-cream-2)" }}>
-                  <ev.icon className="h-6 w-6" style={{ color: "var(--ec-green)" }} />
-                </span>
-                <span className="text-[13px] font-semibold" style={{ color: "var(--ec-green-deep)" }}>
-                  {ev.titulo}
-                </span>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ───────────────── HISTÓRIA ───────────────── */}
-      <section id="historia" className="py-20 lg:py-28" style={{ background: "var(--ec-cream)" }}>
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 lg:grid-cols-2 lg:gap-16 lg:px-8">
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={fadeUp} className="relative">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] shadow-xl">
-              <Image
-                src="/ednas-cake/loja-fachada.png"
-                alt="Loja Edna's Cake em Arcozelo, Barcelos"
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
-              />
+      {/* ───────────────── 6 · REVIEWS ───────────────── */}
+      <section id="avaliacoes" className="ec-grain relative py-24 lg:py-32" style={{ background: "var(--ec-ink)" }}>
+        <div className="relative mx-auto max-w-7xl px-6 sm:px-8 lg:px-10">
+          <motion.div {...reveal()} className="mb-12 flex flex-col items-end justify-between gap-8 md:flex-row">
+            <div>
+              <SectionLabel>Prova social real</SectionLabel>
+              <h2 className="ec-serif text-5xl font-light leading-[0.95] sm:text-7xl" style={{ color: "var(--ec-cream)" }}>
+                Quem prova, recomenda.
+              </h2>
             </div>
-            <div
-              className={`absolute -bottom-5 -right-3 hidden rounded-2xl px-6 py-4 shadow-lg sm:block ${display.className}`}
-              style={{ background: "var(--ec-green)", color: "var(--ec-cream)" }}
-            >
-              <span className="block text-3xl font-bold" style={{ color: "var(--ec-gold-soft)" }}>4,9</span>
-              <span className="text-[12px] tracking-wide">9 críticas no Google</span>
+            <div className="flex items-center gap-4">
+              <span className="ec-serif text-6xl" style={{ color: "var(--ec-gold)" }}>4,9</span>
+              <div>
+                <span className="flex gap-0.5" style={{ color: "var(--ec-gold)" }}>
+                  {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}
+                </span>
+                <span className="text-xs uppercase tracking-[0.28em]" style={{ color: "rgba(255,244,230,0.55)" }}>9 avaliações Google</span>
+              </div>
             </div>
           </motion.div>
 
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={stagger}>
-            <motion.div variants={fadeUp}><SectionTag>A nossa história</SectionTag></motion.div>
-            <motion.h2 variants={fadeUp} className={`mt-4 text-3xl font-semibold leading-tight sm:text-4xl ${display.className}`} style={{ color: "var(--ec-green-deep)" }}>
-              Uma brasileira que trouxe sabor e carinho para Barcelos.
-            </motion.h2>
-            <motion.p variants={fadeUp} className="mt-5 text-[15px] leading-relaxed" style={{ color: "var(--ec-brown)" }}>
-              A Edna&apos;s Cake nasceu para transformar receitas, memórias e celebrações em momentos
-              especiais. Entre bolos personalizados, doces artesanais e salgados brasileiros, cada
-              encomenda é preparada com atenção ao detalhe, sabor e carinho.
-            </motion.p>
-            <motion.ul variants={fadeUp} className="mt-7 space-y-3">
-              {[
-                "Receitas brasileiras autênticas, feitas à mão",
-                "Bolos personalizados para cada celebração",
-                "Salgados e doces para festas, empresas e eventos",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3 text-[14px]" style={{ color: "var(--ec-ink)" }}>
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" style={{ color: "var(--ec-green)" }} />
-                  {item}
-                </li>
-              ))}
-            </motion.ul>
-            <motion.div variants={fadeUp} className="mt-8 flex flex-wrap gap-3">
-              <a
-                href={waLink()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
-                style={{ background: "var(--ec-green)" }}
-              >
-                <WhatsAppIcon className="h-4 w-4" /> Falar connosco
-              </a>
-              <a
-                href={EMPRESA.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-colors"
-                style={{ border: "1px solid rgba(169,130,60,0.4)", color: "var(--ec-green-deep)" }}
-              >
-                <InstagramIcon className="h-4 w-4" /> {EMPRESA.instagramHandle}
-              </a>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ───────────────── AVALIAÇÕES ───────────────── */}
-      <section id="avaliacoes" className="py-20 lg:py-28" style={{ background: "var(--ec-green-deeper)" }}>
-        <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={fadeUp} className="mb-12 text-center">
-            <SectionTag>Avaliações reais</SectionTag>
-            <h2 className={`mt-4 text-3xl font-semibold text-white sm:text-4xl ${display.className}`}>
-              Quem prova, recomenda.
-            </h2>
-            <div className="mt-5 inline-flex items-center gap-3 rounded-full px-5 py-2.5" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(216,181,109,0.3)" }}>
-              <span className={`text-2xl font-bold ${display.className}`} style={{ color: "var(--ec-gold)" }}>4,9</span>
-              <span className="flex items-center gap-0.5" style={{ color: "var(--ec-gold)" }}>
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-current" />
-                ))}
-              </span>
-              <span className="text-[13px] text-white/70">· 9 críticas no Google</span>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-60px" }}
-            variants={stagger}
-            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {AVALIACOES.map((a) => (
+          <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6 lg:grid-rows-2">
+            {REVIEWS.map((r, i) => (
               <motion.figure
-                key={a.nome}
-                variants={fadeUp}
-                className="flex flex-col rounded-3xl p-6"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+                key={r.nome}
+                {...reveal((i % 3) * 0.06)}
+                className={`flex flex-col rounded-[1.5rem] p-7 ${r.destaque ? "lg:col-span-3 lg:row-span-2" : "lg:col-span-3"}`}
+                style={{ background: r.destaque ? "var(--ec-gold)" : "rgba(255,244,230,0.05)", border: "1px solid rgba(216,181,109,0.18)" }}
               >
-                <Quote className="h-7 w-7" style={{ color: "var(--ec-gold)" }} />
-                <blockquote className="mt-3 flex-1 text-[15px] leading-relaxed text-white/90">
-                  “{a.texto}”
+                <Quote className="h-7 w-7" style={{ color: r.destaque ? "var(--ec-ink)" : "var(--ec-gold)" }} />
+                <blockquote className={`ec-serif mt-4 flex-1 leading-snug ${r.destaque ? "text-3xl sm:text-5xl" : "text-xl"}`} style={{ color: r.destaque ? "var(--ec-ink)" : "var(--ec-cream)" }}>
+                  “{r.texto}”
                 </blockquote>
-                <figcaption className="mt-5 flex items-center gap-3">
-                  <span
-                    className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ${display.className}`}
-                    style={{ background: "var(--ec-green)", color: "var(--ec-gold-soft)" }}
-                  >
-                    {a.nome.charAt(0)}
-                  </span>
+                <figcaption className="mt-6 flex items-center gap-3">
+                  <span className="ec-serif grid h-10 w-10 place-items-center rounded-full text-sm" style={{ background: r.destaque ? "rgba(8,37,30,0.15)" : "var(--ec-green)", color: r.destaque ? "var(--ec-ink)" : "var(--ec-gold-soft)" }}>{r.nome.charAt(0)}</span>
                   <span>
-                    <span className="block text-[14px] font-semibold text-white">{a.nome}</span>
-                    <span className="flex items-center gap-0.5" style={{ color: "var(--ec-gold)" }}>
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-3 w-3 fill-current" />
-                      ))}
-                    </span>
+                    <span className="block text-[13px] font-semibold" style={{ color: r.destaque ? "var(--ec-ink)" : "var(--ec-cream)" }}>{r.nome}</span>
+                    <span className="text-[11px]" style={{ color: r.destaque ? "rgba(8,37,30,0.6)" : "rgba(255,244,230,0.5)" }}>Cliente Google</span>
                   </span>
                 </figcaption>
               </motion.figure>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* ───────────────── CONTACTOS ───────────────── */}
-      <section id="contactos" className="py-20 lg:py-28" style={{ background: "var(--ec-cream-2)" }}>
-        <div className="mx-auto grid max-w-7xl gap-10 px-5 lg:grid-cols-2 lg:gap-16 lg:px-8">
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={stagger}>
-            <motion.div variants={fadeUp}><SectionTag>Contactos</SectionTag></motion.div>
-            <motion.h2 variants={fadeUp} className={`mt-4 text-3xl font-semibold sm:text-4xl ${display.className}`} style={{ color: "var(--ec-green-deep)" }}>
-              Vamos adoçar o seu próximo momento?
-            </motion.h2>
-            <motion.p variants={fadeUp} className="mt-3 text-[15px] leading-relaxed" style={{ color: "var(--ec-brown)" }}>
-              Encomende pelo WhatsApp ou passe pela nossa loja em Arcozelo. Teremos todo o gosto em ajudar.
-            </motion.p>
+      {/* ───────────────── 7 · EXPERIÊNCIAS (produtos) ───────────────── */}
+      <section id="experiencias" className="py-24 lg:py-32" style={{ background: "var(--ec-cream)" }}>
+        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-10">
+          <motion.div {...reveal()} className="mb-16 max-w-2xl">
+            <SectionLabel tone="green">Experiências Edna&apos;s</SectionLabel>
+            <h2 className="ec-serif text-5xl font-light leading-[0.95] sm:text-7xl" style={{ color: "var(--ec-ink-2)" }}>
+              Três formas de adoçar o momento.
+            </h2>
+          </motion.div>
 
-            <motion.div variants={fadeUp} className="mt-8 space-y-4">
+          <div className="space-y-20 lg:space-y-28">
+            {EXPERIENCIAS.map((e, i) => {
+              const flip = i % 2 === 1
+              return (
+                <motion.div key={e.id} id={e.id} {...reveal()} className="grid items-center gap-8 lg:grid-cols-2 lg:gap-14">
+                  {/* media */}
+                  <div className={`relative ${flip ? "lg:order-2" : ""}`}>
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] shadow-2xl">
+                      <video className="h-full w-full object-cover" src={e.video} poster={e.poster} autoPlay muted loop playsInline preload="metadata" />
+                      <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 55%, rgba(8,37,30,0.5))" }} />
+                      <span className="absolute left-5 top-5 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ background: "rgba(8,37,30,0.7)", color: "var(--ec-gold-soft)" }}>{e.eyebrow}</span>
+                    </div>
+                    <div className={`absolute -bottom-7 hidden aspect-square w-36 overflow-hidden rounded-2xl border-4 shadow-xl sm:block ${flip ? "-left-7" : "-right-7"}`} style={{ borderColor: "var(--ec-cream)" }}>
+                      <Image src={e.foto} alt={e.titulo} fill sizes="160px" className="object-cover" />
+                    </div>
+                  </div>
+                  {/* texto */}
+                  <div className={flip ? "lg:order-1" : ""}>
+                    <p className="text-[10px] uppercase tracking-[0.4em]" style={{ color: "var(--ec-gold-dark)" }}>{e.eyebrow}</p>
+                    <h3 className="ec-serif mt-4 text-4xl font-light leading-[1.0] sm:text-5xl" style={{ color: "var(--ec-ink-2)" }}>{e.titulo}</h3>
+                    <p className="mt-5 max-w-lg text-[15px] leading-8" style={{ color: "var(--ec-brown)" }}>{e.texto}</p>
+                    <div className="mt-8">
+                      <a href={waLink(e.eyebrow)} target="_blank" rel="noopener noreferrer" className="group inline-flex min-h-12 items-center gap-2.5 rounded-full px-7 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition-all hover:scale-[1.03]" style={{ background: "var(--ec-green)" }}>
+                        <WhatsAppIcon className="h-4 w-4" /> {e.cta}
+                        <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                      </a>
+                    </div>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ───────────────── 8 · GALERIA (instagram wall + lightbox) ───────────────── */}
+      <section id="galeria" className="py-24 lg:py-32" style={{ background: "var(--ec-ink-2)" }}>
+        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-10">
+          <motion.div {...reveal()} className="mb-12 flex flex-col items-end justify-between gap-6 md:flex-row">
+            <div>
+              <SectionLabel>Galeria viva</SectionLabel>
+              <h2 className="ec-serif text-5xl font-light leading-[0.95] sm:text-7xl" style={{ color: "var(--ec-cream)" }}>
+                Direto do forno ao Instagram.
+              </h2>
+            </div>
+            <a href={EMPRESA.instagram} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center gap-2.5 rounded-full px-7 py-3 text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ background: "var(--ec-gold)", color: "var(--ec-ink)" }}>
+              <InstagramIcon className="h-4 w-4" /> {EMPRESA.instagramHandle}
+            </a>
+          </motion.div>
+
+          <div className="ec-masonry sm:[column-count:2] lg:[column-count:3]">
+            {GALERIA.map((m, i) => (
+              <motion.button
+                key={m.src + i}
+                {...reveal((i % 3) * 0.05)}
+                onClick={() => setActive(m)}
+                className="group relative block w-full overflow-hidden rounded-[1.25rem] text-left"
+                style={{ border: "1px solid rgba(216,181,109,0.14)" }}
+              >
+                <div className={`relative w-full ${m.tall ? "aspect-[4/5]" : "aspect-square"}`}>
+                  {m.type === "image" ? (
+                    <Image src={m.src} alt={m.tag} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                  ) : (
+                    <>
+                      <Image src={m.poster!} alt={m.tag} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <span className="absolute inset-0 grid place-items-center">
+                        <span className="grid h-14 w-14 place-items-center rounded-full backdrop-blur-md transition-transform group-hover:scale-110" style={{ background: "rgba(255,244,230,0.22)", border: "1px solid rgba(255,244,230,0.5)" }}>
+                          <Play className="h-5 w-5 fill-current text-white" />
+                        </span>
+                      </span>
+                    </>
+                  )}
+                  <div className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" style={{ background: "linear-gradient(180deg, transparent 55%, rgba(8,37,30,0.85))" }} />
+                  <span className="absolute bottom-4 left-4 text-[11px] font-semibold uppercase tracking-[0.2em] opacity-0 transition-opacity duration-300 group-hover:opacity-100" style={{ color: "var(--ec-gold-soft)" }}>{m.tag}</span>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ───────────────── CTA FINAL + CONTACTOS ───────────────── */}
+      <section id="contactos" className="px-6 py-24 sm:px-8 lg:px-10 lg:py-32" style={{ background: "var(--ec-cream)" }}>
+        <div className="ec-grain relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] px-6 py-16 sm:px-10 lg:px-16 lg:py-24" style={{ background: "var(--ec-ink)" }}>
+          <video className="absolute inset-0 h-full w-full object-cover opacity-25" src="/ednas-cake/video-festa.mp4" poster="/ednas-cake/bolo-melancia.png" autoPlay muted loop playsInline preload="metadata" />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(105deg, rgba(8,37,30,0.95) 0%, rgba(11,61,53,0.7) 55%, rgba(8,37,30,0.3))" }} />
+          <div className="relative z-10 grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div>
+              <div className="mb-6 flex flex-wrap gap-4 text-[11px] uppercase tracking-[0.22em]" style={{ color: "var(--ec-gold-soft)" }}>
+                <span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Arcozelo, Barcelos</span>
+                <span className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Encomendas personalizadas</span>
+              </div>
+              <h2 className="ec-serif text-5xl font-light leading-[0.95] sm:text-6xl" style={{ color: "var(--ec-cream)" }}>
+                Vamos adoçar o seu próximo momento?
+              </h2>
+              <p className="mt-6 max-w-lg text-[15px] leading-8" style={{ color: "rgba(255,244,230,0.72)" }}>
+                Conte-nos a ocasião e tratamos do resto. Bolos, salgados e doces feitos à mão, com o
+                sabor que abraça.
+              </p>
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <Pill href={waLink("uma encomenda")} variant="solid"><WhatsAppIcon className="h-4 w-4" /> Encomendar pelo WhatsApp</Pill>
+                <Pill href={EMPRESA.mapsHref} variant="ghost"><MapPin className="h-4 w-4" /> Ver localização</Pill>
+              </div>
+            </div>
+
+            <div className="grid gap-3">
               {[
                 { icon: MapPin, label: "Morada", value: EMPRESA.morada },
-                { icon: Phone, label: "Telefone", value: EMPRESA.telefone },
-                { icon: Clock, label: "Horário", value: "Consulte o horário atualizado no Google Maps." },
+                { icon: Phone, label: "Telefone", value: EMPRESA.telefone, href: EMPRESA.telefoneHref },
+                { icon: Star, label: "Horário", value: "Consulte o horário atualizado no Google Maps." },
               ].map((c) => (
-                <div key={c.label} className="flex items-start gap-4 rounded-2xl border bg-white p-4" style={{ borderColor: "rgba(169,130,60,0.18)" }}>
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl" style={{ background: "var(--ec-cream-2)" }}>
-                    <c.icon className="h-5 w-5" style={{ color: "var(--ec-green)" }} />
+                <div key={c.label} className="ec-glass flex items-start gap-4 rounded-2xl p-4">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl" style={{ background: "rgba(216,181,109,0.15)" }}>
+                    <c.icon className="h-5 w-5" style={{ color: "var(--ec-gold)" }} />
                   </span>
                   <span>
-                    <span className="block text-[12px] font-semibold uppercase tracking-wider" style={{ color: "var(--ec-gold-dark)" }}>{c.label}</span>
-                    <span className="text-[14px]" style={{ color: "var(--ec-ink)" }}>{c.value}</span>
+                    <span className="block text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--ec-gold-soft)" }}>{c.label}</span>
+                    {c.href ? (
+                      <a href={c.href} className="text-sm" style={{ color: "var(--ec-cream)" }}>{c.value}</a>
+                    ) : (
+                      <span className="text-sm" style={{ color: "rgba(255,244,230,0.85)" }}>{c.value}</span>
+                    )}
                   </span>
                 </div>
               ))}
-            </motion.div>
-
-            <motion.div variants={fadeUp} className="mt-7 flex flex-wrap gap-3">
-              <a href={waLink()} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.03]" style={{ background: "var(--ec-green)" }}>
-                <WhatsAppIcon className="h-4 w-4" /> WhatsApp
-              </a>
-              <a href={EMPRESA.instagram} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-colors" style={{ border: "1px solid rgba(169,130,60,0.4)", color: "var(--ec-green-deep)" }}>
-                <InstagramIcon className="h-4 w-4" /> Instagram
-              </a>
-              <a href={EMPRESA.mapsHref} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-colors" style={{ border: "1px solid rgba(169,130,60,0.4)", color: "var(--ec-green-deep)" }}>
-                <MapPin className="h-4 w-4" /> Ver localização
-              </a>
-            </motion.div>
-          </motion.div>
-
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={fadeUp} className="overflow-hidden rounded-[2rem] border shadow-lg" style={{ borderColor: "rgba(169,130,60,0.25)" }}>
-            <iframe
-              title="Localização Edna's Cake"
-              src="https://www.google.com/maps?q=Av.%20Central%206,%204750-130%20Arcozelo,%20Barcelos&output=embed"
-              className="h-full min-h-[360px] w-full"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </motion.div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* ───────────────── FOOTER ───────────────── */}
-      <footer className="pt-16 pb-28 lg:pb-16" style={{ background: "var(--ec-green-deeper)" }}>
-        <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr_1fr]">
+      <footer className="px-6 pb-28 pt-14 sm:px-8 lg:px-10 lg:pb-16" style={{ background: "var(--ec-ink)" }}>
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-10 border-b pb-10 lg:grid-cols-[1.5fr_1fr_1fr]" style={{ borderColor: "rgba(255,244,230,0.1)" }}>
             <div>
-              <Logo light />
-              <p className="mt-5 max-w-sm text-[14px] leading-relaxed text-white/65">
-                {EMPRESA.slogan} Bolos personalizados, doces artesanais, salgados e catering em Arcozelo,
-                Barcelos. Feitos à mão, com carinho brasileiro.
+              <span className="ec-serif text-3xl" style={{ color: "var(--ec-cream)" }}>Edna&apos;s Cake</span>
+              <p className="mt-4 max-w-sm text-sm leading-7" style={{ color: "rgba(255,244,230,0.6)" }}>
+                {EMPRESA.slogan} Confeitaria artesanal brasileira em Arcozelo, Barcelos — bolos
+                personalizados, salgados, doces e catering.
               </p>
               <div className="mt-6 flex gap-3">
-                <a href={EMPRESA.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/10" style={{ border: "1px solid rgba(255,255,255,0.15)", color: "var(--ec-cream)" }}>
-                  <InstagramIcon className="h-4.5 w-4.5" />
-                </a>
-                <a href={waLink()} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/10" style={{ border: "1px solid rgba(255,255,255,0.15)", color: "var(--ec-cream)" }}>
-                  <WhatsAppIcon className="h-4.5 w-4.5" />
-                </a>
+                <a href={EMPRESA.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="grid h-10 w-10 place-items-center rounded-full transition-colors hover:text-[color:var(--ec-gold)]" style={{ border: "1px solid rgba(255,244,230,0.15)", color: "var(--ec-cream)" }}><InstagramIcon className="h-4 w-4" /></a>
+                <a href={waLink()} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="grid h-10 w-10 place-items-center rounded-full transition-colors hover:text-[color:var(--ec-gold)]" style={{ border: "1px solid rgba(255,244,230,0.15)", color: "var(--ec-cream)" }}><WhatsAppIcon className="h-4 w-4" /></a>
               </div>
             </div>
-
             <div>
-              <h4 className="text-[12px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--ec-gold)" }}>Navegação</h4>
+              <h4 className="text-[10px] font-semibold uppercase tracking-[0.24em]" style={{ color: "var(--ec-gold)" }}>Navegação</h4>
               <ul className="mt-4 space-y-2.5">
-                {NAV_LINKS.map((l) => (
-                  <li key={l.label}>
-                    <a href={l.href} className="text-[14px] text-white/70 transition-colors hover:text-white">{l.label}</a>
-                  </li>
+                {NAV.map((n) => (
+                  <li key={n.label}><a href={n.href} className="text-sm transition-colors hover:text-[color:var(--ec-cream)]" style={{ color: "rgba(255,244,230,0.6)" }}>{n.label}</a></li>
                 ))}
               </ul>
             </div>
-
             <div>
-              <h4 className="text-[12px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--ec-gold)" }}>Contactos</h4>
-              <ul className="mt-4 space-y-3 text-[14px] text-white/70">
+              <h4 className="text-[10px] font-semibold uppercase tracking-[0.24em]" style={{ color: "var(--ec-gold)" }}>Contactos</h4>
+              <ul className="mt-4 space-y-3 text-sm" style={{ color: "rgba(255,244,230,0.6)" }}>
                 <li className="flex items-start gap-2.5"><MapPin className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "var(--ec-gold)" }} />{EMPRESA.morada}</li>
-                <li className="flex items-center gap-2.5"><Phone className="h-4 w-4" style={{ color: "var(--ec-gold)" }} /><a href={EMPRESA.telefoneHref} className="hover:text-white">{EMPRESA.telefone}</a></li>
+                <li className="flex items-center gap-2.5"><Phone className="h-4 w-4" style={{ color: "var(--ec-gold)" }} /><a href={EMPRESA.telefoneHref} className="hover:text-[color:var(--ec-cream)]">{EMPRESA.telefone}</a></li>
                 <li className="flex items-center gap-2.5"><InstagramIcon className="h-4 w-4" />{EMPRESA.instagramHandle}</li>
               </ul>
             </div>
           </div>
-
-          <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-6 text-[12px] sm:flex-row" style={{ borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}>
-            <p>© {new Date().getFullYear()} Edna&apos;s Cake · Doces &amp; Salgados. Todos os direitos reservados.</p>
+          <div className="mt-6 flex flex-col items-center justify-between gap-3 text-[11px] sm:flex-row" style={{ color: "rgba(255,244,230,0.45)" }}>
+            <p>© {new Date().getFullYear()} Edna&apos;s Cake · Doces &amp; Salgados</p>
             <div className="flex gap-5">
-              <a href="#" className="transition-colors hover:text-white">Política de Privacidade</a>
-              <a href="#" className="transition-colors hover:text-white">Termos</a>
+              <a href="#" className="hover:text-[color:var(--ec-cream)]">Política de Privacidade</a>
+              <a href="#" className="hover:text-[color:var(--ec-cream)]">Termos</a>
             </div>
           </div>
         </div>
       </footer>
 
-      {/* ───────────────── WHATSAPP FLUTUANTE ───────────────── */}
-      <a
-        href={waLink()}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Encomendar pelo WhatsApp"
-        className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-xl transition-transform hover:scale-110"
-        style={{ background: "#25D366", boxShadow: "0 10px 30px -8px rgba(37,211,102,0.7)" }}
-      >
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-30" style={{ background: "#25D366" }} />
-        <WhatsAppIcon className="relative h-7 w-7" />
-      </a>
-    </div>
+      {/* ───────────────── DOCK FLUTUANTE ───────────────── */}
+      <div className="ec-glass fixed bottom-4 left-1/2 z-50 flex max-w-[calc(100vw-1.5rem)] -translate-x-1/2 items-center gap-2 rounded-full p-2 shadow-2xl">
+        <a href={waLink("uma encomenda")} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full px-4 text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ background: "var(--ec-gold)", color: "var(--ec-ink)" }}>
+          <WhatsAppIcon className="h-4 w-4" /> <span className="hidden sm:inline">Encomendar</span>
+        </a>
+        <a href={EMPRESA.telefoneHref} aria-label="Ligar" className="grid h-11 w-11 place-items-center rounded-full transition-colors hover:text-[color:var(--ec-gold)]" style={{ border: "1px solid rgba(255,244,230,0.15)", color: "var(--ec-cream)" }}><Phone className="h-4 w-4" /></a>
+        <a href={EMPRESA.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="grid h-11 w-11 place-items-center rounded-full transition-colors hover:text-[color:var(--ec-gold)]" style={{ border: "1px solid rgba(255,244,230,0.15)", color: "var(--ec-cream)" }}><InstagramIcon className="h-4 w-4" /></a>
+      </div>
+
+      {/* ───────────────── LIGHTBOX ───────────────── */}
+      <AnimatePresence>
+        {active && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] grid place-items-center p-4 backdrop-blur-xl"
+            style={{ background: "rgba(8,37,30,0.94)" }}
+            onClick={() => setActive(null)}
+          >
+            <button aria-label="Fechar" onClick={() => setActive(null)} className="absolute right-5 top-5 grid h-12 w-12 place-items-center rounded-full" style={{ background: "var(--ec-cream)", color: "var(--ec-ink)" }}>
+              <X className="h-5 w-5" />
+            </button>
+            <motion.div
+              initial={{ scale: 0.92, y: 24 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.96, y: 16 }}
+              transition={{ duration: 0.4, ease: EASE }}
+              className="relative max-h-[86svh] w-auto overflow-hidden rounded-[1.5rem] shadow-2xl"
+              onClick={(ev) => ev.stopPropagation()}
+            >
+              {active.type === "video" ? (
+                <video src={active.src} poster={active.poster} className="max-h-[86svh] w-auto max-w-[92vw] object-contain" autoPlay controls playsInline />
+              ) : (
+                <img src={active.src} alt={active.tag} className="max-h-[86svh] w-auto max-w-[92vw] object-contain" />
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </main>
   )
 }
